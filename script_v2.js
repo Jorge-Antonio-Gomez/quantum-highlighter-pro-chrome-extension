@@ -320,9 +320,9 @@
         constructor() {
             this.element = document.createElement('div');
             this.element.className = 'highlighter-menu';
-            this.element.innerHTML = `<div id="highlighter-arrow"></div>`;
             document.body.appendChild(this.element);
-            this.arrowElement = this.element.querySelector('#highlighter-arrow');
+            // this.arrowElement will be created and assigned in configure()
+            this.arrowElement = null;
         }
 
         configure(config) {
@@ -332,7 +332,8 @@
             let actionsHTML = actions ? `<div class="menu-row actions">${this._createButtons(actions)}</div>` : '';
             let warningHTML = config.showWarning ? `<div class="highlighter-shortcut-warning">Atajos desactivados en campo de texto</div>` : '';
 
-            this.element.innerHTML = colorsHTML + typesHTML + actionsHTML + warningHTML;
+            this.element.innerHTML = `<div id="highlighter-arrow"></div>${colorsHTML}${typesHTML}${actionsHTML}${warningHTML}`;
+            this.arrowElement = this.element.querySelector('#highlighter-arrow');
 
             this.element.onclick = (e) => {
                 const button = e.target.closest('button');
@@ -352,7 +353,7 @@
         async show(referenceEl) {
             this.element.classList.add('show');
 
-            const {x, y, middlewareData} = await computePosition(referenceEl, this.element, {
+            const {x, y, placement, middlewareData} = await computePosition(referenceEl, this.element, {
                 placement: 'bottom',
                 middleware: [offset(12), flip(), shift({padding: 10}), arrow({element: this.arrowElement})],
             });
@@ -364,9 +365,19 @@
 
             const {x: arrowX, y: arrowY} = middlewareData.arrow;
 
+            const staticSide = {
+                top: 'bottom',
+                right: 'left',
+                bottom: 'top',
+                left: 'right',
+            }[placement.split('-')[0]];
+
             Object.assign(this.arrowElement.style, {
                 left: arrowX != null ? `${arrowX}px` : '',
                 top: arrowY != null ? `${arrowY}px` : '',
+                right: '',
+                bottom: '',
+                [staticSide]: '-4px',
             });
         }
 
