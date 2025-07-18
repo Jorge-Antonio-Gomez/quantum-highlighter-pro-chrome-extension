@@ -139,6 +139,15 @@
             background-color: #FFE0E0;
             color: #D8000C;
         }
+
+        .highlighter-shortcut-warning {
+            font-size: 11px;
+            color: #888;
+            text-align: center;
+            padding: 4px 0 0 0;
+            border-top: 1px solid #f0f0f0;
+            margin-top: 4px;
+        }
     `;
 
     // --- DOM UTILITIES ---
@@ -322,7 +331,10 @@
             let typesHTML = types ? `<div class="menu-row types">${this._createButtons(types)}</div>` : '';
             let colorsHTML = colors ? `<div class="menu-row colors">${this._createButtons(colors)}</div>` : '';
             let actionsHTML = actions ? `<div class="menu-row actions">${this._createButtons(actions)}</div>` : '';
-            this.element.innerHTML = colorsHTML + typesHTML + actionsHTML;
+            let warningHTML = config.showWarning ? `<div class="highlighter-shortcut-warning">Atajos desactivados en campo de texto</div>` : '';
+
+            this.element.innerHTML = colorsHTML + typesHTML + actionsHTML + warningHTML;
+
             this.element.onclick = (e) => {
                 const button = e.target.closest('button');
                 if (!button) return;
@@ -366,6 +378,7 @@
             this.currentAnnotationType = 'highlight';
             this.menu = new HighlightMenu();
             this.deleteIcon = `Borrar`;
+            this.shortcutsEnabled = true; // By default, shortcuts are on
             this._injectStyles();
             this._loadAnnotations();
             this._setupEventListeners();
@@ -377,24 +390,24 @@
             document.addEventListener('mouseup', this._onMouseUp.bind(this));
             document.addEventListener('mousedown', this._onMouseDown.bind(this), true);
             document.addEventListener('keydown', this._onKeyDown.bind(this));
+            // Add focus listeners to track when the user enters/leaves an input field.
+            document.addEventListener('focusin', this._onFocusChange.bind(this));
+            document.addEventListener('focusout', this._onFocusChange.bind(this));
+        }
+
+        _onFocusChange(event) {
+            const target = event.target;
+            const isInput = target.isContentEditable || target.matches('input, textarea, select');
+            this.shortcutsEnabled = !isInput;
         }
 
         _onKeyDown(event) {
-            const target = event.target;
-
-            // --- CONTEXT-AWARE GUARD ---
-            // Don't interfere if the user is typing in an input, textarea, or a rich-text editor.
-            const isInput = target.isContentEditable || target.matches('input, textarea, select');
-            if (isInput) {
-                return;
-            }
-            // --- END GUARD ---
+            // If shortcuts are disabled for the current context, do nothing.
+            if (!this.shortcutsEnabled) return;
 
             if (event.key === 'Escape') {
                 // Case 1: An annotation's context menu is open. Close it.
                 if (this.activeAnnotationId) {
-                    event.preventDefault();
-                    event.stopPropagation();
                     this.menu.hide();
                     this.activeAnnotationId = null;
                 }
@@ -402,8 +415,6 @@
                 else {
                     const selection = window.getSelection();
                     if (selection && !selection.isCollapsed) {
-                        event.preventDefault();
-                        event.stopPropagation();
                         selection.removeAllRanges();
                         this.menu.hide();
                         this.activeRange = null;
@@ -414,8 +425,6 @@
             // On Delete, if an annotation's context menu is open, delete the annotation.
             if (event.key === 'Delete') {
                 if (this.activeAnnotationId) {
-                    event.preventDefault();
-                    event.stopPropagation();
                     this.deleteAnnotation();
                 }
             }
@@ -508,7 +517,8 @@
                         { action: 'setType', value: 'highlight', label: 'Highlight', content: 'A', className: `highlighter-type-selector ${this.currentAnnotationType === 'highlight' ? 'active' : ''}` },
                         { action: 'setType', value: 'underline', label: 'Underline', content: '<span class="underline">A</span>', className: `highlighter-type-selector ${this.currentAnnotationType === 'underline' ? 'active' : ''}` }
                     ]
-                }
+                },
+                showWarning: !this.shortcutsEnabled
             });
             this.menu.show(x, y_bottom);
         }
@@ -532,7 +542,8 @@
                         { action: 'changeType', value: 'underline', label: 'Underline', content: '<span class="underline">A</span>', className: `highlighter-type-selector ${annotation.type === 'underline' ? 'active' : ''}` }
                     ],
                     actions: [{ action: 'delete', label: 'Delete', content: this.deleteIcon, className: 'highlighter-delete-btn' }]
-                }
+                },
+                showWarning: !this.shortcutsEnabled
             });
             this.menu.show(rect.x + rect.width / 2, window.scrollY + rect.bottom);
         }
