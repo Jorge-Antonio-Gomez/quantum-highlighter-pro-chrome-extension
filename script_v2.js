@@ -1,8 +1,13 @@
 // ==UserScript==
 // @name         Quantum Highlighter WEB
 // @namespace    http://tampermonkey.net/
-// @version      18.07.2025.12
-// @description  Sistema de anotaciones web inspirado en Zotero. Resalta, subraya y gestiona anotaciones en cualquier página.
+// @version      18.07.2025.13
+// @description  Web annotation system inspired by Zotero. Highlight, underline, and manage annotations on any page.
+// @description:es Sistema de anotaciones web inspirado en Zotero. Resalta, subraya y gestiona anotaciones en cualquier página.
+// @description:fr Système d'annotation web inspiré de Zotero. Surlignez, soulignez et gérez les annotations sur n'importe quelle page.
+// @description:pt Sistema de anotações web inspirado no Zotero. Destaque, sublinhe e gerencie anotações em qualquer página.
+// @description:ru Система веб-аннотаций, вдохновленная Zotero. Выделяйте, подчеркивайте и управляйте аннотациями на любой странице.
+// @description:zh 受 Zotero 启发的网页注释系统。在任何页面上突出显示、加下划线和管理注释。
 // @author       George
 // @match        *://*/*
 // @grant        GM_addStyle
@@ -13,6 +18,59 @@
 
 (function () {
     'use strict';
+
+    // --- LANGUAGE SELECTION ---
+    // Supported languages: 'en', 'es', 'fr', 'pt', 'ru', 'zh'
+    const preferredLanguage = 'es';
+
+    // --- i18n STRINGS ---
+    const i18n = {
+        en: {
+            shortcutsDisabled: "Shortcuts disabled in text field",
+            delete: "Delete",
+            highlight: "Highlight",
+            underline: "Underline",
+            colors: { yellow: "Yellow", red: "Red", green: "Green", blue: "Blue", purple: "Purple", pink: "Pink", orange: "Orange", grey: "Grey" }
+        },
+        es: {
+            shortcutsDisabled: "Atajos de teclado desactivados en este campo",
+            delete: "Borrar",
+            highlight: "Resaltar",
+            underline: "Subrayar",
+            colors: { yellow: "Amarillo", red: "Rojo", green: "Verde", blue: "Azul", purple: "Morado", pink: "Rosa", orange: "Naranja", grey: "Gris" }
+        },
+        fr: {
+            shortcutsDisabled: "Les raccourcis sont désactivés dans ce champ de texte",
+            delete: "Supprimer",
+            highlight: "Surligner",
+            underline: "Souligner",
+            colors: { yellow: "Jaune", red: "Rouge", green: "Vert", blue: "Bleu", purple: "Violet", pink: "Rose", orange: "Orange", grey: "Gris" }
+        },
+        pt: {
+            shortcutsDisabled: "Os atalhos estão desativados neste campo de texto",
+            delete: "Excluir",
+            highlight: "Destacar",
+            underline: "Sublinhar",
+            colors: { yellow: "Amarelo", red: "Vermelho", green: "Verde", blue: "Azul", purple: "Roxo", pink: "Rosa", orange: "Laranja", grey: "Cinza" }
+        },
+        ru: {
+            shortcutsDisabled: "Горячие клавиши отключены в этом текстовом поле",
+            delete: "Удалить",
+            highlight: "Выделить цветом",
+            underline: "Подчеркнуть",
+            colors: { yellow: "Желтый", red: "Красный", green: "Зеленый", blue: "Синий", purple: "Фиолетовый", pink: "Розовый", orange: "Оранжевый", grey: "Серый" }
+        },
+        zh: {
+            shortcutsDisabled: "文本框内快捷键已禁用",
+            delete: "删除",
+            highlight: "高亮",
+            underline: "下划线",
+            colors: { yellow: "黄色", red: "红色", green: "绿色", blue: "蓝色", purple: "紫色", pink: "粉色", orange: "橙色", grey: "灰色" }
+        }
+    };
+
+    const lang = i18n[preferredLanguage] || i18n.en;
+
 
     const {computePosition, offset, flip, shift, arrow} = FloatingUIDOM;
 
@@ -330,7 +388,7 @@
             let typesHTML = types ? `<div class="menu-row types">${this._createButtons(types)}</div>` : '';
             let colorsHTML = colors ? `<div class="menu-row colors">${this._createButtons(colors)}</div>` : '';
             let actionsHTML = actions ? `<div class="menu-row actions">${this._createButtons(actions)}</div>` : '';
-            let warningHTML = config.showWarning ? `<div class="highlighter-shortcut-warning">Atajos desactivados en campo de texto</div>` : '';
+            let warningHTML = config.showWarning ? `<div class="highlighter-shortcut-warning">${lang.shortcutsDisabled}</div>` : '';
 
             this.element.innerHTML = `<div id="highlighter-arrow"></div>${colorsHTML}${typesHTML}${actionsHTML}${warningHTML}`;
             this.arrowElement = this.element.querySelector('#highlighter-arrow');
@@ -397,7 +455,7 @@
             };
             this.currentAnnotationType = 'highlight';
             this.menu = new HighlightMenu();
-            this.deleteIcon = `Borrar`;
+            this.deleteIcon = lang.delete;
             this.shortcutsEnabled = true; // By default, shortcuts are on
             this._injectStyles();
             this._loadAnnotations();
@@ -531,11 +589,11 @@
                 },
                 buttons: {
                     colors: Object.entries(this.colors).map(([name, color]) => ({
-                        action: 'create', value: color, label: name, className: 'highlighter-color-selector', content: `<div style="width:100%; height:100%; background-color:${color}; border-radius:3px;"></div>`
+                        action: 'create', value: color, label: lang.colors[name] || name, className: 'highlighter-color-selector', content: `<div style="width:100%; height:100%; background-color:${color}; border-radius:3px;"></div>`
                     })),
                     types: [
-                        { action: 'setType', value: 'highlight', label: 'Highlight', content: 'A', className: `highlighter-type-selector ${this.currentAnnotationType === 'highlight' ? 'active' : ''}` },
-                        { action: 'setType', value: 'underline', label: 'Underline', content: '<span class="underline">A</span>', className: `highlighter-type-selector ${this.currentAnnotationType === 'underline' ? 'active' : ''}` }
+                        { action: 'setType', value: 'highlight', label: lang.highlight, content: 'A', className: `highlighter-type-selector ${this.currentAnnotationType === 'highlight' ? 'active' : ''}` },
+                        { action: 'setType', value: 'underline', label: lang.underline, content: '<span class="underline">A</span>', className: `highlighter-type-selector ${this.currentAnnotationType === 'underline' ? 'active' : ''}` }
                     ]
                 },
                 showWarning: !this.shortcutsEnabled
@@ -555,13 +613,13 @@
                 },
                 buttons: {
                     colors: Object.entries(this.colors).map(([name, color]) => ({
-                        action: 'changeColor', value: color, label: name, className: `highlighter-color-selector ${annotation.color === color ? 'active' : ''}`, content: `<div style="width:100%; height:100%; background-color:${color}; border-radius:3px;"></div>`
+                        action: 'changeColor', value: color, label: lang.colors[name] || name, className: `highlighter-color-selector ${annotation.color === color ? 'active' : ''}`, content: `<div style="width:100%; height:100%; background-color:${color}; border-radius:3px;"></div>`
                     })),
                     types: [
-                        { action: 'changeType', value: 'highlight', label: 'Highlight', content: 'A', className: `highlighter-type-selector ${annotation.type === 'highlight' ? 'active' : ''}` },
-                        { action: 'changeType', value: 'underline', label: 'Underline', content: '<span class="underline">A</span>', className: `highlighter-type-selector ${annotation.type === 'underline' ? 'active' : ''}` }
+                        { action: 'changeType', value: 'highlight', label: lang.highlight, content: 'A', className: `highlighter-type-selector ${annotation.type === 'highlight' ? 'active' : ''}` },
+                        { action: 'changeType', value: 'underline', label: lang.underline, content: '<span class="underline">A</span>', className: `highlighter-type-selector ${annotation.type === 'underline' ? 'active' : ''}` }
                     ],
-                    actions: [{ action: 'delete', label: 'Delete', content: this.deleteIcon, className: 'highlighter-delete-btn' }]
+                    actions: [{ action: 'delete', label: lang.delete, content: this.deleteIcon, className: 'highlighter-delete-btn' }]
                 },
                 showWarning: !this.shortcutsEnabled
             });
