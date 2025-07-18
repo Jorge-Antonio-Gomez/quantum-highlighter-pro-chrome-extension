@@ -75,7 +75,6 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
-ROADMAP.md
 
 # Build directories
 dist/
