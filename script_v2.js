@@ -6,11 +6,15 @@
 // @author       George
 // @match        *://*/*
 // @grant        GM_addStyle
+// @require      https://unpkg.com/@floating-ui/core@1.6.2
+// @require      https://unpkg.com/@floating-ui/dom@1.6.5
 // @run-at       document-idle
 // ==/UserScript==
 
 (function () {
     'use strict';
+
+    const {computePosition, offset, flip, shift, arrow} = FloatingUIDOM;
 
     // --- STYLES ---
     const styles = `
@@ -59,19 +63,12 @@
         
         .highlighter-menu.show { display: flex; }
 
-        /* Caret pointing up */
-        .highlighter-menu::before {
-            content: '';
+        #highlighter-arrow {
             position: absolute;
-            top: -5px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 6px solid transparent;
-            border-right: 6px solid transparent;
-            border-bottom: 6px solid white;
-            filter: drop-shadow(0 -2px 2px rgba(0,0,0,0.05));
+            background: white;
+            width: 8px;
+            height: 8px;
+            transform: rotate(45deg);
         }
 
         .highlighter-menu .menu-row {
@@ -323,7 +320,9 @@
         constructor() {
             this.element = document.createElement('div');
             this.element.className = 'highlighter-menu';
+            this.element.innerHTML = `<div id="highlighter-arrow"></div>`;
             document.body.appendChild(this.element);
+            this.arrowElement = this.element.querySelector('#highlighter-arrow');
         }
 
         configure(config) {
@@ -350,15 +349,25 @@
             return buttons.map(btn => `<button title="${btn.label}" data-action="${btn.action}" ${btn.value ? `data-value="${btn.value}"` : ''} class="${btn.className || ''}">${btn.content || ''}</button>`).join('');
         }
 
-        show(x, y_bottom) {
+        async show(referenceEl) {
             this.element.classList.add('show');
-            const rect = this.element.getBoundingClientRect();
-            const scaledWidth = rect.width * 0.9;
-            let finalX = x - scaledWidth / 2;
-            let finalY = y_bottom + 12;
-            if (finalX < 0) finalX = 10;
-            this.element.style.left = `${finalX}px`;
-            this.element.style.top = `${finalY}px`;
+
+            const {x, y, middlewareData} = await computePosition(referenceEl, this.element, {
+                placement: 'bottom',
+                middleware: [offset(12), flip(), shift({padding: 10}), arrow({element: this.arrowElement})],
+            });
+
+            Object.assign(this.element.style, {
+                left: `${x}px`,
+                top: `${y}px`,
+            });
+
+            const {x: arrowX, y: arrowY} = middlewareData.arrow;
+
+            Object.assign(this.arrowElement.style, {
+                left: arrowX != null ? `${arrowX}px` : '',
+                top: arrowY != null ? `${arrowY}px` : '',
+            });
         }
 
         hide() { this.element.classList.remove('show'); }
@@ -495,11 +504,11 @@
 
                 this.activeRange = range;
                 const rect = range.getBoundingClientRect();
-                this._showCreationMenu(rect.x + rect.width / 2, window.scrollY + rect.bottom);
+                this._showCreationMenu(range.getBoundingClientRect());
             }, 10);
         }
 
-        _showCreationMenu(x, y_bottom) {
+        _showCreationMenu(rect) {
             this.menu.configure({
                 callbacks: {
                     create: (color) => this.createAnnotation(color, this.currentAnnotationType),
@@ -520,7 +529,7 @@
                 },
                 showWarning: !this.shortcutsEnabled
             });
-            this.menu.show(x, y_bottom);
+            this.menu.show({ getBoundingClientRect: () => rect });
         }
 
         _showContextMenuFor(element) {
@@ -545,7 +554,7 @@
                 },
                 showWarning: !this.shortcutsEnabled
             });
-            this.menu.show(rect.x + rect.width / 2, window.scrollY + rect.bottom);
+            this.menu.show(element);
         }
 
         _loadAnnotations() {
