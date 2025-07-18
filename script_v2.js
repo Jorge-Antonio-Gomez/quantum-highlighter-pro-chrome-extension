@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Highlighter WEB
+// @name         Quantum Highlighter WEB
 // @namespace    http://tampermonkey.net/
-// @version      18.07.2025.11
+// @version      18.07.2025.12
 // @description  Sistema de anotaciones web inspirado en Zotero. Resalta, subraya y gestiona anotaciones en cualquier página.
 // @author       George
 // @match        *://*/*
@@ -37,7 +37,7 @@
         }
 
         .highlighter-mark:hover {
-            opacity: 0.7;
+            opacity: 1;
         }
 
         .highlighter-menu {
@@ -107,7 +107,7 @@
         }
         
         .highlighter-color-selector.active {
-            box-shadow: 0 0 0 2px #007acc;
+            box-shadow: 0 0 0 3px #57b4dfff;
         }
         
         .highlighter-type-selector {
@@ -173,9 +173,24 @@
             const endNode = this.getNodeFromXPath(end.xpath)?.childNodes[end.childIndex];
             if (!startNode || !endNode) return null;
             const range = document.createRange();
-            range.setStart(startNode, start.offset);
-            range.setEnd(endNode, end.offset);
-            return range;
+
+            // Determine the valid maximum offset. For text nodes, it's character length.
+            // For element nodes, it's the number of child nodes.
+            const startNodeLength = startNode.nodeType === Node.TEXT_NODE ? startNode.length : startNode.childNodes.length;
+            const endNodeLength = endNode.nodeType === Node.TEXT_NODE ? endNode.length : endNode.childNodes.length;
+
+            // Clamp the offsets to ensure they are not out of bounds.
+            const safeStartOffset = Math.min(start.offset, startNodeLength);
+            const safeEndOffset = Math.min(end.offset, endNodeLength);
+
+            try {
+                range.setStart(startNode, safeStartOffset);
+                range.setEnd(endNode, safeEndOffset);
+                return range;
+            } catch (e) {
+                console.error("Highlighter: Error creating range from pointers even after clamping.", {start, end}, e);
+                return null;
+            }
         }
 
         static applyAnnotationStyle(element, annotation) {
@@ -191,20 +206,91 @@
 
         static wrapRange(range, annotation) {
             if (range.collapsed) return [];
-            const mark = document.createElement('mark');
-            mark.className = 'highlighter-mark';
-            mark.dataset.annotationId = annotation.id;
-            this.applyAnnotationStyle(mark, annotation);
-            try {
-                const fragment = range.extractContents();
-                mark.appendChild(fragment);
-                range.insertNode(mark);
-                mark.parentNode.normalize();
-                return [mark];
-            } catch (e) {
-                console.error("Highlighter: Error wrapping range.", e);
-                return [];
+
+            // This function is complex because it needs to handle selections that can
+            // span across multiple block-level elements (like <p>, <div>, <h1>).
+            // The strategy is to iterate through all affected elements and wrap their contents individually.
+
+            const affectedNodes = this.getNodesInRange(range);
+            const marks = [];
+
+            affectedNodes.forEach(node => {
+                // We only care about text nodes that are not inside a script/style tag.
+                if (node.nodeType !== Node.TEXT_NODE || node.parentNode.closest('script, style')) {
+                    return;
+                }
+
+                const nodeRange = document.createRange();
+                nodeRange.selectNodeContents(node);
+
+                // Adjust the range to only cover the intersection with the user's selection.
+                if (node === range.startContainer) nodeRange.setStart(node, range.startOffset);
+                if (node === range.endContainer) nodeRange.setEnd(node, range.endOffset);
+
+                if (!nodeRange.collapsed) {
+                    const mark = document.createElement('mark');
+                    mark.className = 'highlighter-mark';
+                    mark.dataset.annotationId = annotation.id;
+                    this.applyAnnotationStyle(mark, annotation);
+                    
+                    try {
+                        // The safest method that doesn't break the parent element's structure.
+                        nodeRange.surroundContents(mark);
+                        marks.push(mark);
+                    } catch (e) {
+                        // This can happen with very complex selections, but the impact is minimal.
+                        console.warn("Highlighter: Could not wrap a specific node within the selection.", e);
+                    }
+                }
+            });
+
+            // Clean up the DOM by merging adjacent text nodes.
+            if (marks.length > 0) {
+                const parent = marks[0].parentNode;
+                if(parent) parent.normalize();
             }
+
+            return marks;
+        }
+
+        static getNodesInRange(range) {
+            const start = range.startContainer;
+            const end = range.endContainer;
+            const commonAncestor = range.commonAncestorContainer;
+            const nodes = [];
+            let node;
+
+            // Walk the DOM tree from the start of the range.
+            for (node = start; node; node = this.getNextNode(node)) {
+                if (commonAncestor.contains(node)) {
+                    nodes.push(node);
+                }
+                if (node === end) break;
+            }
+            return nodes;
+        }
+
+        static getNextNode(node) {
+            if (node.firstChild) return node.firstChild;
+            while (node) {
+                if (node.nextSibling) return node.nextSibling;
+                node = node.parentNode;
+            }
+            return null;
+        }
+
+        static findBlockContainer(node) {
+            let current = node;
+            while (current) {
+                if (current.nodeType === Node.ELEMENT_NODE) {
+                    const style = window.getComputedStyle(current).display;
+                    if (style !== 'inline' && style !== 'inline-block') {
+                        return current; // Found the block-level container
+                    }
+                }
+                current = current.parentNode;
+            }
+            return document.body; // Fallback
         }
 
         static unwrap(element) {
@@ -290,6 +376,49 @@
         _setupEventListeners() {
             document.addEventListener('mouseup', this._onMouseUp.bind(this));
             document.addEventListener('mousedown', this._onMouseDown.bind(this), true);
+            document.addEventListener('keydown', this._onKeyDown.bind(this));
+        }
+
+        _onKeyDown(event) {
+            const target = event.target;
+
+            // --- CONTEXT-AWARE GUARD ---
+            // Don't interfere if the user is typing in an input, textarea, or a rich-text editor.
+            const isInput = target.isContentEditable || target.matches('input, textarea, select');
+            if (isInput) {
+                return;
+            }
+            // --- END GUARD ---
+
+            if (event.key === 'Escape') {
+                // Case 1: An annotation's context menu is open. Close it.
+                if (this.activeAnnotationId) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.menu.hide();
+                    this.activeAnnotationId = null;
+                }
+                // Case 2: A new text selection is active. Deselect and hide menu.
+                else {
+                    const selection = window.getSelection();
+                    if (selection && !selection.isCollapsed) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        selection.removeAllRanges();
+                        this.menu.hide();
+                        this.activeRange = null;
+                    }
+                }
+            }
+
+            // On Delete, if an annotation's context menu is open, delete the annotation.
+            if (event.key === 'Delete') {
+                if (this.activeAnnotationId) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.deleteAnnotation();
+                }
+            }
         }
 
         _onMouseDown(event) {
@@ -311,7 +440,26 @@
                 const selection = window.getSelection();
                 if (selection.isCollapsed || selection.rangeCount === 0) return;
 
-                const range = selection.getRangeAt(0);
+                let range = selection.getRangeAt(0);
+
+                // --- SELECTION SANITIZATION ---
+                // Problem: If a selection ends at the very beginning of a new block element (offset 0),
+                // it can cause the block element itself to be included in the highlight, breaking layout.
+                // Solution: Detect this case and adjust the range to end at the end of the previous sibling.
+                if (range.endOffset === 0 && range.endContainer.nodeType === Node.ELEMENT_NODE) {
+                    const previousSibling = range.endContainer.previousSibling;
+                    if (previousSibling) {
+                        // If the previous sibling is a text node, set the end there.
+                        if (previousSibling.nodeType === Node.TEXT_NODE) {
+                            range.setEnd(previousSibling, previousSibling.length);
+                        }
+                        // If it's an element, set the end after its last child.
+                        else if (previousSibling.nodeType === Node.ELEMENT_NODE) {
+                            range.setEnd(previousSibling, previousSibling.childNodes.length);
+                        }
+                    }
+                }
+                // --- END SANITIZATION ---
                 
                 // --- Trim selection logic ---
                 const originalString = range.toString();
@@ -324,10 +472,10 @@
                     range.setStart(range.startContainer, range.startOffset + leadingSpaces);
                 }
                 if (trailingSpaces > 0) {
-                    range.setEnd(range.endContainer, range.endOffset - trailingSpaces);
+                    const newEndOffset = Math.max(0, range.endOffset - trailingSpaces);
+                    range.setEnd(range.endContainer, newEndOffset);
                 }
                 
-                // Visually update the selection in the browser
                 if (leadingSpaces > 0 || trailingSpaces > 0) {
                     selection.removeAllRanges();
                     selection.addRange(range);
