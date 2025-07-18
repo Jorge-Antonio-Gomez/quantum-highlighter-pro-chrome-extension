@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Highlighter WEB
 // @namespace    http://tampermonkey.net/
-// @version      18.07.2025.9
+// @version      18.07.2025.10
 // @description  Sistema de anotaciones web inspirado en Zotero. Resalta, subraya y gestiona anotaciones en cualquier página.
 // @author       George
 // @match        *://*/*
@@ -53,6 +53,8 @@
             padding: 6px;
             transition: opacity 0.1s ease-in-out;
             width: auto; /* Let content define the width */
+            transform: scale(0.9);
+            transform-origin: top center;
         }
         
         .highlighter-menu.show { display: flex; }
@@ -110,7 +112,7 @@
         
         .highlighter-type-selector {
             flex: 1; /* Fill available space in the .types row */
-            height: 28px;
+            height: 25px; /* 90% of 28px */
             font-size: 16px;
             font-weight: bold;
             color: #555;
@@ -129,9 +131,9 @@
         
         .highlighter-delete-btn {
             flex: 1; /* Fill the entire row */
-            font-size: 18px;
-            height: 28px;
+            height: 25px; /* 90% of 28px */
             background-color: #f0f0f0;
+            color: #333;
         }
         .highlighter-delete-btn:hover {
             background-color: #FFE0E0;
@@ -253,7 +255,9 @@
         show(x, y_bottom) {
             this.element.classList.add('show');
             const rect = this.element.getBoundingClientRect();
-            let finalX = x - rect.width / 2;
+            // Adjust for scaling
+            const scaledWidth = rect.width * 0.9;
+            let finalX = x - scaledWidth / 2;
             let finalY = y_bottom + 12; // Position below the selection
             if (finalX < 0) finalX = 10;
             this.element.style.left = `${finalX}px`;
@@ -276,6 +280,8 @@
             };
             this.currentAnnotationType = 'highlight';
             this.menu = new HighlightMenu();
+            // this.deleteIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
+            this.deleteIcon = `Borrar`;
             this._injectStyles();
             this._loadAnnotations();
             this._setupEventListeners();
@@ -355,7 +361,7 @@
                         { action: 'changeType', value: 'highlight', label: 'Highlight', content: 'A', className: `highlighter-type-selector ${annotation.type === 'highlight' ? 'active' : ''}` },
                         { action: 'changeType', value: 'underline', label: 'Underline', content: '<span class="underline">A</span>', className: `highlighter-type-selector ${annotation.type === 'underline' ? 'active' : ''}` }
                     ],
-                    actions: [{ action: 'delete', label: 'Delete', content: '🗑️', className: 'highlighter-delete-btn' }]
+                    actions: [{ action: 'delete', label: 'Delete', content: this.deleteIcon, className: 'highlighter-delete-btn' }]
                 }
             });
             this.menu.show(rect.x + rect.width / 2, window.scrollY + rect.bottom);
