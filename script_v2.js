@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Highlighter WEB
 // @namespace    http://tampermonkey.net/
-// @version      18.07.2025.10
+// @version      18.07.2025.11
 // @description  Sistema de anotaciones web inspirado en Zotero. Resalta, subraya y gestiona anotaciones en cualquier página.
 // @author       George
 // @match        *://*/*
@@ -255,10 +255,9 @@
         show(x, y_bottom) {
             this.element.classList.add('show');
             const rect = this.element.getBoundingClientRect();
-            // Adjust for scaling
             const scaledWidth = rect.width * 0.9;
             let finalX = x - scaledWidth / 2;
-            let finalY = y_bottom + 12; // Position below the selection
+            let finalY = y_bottom + 12;
             if (finalX < 0) finalX = 10;
             this.element.style.left = `${finalX}px`;
             this.element.style.top = `${finalY}px`;
@@ -280,7 +279,6 @@
             };
             this.currentAnnotationType = 'highlight';
             this.menu = new HighlightMenu();
-            // this.deleteIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
             this.deleteIcon = `Borrar`;
             this._injectStyles();
             this._loadAnnotations();
@@ -312,8 +310,32 @@
             setTimeout(() => {
                 const selection = window.getSelection();
                 if (selection.isCollapsed || selection.rangeCount === 0) return;
+
                 const range = selection.getRangeAt(0);
-                if (range.toString().trim().length === 0) return;
+                
+                // --- Trim selection logic ---
+                const originalString = range.toString();
+                if (originalString.length === 0) return;
+                
+                const leadingSpaces = originalString.match(/^\s*/)[0].length;
+                const trailingSpaces = originalString.match(/\s*$/)[0].length;
+
+                if (leadingSpaces > 0) {
+                    range.setStart(range.startContainer, range.startOffset + leadingSpaces);
+                }
+                if (trailingSpaces > 0) {
+                    range.setEnd(range.endContainer, range.endOffset - trailingSpaces);
+                }
+                
+                // Visually update the selection in the browser
+                if (leadingSpaces > 0 || trailingSpaces > 0) {
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }
+                // --- End trim logic ---
+
+                if (range.toString().length === 0) return;
+
                 this.activeRange = range;
                 const rect = range.getBoundingClientRect();
                 this._showCreationMenu(rect.x + rect.width / 2, window.scrollY + rect.bottom);
