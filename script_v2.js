@@ -259,6 +259,7 @@
 
         static applyAnnotationStyle(element, annotation) {
             const colorWithOpacity = annotation.color.startsWith('#') ? `${annotation.color}80` : annotation.color;
+            element.style.color = 'inherit';
             if (annotation.type === 'highlight') {
                 element.style.backgroundColor = colorWithOpacity;
                 element.style.borderBottom = 'none';
