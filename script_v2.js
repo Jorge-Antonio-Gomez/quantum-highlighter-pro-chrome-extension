@@ -76,6 +76,8 @@
 
     // --- STYLES ---
     const styles = `
+        @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap');
+
         :root {
             --highlighter-z-index: 10001;
             --highlighter-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
@@ -111,7 +113,7 @@
             border-radius: var(--highlighter-radius);
             box-shadow: var(--highlighter-shadow);
             z-index: var(--highlighter-z-index);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: "Rubik", -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             padding: 6px;
             transition: opacity 0.1s ease-in-out;
             width: auto; /* Let content define the width */
