@@ -2,17 +2,19 @@
 
 Un script de usuario (UserScript) para navegadores web que permite resaltar y tomar notas en cualquier página web, inspirado en el sistema de anotaciones de Zotero.
 
-## Características
+## Características principales
 
-*   **Resaltado y subrayado:** Selecciona texto en cualquier página y elige un color para resaltarlo o subrayarlo.
-*   **Menú contextual flotante:** Un menú limpio y moderno aparece al seleccionar texto o al hacer clic en una anotación existente.
-*   **Personalización:** Cambia el color o el tipo (resaltado/subrayado) de cualquier anotación en cualquier momento.
-*   **Persistencia:** Las anotaciones se guardan localmente en tu navegador y se recargan automáticamente cuando vuelves a visitar la página.
+*   **Dos tipos de anotación:** Resalta texto con un color de fondo o subráyalo.
+*   **Ocho colores disponibles:** Personaliza tus notas con una paleta de 8 colores (amarillo, rojo, verde, azul, morado, rosa, naranja, gris).
+*   **Menú contextual flotante:** Un menú limpio y moderno aparece al seleccionar texto o al hacer clic en una anotación existente para una edición rápida.
+*   **Persistencia de datos:** Las anotaciones se guardan en el `localStorage` de tu navegador y se recargan automáticamente cuando vuelves a visitar la página.
 *   **Atajos de teclado:**
-    *   `Esc`: Cierra el menú o cancela la selección de texto actual.
-    *   `Supr`: Elimina la anotación seleccionada.
-*   **Inteligente:** Los atajos de teclado se desactivan automáticamente cuando estás escribiendo en un campo de texto para no interferir.
-*   **Ligero y rápido:** No requiere de pesadas librerías y se ejecuta eficientemente.
+    *   `Esc`: Cierra el menú contextual o cancela la selección de texto actual.
+    *   `Supr`: Elimina la anotación que esté seleccionada.
+*   **Manejo inteligente de entradas:** Los atajos de teclado se desactivan automáticamente cuando estás escribiendo en un campo de texto para no interferir.
+*   **Selección precisa:** El script recorta automáticamente los espacios en blanco al inicio y al final de tu selección para mantener las notas limpias.
+*   **Soporte multi-idioma:** La interfaz está disponible en español, inglés, francés, portugués, ruso y chino.
+*   **Ligero y rápido:** Escrito en JavaScript puro y moderno, solo depende de la ligera librería `@floating-ui/dom` para el posicionamiento del menú.
 
 ## Instalación
 
@@ -31,21 +33,40 @@ Una vez que tengas la extensión instalada, puedes instalar el script desde [Gre
 ## Uso
 
 1.  **Selecciona texto:** Simplemente arrastra el ratón sobre el texto que quieres anotar en cualquier página web.
-2.  **Anota:** Aparecerá un pequeño menú.
+2.  **Anota:** Aparecerá un pequeño menú flotante.
     *   Elige uno de los **colores** para crear la anotación.
     *   Puedes cambiar entre el modo de resaltado (`A`) y subrayado (`A` con una línea debajo) antes de seleccionar el color.
 3.  **Gestiona tus anotaciones:**
     *   Haz **clic** en cualquier anotación existente para abrir el menú de nuevo.
-    *   Puedes cambiar el color, el tipo o hacer clic en **"Borrar"** para eliminarla.
+    *   Desde el menú puedes cambiar el color, el tipo de anotación o hacer clic en **"Borrar"** para eliminarla.
+
+## Configuración
+
+### Cómo cambiar el idioma
+
+Por defecto, el script está en español. Para cambiarlo:
+1.  Abre el editor de scripts en Tampermonkey (o tu gestor preferido).
+2.  Busca la línea `const preferredLanguage = 'es';`.
+3.  Cambia `'es'` por el código del idioma que prefieras. Los códigos soportados son:
+    *   `'en'`: Inglés
+    *   `'es'`: Español
+    *   `'fr'`: Francés
+    *   `'pt'`: Portugués
+    *   `'ru'`: Ruso
+    *   `'zh'`: Chino
+4.  Guarda los cambios.
 
 ## Desarrollo
 
-Este script está escrito en JavaScript plano y utiliza la librería `@floating-ui/dom` para posicionar el menú contextual de forma inteligente.
+El script está escrito en JavaScript moderno con una estructura orientada a objetos para separar las responsabilidades.
 
-*   **`script_v2.js`**: El código fuente principal del script.
+*   **`Highlighter`**: La clase principal que gestiona los eventos, el estado y la lógica de la aplicación.
+*   **`DOMManager`**: Clase estática con métodos para interactuar con el DOM, como obtener el XPath de un nodo, envolver rangos de texto y aplicar estilos.
+*   **`HighlightStorage`**: Se encarga de guardar y cargar las anotaciones en el `localStorage`.
+*   **`HighlightMenu`**: Gestiona la creación y visualización del menú contextual usando `@floating-ui/dom`.
+*   **Internacionalización (i18n)**: Las cadenas de texto están centralizadas en el objeto `i18n` para facilitar la traducción y el mantenimiento.
 *   **Estilos**: Los estilos CSS están inyectados directamente en el script para asegurar que funcione sin necesidad de archivos externos.
-*   **Almacenamiento**: Las anotaciones se guardan en el `localStorage` del navegador, con una clave única para cada página.
 
 ## Licencia
 
-Este proyecto está bajo la Licencia MIT. Consulta el archivo `LICENSE` para más detalles.
+Este proyecto está bajo la Licencia Creative Commons Atribución-CompartirIgual 4.0 Internacional (CC BY-SA 4.0).
