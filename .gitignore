@@ -79,3 +79,6 @@ Thumbs.db
 # Build directories
 dist/
 build/
+
+# Extensión de Chrome
+chrome_extension/

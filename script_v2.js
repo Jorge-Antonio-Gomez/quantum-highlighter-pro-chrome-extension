@@ -257,14 +257,31 @@
             }
         }
 
-        static applyAnnotationStyle(element, annotation) {
+        static applyAnnotationStyle(element, annotation, nodeContext) {
             const colorWithOpacity = annotation.color.startsWith('#') ? `${annotation.color}80` : annotation.color;
-            element.style.color = 'inherit';
+
+            // Adaptive text color for highlights
             if (annotation.type === 'highlight') {
                 element.style.backgroundColor = colorWithOpacity;
                 element.style.borderBottom = 'none';
-            } else {
+
+                const isLink = nodeContext && nodeContext.parentNode.closest('a');
+
+                if (isLink) {
+                    // For links, always inherit the original color to preserve custom styles
+                    element.style.color = 'inherit';
+                } else {
+                    // For plain text, use adaptive color for dark mode
+                    const bodyColor = window.getComputedStyle(document.body).color;
+                    if (this.isColorLight(bodyColor)) {
+                        element.style.color = '#1a1a1a'; // Force dark text on light-text pages
+                    } else {
+                        element.style.color = 'inherit'; // Use original color on dark-text pages
+                    }
+                }
+            } else { // Underlines
                 element.style.backgroundColor = 'transparent';
+                element.style.color = 'inherit';
                 element.style.borderBottom = `2px solid ${colorWithOpacity}`;
             }
         }
@@ -296,7 +313,7 @@
                     const mark = document.createElement('mark');
                     mark.className = 'highlighter-mark';
                     mark.dataset.annotationId = annotation.id;
-                    this.applyAnnotationStyle(mark, annotation);
+                    this.applyAnnotationStyle(mark, annotation, node);
                     
                     try {
                         // The safest method that doesn't break the parent element's structure.
@@ -363,6 +380,19 @@
             while (element.firstChild) parent.insertBefore(element.firstChild, element);
             parent.removeChild(element);
             parent.normalize();
+        }
+
+        static isColorLight(colorString) {
+            try {
+                const match = colorString.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+                if (!match) return false; // Fallback for non-rgb colors
+                const [, r, g, b] = match.map(Number);
+                // Using the YIQ formula to determine perceived brightness
+                const luminance = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+                return luminance > 155; // Threshold for "light" color
+            } catch (e) {
+                return false; // Default to false on any error
+            }
         }
     }
 
@@ -657,7 +687,15 @@
             if (!annotation) return;
             Object.assign(annotation, updates);
             document.querySelectorAll(`[data-annotation-id="${id}"]`).forEach(el => {
-                DOMManager.applyAnnotationStyle(el, annotation);
+                // For updates, we can't easily get the original node context,
+                // so we re-apply the style generally and then fix links inside.
+                DOMManager.applyAnnotationStyle(el, annotation, null); // Apply general style
+                if (annotation.type === 'highlight') {
+                    const links = el.getElementsByTagName('a');
+                    if (links.length > 0) {
+                        el.style.color = 'inherit'; // If mark contains a link, let it inherit color
+                    }
+                }
             });
             this.annotations.set(id, annotation);
             this.storage.save(this.annotations);
