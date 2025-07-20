@@ -1,0 +1,114 @@
+/* Importar Rubik */
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap');
+
+.highlighter-context-menu {
+    position: absolute;
+    background: white;
+    /* border: 1px solid #ccc; */
+    flex-direction: column;
+    gap: 4px;
+    border-radius: var(--highlighter-radius);
+    box-shadow: var(--highlighter-shadow);
+    padding: 5px;
+    z-index: 10002;
+    display: none;
+    font-family: "Rubik", -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    transform-origin: top center;
+}
+
+.highlighter-context-menu button {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 13px;
+    /* font-weight: 400; */
+    color: #333;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.highlighter-context-menu button:hover {
+    background-color: #f0f0f0;
+}
+
+@keyframes popup-bounce-in {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    
+    60% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+
+    80% {
+        transform: scale(0.95);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes popup-bounce-out {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    20% {
+        transform: scale(0.95);
+    }
+
+    40% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(0);
+        opacity: 0;
+    }
+}
+
+.highlighter-close-btn {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 6px;
+    font-weight: 900;
+    line-height: 10px;
+    color: #555;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    z-index: 10001;
+    transition: all 0.15s ease-in-out;
+    padding: 0;
+    margin: 0;
+    border: none;
+    margin-top: 3px;
+    opacity: 0; transform: scale(0); pointer-events: none; transition: background-color 0.2s, color 0.2s;
+}
+
+.highlighter-close-btn.show {
+    pointer-events: auto; animation: popup-bounce-in 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); opacity: 1; transform: scale(1);
+}
+
+.highlighter-close-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+body.highlighter-sidebar-open {
+    transition: margin-right 0.3s ease-in-out;
+    margin-right: 480px;
+}

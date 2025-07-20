@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido a Quantum Highlighter WEB</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="welcome.css">
+    <link rel="icon" href="images/icon48.png">
+</head>
+<body>
+    <div class="container">
+        <div class="language-selector-container">
+            <select id="language-selector">
+                <option value="en">English</option>
+                <option value="es">Español</option>
+                <option value="fr">Français</option>
+                <option value="pt">Português</option>
+                <option value="ru">Русский</option>
+                <option value="zh">中文</option>
+            </select>
+        </div>
+        <header>
+            <img src="images/icon128.png" alt="Quantum Highlighter Logo" class="logo">
+            <h1 data-key="title">Gracias por instalar Quantum Highlighter WEB!</h1>
+            <p class="subtitle" data-key="subtitle">Tu herramienta para anotar y recordar lo importante en la web.</p>
+        </header>
+
+        <main>
+            <section class="feature-box">
+                <h2 data-key="how_it_works">¿Cómo funciona?</h2>
+                <ol>
+                    <li data-key="step1"><strong>Selecciona texto:</strong> Simplemente arrastra el cursor sobre cualquier texto en una página web. <i>¡Puedes probar con este texto!</i></li>
+                    <li data-key="step2"><strong>Elige una acción:</strong> Aparecerá un menú contextual. Escoge un color para resaltar o la opción para subrayar.</li>
+                    <li data-key="step3"><strong>Gestiona tus notas:</strong> Haz clic en una anotación existente para cambiar su color, tipo o para eliminarla.</li>
+                    <li data-key="step4"><strong>Persistencia:</strong> Tus anotaciones se guardan automáticamente en la página donde las creaste.</li>
+                </ol>
+            </section>
+
+            <section class="feature-box">
+                <h2 data-key="features">Características Principales</h2>
+                <ul>
+                    <li data-key="feature1">🎨 <strong>Múltiples colores:</strong> Elige entre 8 colores vibrantes para organizar tus ideas.</li>
+                    <li data-key="feature2">✍️ <strong>Dos tipos de anotación:</strong> Resaltado clásico y subrayado.</li>
+                    <li data-key="feature3">💾 <strong>Guardado automático:</strong> No te preocupes por perder tus notas.</li>
+                    <li data-key="feature4">🌐 <strong>Funciona en casi todas partes:</strong> Compatible con la mayoría de las páginas web.</li>
+                    <li data-key="feature5">⌨️ <strong>Atajos de teclado:</strong> Usa `Esc` para cancelar una selección y `Supr` para borrar una nota activa.</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <p data-key="support">¿Disfrutas de la extensión? ¡Considera apoyarme!</p>
+            <a href="https://www.buymeacoffee.com/georgemarrero" target="_blank" class="coffee-button" data-key="coffee">Invítame un café ☕</a>
+        </footer>
+    </div>
+
+    <script>
+        const translations = {
+            'en': {
+                'title': 'Thanks for installing Quantum Highlighter WEB!',
+                'subtitle': 'Your tool to annotate and remember what\'s important on the web.',
+                'how_it_works': 'How does it work?',
+                'step1': '<strong>Select text:</strong> Simply drag your cursor over any text on a webpage. <i>You can try with this text!</i>',
+                'step2': '<strong>Choose an action:</strong> A context menu will appear. Pick a color to highlight or the option to underline.',
+                'step3': '<strong>Manage your notes:</strong> Click on an existing annotation to change its color, type, or to delete it.',
+                'step4': '<strong>Persistence:</strong> Your annotations are automatically saved on the page where you created them.',
+                'features': 'Main Features',
+                'feature1': '🎨 <strong>Multiple colors:</strong> Choose from 8 vibrant colors to organize your ideas.',
+                'feature2': '✍️ <strong>Two annotation types:</strong> Classic highlighting and underlining.',
+                'feature3': '💾 <strong>Automatic saving:</strong> Don\'t worry about losing your notes.',
+                'feature4': '🌐 <strong>Works almost everywhere:</strong> Compatible with most websites.',
+                'feature5': '⌨️ <strong>Keyboard shortcuts:</strong> Use `Esc` to cancel a selection and `Del` to delete an active note.',
+                'support': 'Enjoying the extension? Consider supporting me!',
+                'coffee': 'Buy me a coffee ☕'
+            },
+            'es': {
+                'title': '¡Gracias por instalar Quantum Highlighter WEB!',
+                'subtitle': 'Tu herramienta para anotar y recordar lo importante en la web.',
+                'how_it_works': '¿Cómo funciona?',
+                'step1': '<strong>Selecciona texto:</strong> Simplemente arrastra el cursor sobre cualquier texto en una página web. <i>¡Puedes probar con este texto!</i>',
+                'step2': '<strong>Elige una acción:</strong> Aparecerá un menú contextual. Escoge un color para resaltar o la opción para subrayar.',
+                'step3': '<strong>Gestiona tus notas:</strong> Haz clic en una anotación existente para cambiar su color, tipo o para eliminarla.',
+                'step4': '<strong>Persistencia:</strong> Tus anotaciones se guardan automáticamente en la página donde las creaste.',
+                'features': 'Características Principales',
+                'feature1': '🎨 <strong>Múltiples colores:</strong> Elige entre 8 colores vibrantes para organizar tus ideas.',
+                'feature2': '✍️ <strong>Dos tipos de anotación:</strong> Resaltado clásico y subrayado.',
+                'feature3': '💾 <strong>Guardado automático:</strong> No te preocupes por perder tus notas.',
+                'feature4': '🌐 <strong>Funciona en casi todas partes:</strong> Compatible con la mayoría de las páginas web.',
+                'feature5': '⌨️ <strong>Atajos de teclado:</strong> Usa `Esc` para cancelar una selección y `Supr` para borrar una nota activa.',
+                'support': '¿Disfrutas de la extensión? ¡Considera apoyarme!',
+                'coffee': 'Invítame un café ☕'
+            },
+            'fr': {
+                'title': 'Merci d\'avoir installé Quantum Highlighter WEB !',
+                'subtitle': 'Votre outil pour annoter et mémoriser ce qui est important sur le web.',
+                'how_it_works': 'Comment ça marche ?',
+                'step1': "<strong>Sélectionnez du texte :</strong> Faites simplement glisser votre curseur sur n'importe quel texte d'une page web. <i>Vous pouvez essayer avec ce texte !</i>",
+                'step2': "<strong>Choisissez une action :</strong> Un menu contextuel apparaîtra. Choisissez une couleur pour surligner ou l'option pour souligner.",
+                'step3': '<strong>Gérez vos notes :</strong> Cliquez sur une annotation existante pour changer sa couleur, son type ou pour la supprimer.',
+                'step4': '<strong>Persistance :</strong> Vos annotations sont automatiquement sauvegardées sur la page où vous les avez créées.',
+                'features': 'Caractéristiques Principales',
+                'feature1': '🎨 <strong>Plusieurs couleurs :</strong> Choisissez parmi 8 couleurs vives pour organiser vos idées.',
+                'feature2': "✍️ <strong>Dos tipos de anotación :</strong> Surlignage classique y soulignement.",
+                'feature3': '💾 <strong>Sauvegarde automatique :</strong> Ne vous inquiétez pas de perdre vos notes.',
+                'feature4': '🌐 <strong>Fonctionne presque partout :</strong> Compatible con la mayoría de los sitios web.',
+                'feature5': "⌨️ <strong>Raccourcis clavier :</strong> Utilisez `Échap` para anular una selección y `Supr` para borrar una nota activa.",
+                'support': "Vous appréciez l'extension ? Envisagez de me soutenir !",
+                'coffee': 'Offrez-moi un café ☕'
+            },
+            'pt': {
+                'title': 'Obrigado por instalar o Quantum Highlighter WEB!',
+                'subtitle': 'Sua ferramenta para anotar e lembrar o que é importante na web.',
+                'how_it_works': 'Como funciona?',
+                'step1': '<strong>Selecione o texto:</strong> Simplesmente arraste o cursor sobre qualquer texto em uma página da web. <i>Você pode tentar com este texto!</i>',
+                'step2': '<strong>Escolha uma ação:</strong> Um menu de contexto aparecerá. Escolha uma cor para destacar ou a opção para sublinhar.',
+                'step3': '<strong>Gerencie suas anotações:</strong> Clique em uma anotação existente para alterar sua cor, tipo ou para excluí-la.',
+                'step4': '<strong>Persistência:</strong> Suas anotações são salvas automaticamente na página onde você as criou.',
+                'features': 'Principais Características',
+                'feature1': '🎨 <strong>Múltiplas cores:</strong> Escolha entre 8 cores vibrantes para organizar suas ideias.',
+                'feature2': '✍️ <strong>Dois tipos de anotação:</strong> Destaque clássico e sublinhado.',
+                'feature3': '💾 <strong>Salvamento automático:</strong> Não se preocupe em perder suas anotações.',
+                'feature4': '🌐 <strong>Funciona em quase todos os lugares:</strong> Compatível com a maioria dos sites.',
+                'feature5': '⌨️ <strong>Atalhos de teclado:</strong> Use `Esc` para cancelar uma seleção y `Del` para excluir una nota activa.',
+                'support': 'Gostando da extensão? Considere me apoiar!',
+                'coffee': 'Pague-me um café ☕'
+            },
+            'ru': {
+                'title': 'Спасибо за установку Quantum Highlighter WEB!',
+                'subtitle': 'Ваш инструмент para аннотирования и запоминания важного в Интернете.',
+                'how_it_works': 'Как это работает?',
+                'step1': '<strong>Выделите текст:</strong> Просто проведите курсором по любому тексту на веб-странице. <i>Вы можете попробовать на этом тексте!</i>',
+                'step2': '<strong>Выберите действие:</strong> Появится контекстное меню. Выберите цвет для выделения или опцию для подчеркивания.',
+                'step3': '<strong>Управляйте своими заметками:</strong> Нажмите на существующую аннотацию, чтобы изменить ее цвет, тип или удалить ее.',
+                'step4': '<strong>Сохранение:</strong> Ваши аннотации автоматически сохраняются на странице, где вы их создали.',
+                'features': 'Основные возможности',
+                'feature1': '🎨 <strong>Несколько цветов:</strong> Выбирайте из 8 ярких цветов для организации своих идей.',
+                'feature2': '✍️ <strong>Два типа аннотаций:</strong> Классическое выделение и подчеркивание.',
+                'feature3': '💾 <strong>Автоматическое сохранение:</strong> Не беспокойтесь о потере своих заметок.',
+                'feature4': '🌐 <strong>Работает почти везде:</strong> Совместимо с большинством веб-сайтов.',
+                'feature5': '⌨️ <strong>Горячие клавиши:</strong> Используйте `Esc` para отмены выделения y `Del` para удаления активной заметки.',
+                'support': 'Нравится расширение? Поддержите меня!',
+                'coffee': 'Купите мне кофе ☕'
+            },
+            'zh': {
+                'title': '感谢您安装 Quantum Highlighter WEB！',
+                'subtitle': '您在网络上注释和记忆重要内容的工具。',
+                'how_it_works': '它是如何工作的？',
+                'step1': '<strong>选择文本：</strong> 只需将光标拖到网页上的任何文本上。 <i>你可以用这段文字试试！</i>',
+                'step2': '<strong>选择一个操作：</strong> 将出现一个上下文菜单。选择一种颜色以突出显示或选择下划线选项。',
+                'step3': '<strong>管理您的笔记：</strong> 单击现有的注释以更改其颜色、类型或将其删除。',
+                'step4': '<strong>持久性：</strong> 您的注释会自动保存在您创建它们的页面上。',
+                'features': '主要特点',
+                'feature1': '🎨 <strong>多种颜色：</strong> 从8种鲜艳的颜色中选择，以组织您的想法。',
+                'feature2': '✍️ <strong>两种注释类型：</strong> 经典高亮和下划线。',
+                'feature3': '💾 <strong>自动保存：</strong> 不用担心丢失笔记。',
+                'feature4': '🌐 <strong>几乎无处不在：</strong> 与大多数网站兼容。',
+                'feature5': '⌨️ <strong>键盘快捷键：</strong> 使用 `Esc` 取消选择，使用 `Del` 删除活动笔记。',
+                'support': '喜欢这个扩展吗？考虑支持我！',
+                'coffee': '给我买杯咖啡☕'
+            }
+        };
+
+        function setLanguage(lang) {
+            const langTranslations = translations[lang] || translations['en'];
+            document.querySelectorAll('[data-key]').forEach(element => {
+                const key = element.getAttribute('data-key');
+                if (langTranslations[key]) {
+                    element.innerHTML = langTranslations[key];
+                }
+            });
+            document.documentElement.lang = lang;
+            // Save language preference to chrome.storage.sync
+            if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
+                chrome.storage.sync.set({ 'language': lang }, () => {
+                    if (chrome.runtime.lastError) {
+                        console.error("Error saving language to chrome.storage.sync: ", chrome.runtime.lastError);
+                    }
+                });
+            } else {
+                console.warn("chrome.storage.sync not available. Running outside Chrome Extension context?");
+            }
+        }
+
+        // Initialize language selector and set initial language
+        document.addEventListener('DOMContentLoaded', () => {
+            const languageSelector = document.getElementById('language-selector');
+
+            if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.sync) {
+                // Get language from chrome.storage.sync or use browser language
+                chrome.storage.sync.get('language', (data) => {
+                    let userLang = data.language || navigator.language.split('-')[0];
+                    if (!translations[userLang]) {
+                        userLang = 'en'; // Default to English if unsupported
+                    }
+                    languageSelector.value = userLang;
+                    setLanguage(userLang);
+                });
+            } else {
+                console.warn("chrome.storage.sync not available. Running outside Chrome Extension context?");
+                let userLang = navigator.language.split('-')[0];
+                if (!translations[userLang]) {
+                    userLang = 'en'; // Default to English if unsupported
+                }
+                languageSelector.value = userLang;
+                setLanguage(userLang);
+            }
+
+            languageSelector.addEventListener('change', (event) => {
+                setLanguage(event.target.value);
+            });
+        });
+    </script>
+</body>
+</html>

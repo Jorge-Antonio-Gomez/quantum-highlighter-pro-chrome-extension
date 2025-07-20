@@ -1,0 +1,134 @@
+/* Importar RUBIK */
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap');
+
+html {
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+body {
+    font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f18822;
+}
+
+.container {
+    max-width: 900px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    text-align: center;
+    position: relative; /* Added for positioning the language selector */
+}
+
+.language-selector-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+}
+
+#language-selector {
+    padding: 8px 12px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+#language-selector:focus {
+    outline: none;
+    border-color: #57b4dfff;
+    box-shadow: 0 0 0 2px rgba(87, 180, 223, 0.2);
+}
+
+header .logo {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    font-size: 2em;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+header .subtitle {
+    font-size: 1.2em;
+    color: #666;
+    margin-top: 10px;
+}
+
+main {
+    margin-top: 40px;
+    text-align: left;
+}
+
+.feature-box {
+    background-color: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 25px;
+}
+
+.feature-box h2 {
+    font-size: 1.4em;
+    color: #333;
+    border-bottom: 2px solid #57b4dfff;
+    padding-bottom: 10px;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.feature-box ol, .feature-box ul {
+    padding-left: 20px;
+    font-size: 1.1em;
+    line-height: 1.6;
+}
+
+.feature-box li {
+    margin-bottom: 10px;
+}
+
+.feature-box strong {
+    color: #1a1a1a;
+}
+
+footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+footer p {
+    font-size: 1.1em;
+    color: #555;
+}
+
+.coffee-button {
+    display: inline-block;
+    background-color: #FFDD00;
+    color: #000;
+    text-decoration: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1.1em;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.coffee-button:hover {
+    background-color: #f0c808;
+    transform: scale(1.05);
+}

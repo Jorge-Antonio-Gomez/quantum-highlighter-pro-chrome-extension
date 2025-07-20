@@ -1,0 +1,51 @@
+{
+    "manifest_version": 3,
+    "name": "Quantum Highlighter WEB",
+    "version": "18.07.2025.16",
+    "description": "Web annotation system inspired by Zotero. Highlight, underline, and manage annotations on any page.",
+    "permissions": [
+        "storage",
+        "activeTab",
+        "scripting"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "icons": {
+        "16": "images/icon16.png",
+        "48": "images/icon48.png",
+        "128": "images/icon128.png"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "*://*/*"
+            ],
+            "js": [
+                "libs/floating-ui-core.js",
+                "libs/floating-ui-dom.umd.js",
+                "i18n.js",
+                "script.js"
+            ],
+            "css": [
+                "style.css"
+            ],
+            "run_at": "document_idle"
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "sidebar.html",
+                "sidebar.css",
+                "sidebar.js"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ],
+    "action": {
+        "default_title": "Show Highlighter Panel"
+    }
+}

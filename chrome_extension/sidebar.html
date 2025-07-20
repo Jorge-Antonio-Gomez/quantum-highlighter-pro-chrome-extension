@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="sidebar.css">
+</head>
+<body>
+    <div id="resize-handle">
+        <button id="lock-button" aria-label="Lock sidebar width">
+            <img src="images/padlock-unlocked-outlined-svgrepo-com.svg" alt="Unlock" class="icon-unlocked">
+            <img src="images/padlock-outlined-svgrepo-com.svg" alt="Lock" class="icon-locked">
+        </button>
+    </div>
+    <div class="container">
+        <div class="header">
+            <h2 data-i18n-key="sidebarTitle">Annotations</h2>
+            <div>
+                <button id="config-button" class="icon-button" data-i18n-key="settingsButton" aria-label="Settings"><img src="images/settings.svg" alt="Settings"></button>
+                <button id="close-button" class="icon-button" data-i18n-key="closeButton" aria-label="Close">&times;</button>
+            </div>
+        </div>
+        <div id="annotations-list"></div>
+    </div>
+
+    <div id="config-popup" class="config-popup">
+        <div class="config-section">
+            <label data-i18n-key="languageLabel">Language</label>
+            <div class="custom-select-wrapper" id="language-select-wrapper">
+                <div class="custom-select-trigger" id="language-select-trigger">
+                    <span>Español</span>
+                    <svg class="arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+                <ul class="custom-select-options" id="language-options">
+                    <li class="custom-select-option" data-lang="es">Español</li>
+                    <li class="custom-select-option" data-lang="en">English</li>
+                    <li class="custom-select-option" data-lang="fr">Français</li>
+                    <li class="custom-select-option" data-lang="pt">Português</li>
+                    <li class="custom-select-option" data-lang="ru">Русский</li>
+                    <li class="custom-select-option" data-lang="zh">中文</li>
+                </ul>
+            </div>
+        </div>
+        <div class="config-section">
+            <label data-i18n-key="disableOnPageLabel">Disable on this page</label>
+            <label class="switch">
+                <input type="checkbox" id="disable-page-switch">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="config-section">
+            <label data-i18n-key="disableOnDomainLabel">Disable on this domain</label>
+            <label class="switch">
+                <input type="checkbox" id="disable-domain-switch">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <script src="libs/floating-ui-core.js"></script>
+    <script src="libs/floating-ui-dom.umd.js"></script>
+    <script src="i18n.js"></script>
+    <script src="sidebar.js"></script>
+</body>
+</html>
