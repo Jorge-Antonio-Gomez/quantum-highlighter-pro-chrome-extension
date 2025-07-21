@@ -691,6 +691,31 @@
                 this.activeAnnotationId = null;
             }
         }
+
+        scrollToAnnotation(id) {
+            const elements = document.querySelectorAll(`.highlighter-mark[data-annotation-id="${id}"]`);
+            const element = elements.length > 0 ? elements[0] : null;
+
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                elements.forEach(el => {
+                    el.style.transition = 'background-color 150ms ease-in-out, color 150ms ease-in-out';
+                    el.style.backgroundColor = '#90caf9';
+                    el.style.color = '#1a1a1a';
+                });
+
+                setTimeout(() => {
+                    const annotation = this.annotations.get(id);
+                    if (annotation) {
+                        elements.forEach(el => {
+                            el.style.transition = ''; // Reset transition
+                            DOMManager.applyAnnotationStyle(el, annotation, null);
+                        });
+                    }
+                }, 1200);
+            }
+        }
     }
 
     
@@ -723,5 +748,48 @@
             return;
         }
         initializeHighlighter();
+    });
+
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        const { action, annotationId, language, width } = request;
+
+        if (action === 'toggleSidebar') {
+            toggleSidebar();
+        } else if (action === 'getAnnotations') {
+            if (window.highlighterInstance) {
+                const annotations = window.highlighterInstance.storage.load();
+                const sortedAnnotations = Array.from(annotations.entries()).sort(([, a], [, b]) => {
+                    const rangeA = DOMManager.getRangeFromPointers(a.pointers);
+                    const rangeB = DOMManager.getRangeFromPointers(b.pointers);
+                    if (!rangeA || !rangeB) return 0;
+                    return rangeA.compareBoundaryPoints(Range.START_TO_START, rangeB);
+                });
+                sendResponse({ data: sortedAnnotations });
+            } else {
+                sendResponse({ data: [] });
+            }
+            return true; // Async response
+        } else if (action === 'scrollToAnnotation' && annotationId) {
+            window.highlighterInstance?.scrollToAnnotation(annotationId);
+        } else if (action === 'deleteAnnotation' && annotationId) {
+            window.highlighterInstance?.deleteAnnotation(annotationId);
+        } else if (action === 'languageChanged' && language) {
+            window.highlighterInstance?.updateLanguage(language);
+        } else if (action === 'startSidebarResize') {
+            startSidebarResize();
+        } else if (action === 'getSidebarWidth') {
+            const sidebar = document.getElementById(SIDEBAR_ID);
+            sendResponse({ width: sidebar ? sidebar.offsetWidth : 420 });
+            return true; // Async response
+        } else if (action === 'setSidebarWidth' && width) {
+            const sidebar = document.getElementById(SIDEBAR_ID);
+            if (sidebar) {
+                const newWidth = Math.max(MIN_WIDTH, Math.min(width, MAX_WIDTH));
+                sidebar.style.width = `${newWidth}px`;
+                document.body.style.marginRight = `${newWidth}px`;
+            }
+        }
+        // Return true for async responses, otherwise the channel might close.
+        return ["getAnnotations", "getSidebarWidth"].includes(action);
     });
 })();

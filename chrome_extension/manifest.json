@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Quantum Highlighter WEB",
-    "version": "18.07.2025.16",
+    "version": "18.07.2025.17",
     "description": "Web annotation system inspired by Zotero. Highlight, underline, and manage annotations on any page.",
     "permissions": [
         "storage",

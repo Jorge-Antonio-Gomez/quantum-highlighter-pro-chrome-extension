@@ -1,9 +1,9 @@
 chrome.action.onClicked.addListener((tab) => {
-    chrome.tabs.sendMessage(tab.id, { action: "toggleSidebar" });
-});
-
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "toggleSidebar") {
-        chrome.tabs.sendMessage(sender.tab.id, { action: "toggleSidebar" });
+    if (tab.id) {
+        chrome.tabs.sendMessage(tab.id, { action: "toggleSidebar" }).catch(err => {
+            // This error is expected on pages where the content script can't run,
+            // so we can safely ignore it.
+            console.log("Quantum Highlighter: Could not connect to content script. This is expected on some pages (e.g., chrome://newtab).");
+        });
     }
 });
