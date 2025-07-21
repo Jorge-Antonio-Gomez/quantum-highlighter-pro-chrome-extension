@@ -309,7 +309,7 @@ body:not(.locked) #resize-handle {
     position: relative;
     overflow: hidden;
     display: grid; /* Change to Grid */
-    grid-template-columns: 1fr auto auto; /* Content | Divider | Button */
+    grid-template-columns: 1fr auto; /* Content | Actions */
     align-items: center; /* Vertically center all items */
     column-gap: 12px; /* Space between items */
 }
@@ -394,22 +394,22 @@ body:not(.locked) #resize-handle {
     font-style: italic;
 }
 
-/* The vertical divider line, now a standalone element */
-.divider {
-    width: 1px;
-    /* height: 80%; */
-    height: calc(100% + 24px); /* Adjust height to fit within the card */
-    background-color: var(--border-color);
-    justify-self: center; /* Center itself in the grid column */
-}
-
-/* Area for the delete button */
-.delete-area {
+.actions-container {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
+    height: 100%;
 }
 
+.divider {
+    width: 1px;
+    /* height: 28px; */
+    height: calc(100% - 12px);
+    background-color: var(--border-color);
+}
+
+.comment-btn,
 .delete-btn {
     background-color: transparent;
     border: none;
@@ -423,24 +423,97 @@ body:not(.locked) #resize-handle {
     transition: background-color 0.2s;
 }
 
-.delete-btn:hover {
-    background-color: rgba(229, 57, 53, 0.15);
-    color: var(--danger-color);
-}
+.comment-btn:hover { background-color: rgba(0, 0, 0, 0.08); }
+.delete-btn:hover { background-color: rgba(229, 57, 53, 0.15); }
 
+.comment-btn svg,
 .delete-btn svg {
     width: 16px;
     height: 16px;
-    color: var(--primary-color);
-    opacity: 0.7;
-    transition: color 0.2s;
+    color: var(--text-color-secondary);
+    opacity: 0.8;
+    transition: color 0.2s, opacity 0.2s;
 }
 
-.delete-btn:hover svg {
-    color: var(--danger-color);
-    opacity: 1;
+.comment-btn:hover svg { color: var(--primary-color); opacity: 1; }
+.delete-btn:hover svg { color: var(--danger-color); opacity: 1; }
+
+.comment-editor {
+    display: none; /* Hidden by default */
+    margin-top: 8px;
 }
 
+/* --- STATE CHANGE: When .editing is added to .annotation-card --- */
+.annotation-card.editing .comment {
+    display: none;
+}
+
+.annotation-card.editing .comment-editor {
+    display: block;
+}
+
+/* --- STYLING THE EDITOR --- */
+.comment-editor .wysiwyg-editor {
+    width: 100%;
+    border: none;
+    border-radius: 5px;
+    box-sizing: border-box;
+    color: var(--text-primary, #334155);
+    font-size: 13px;
+    transition: border-color 0.2s, background-color 0.2s;
+    background-color: #f0f0f0;
+    padding: 8px;
+    line-height: 1.4;
+    font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 80px;
+    resize: vertical;
+    max-height: 245px;
+    overflow-y: auto;
+}
+
+.comment-editor .wysiwyg-editor:focus {
+    outline: none;
+    background-color: var(--surface, #ffffff);
+    box-shadow: 0 0 0 1px var(--border, #e2e8f0);
+}
+
+
+.comment-editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.comment-editor-actions button {
+    padding: 5px 12px;
+    font-size: 13;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.comment-save-btn {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.comment-save-btn:hover {
+    background-color: #c86f1c;
+}
+
+.comment-cancel-btn {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-color-secondary);
+}
+
+.comment-cancel-btn:hover {
+    background-color: #ececec;
+    border-color: #ccc;
+}
 
 .config-popup {
     position: absolute;

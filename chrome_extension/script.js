@@ -1,11 +1,171 @@
+
 (function () {
     'use strict';
+
+    // --- TIPTAP EDITOR FUNCTIONS ---
+    let tiptapEditor = null; // A single instance for the context menu editor
+
+    function applyMarkWithTrim(editor, markName) {
+        const { state } = editor;
+        const { from, to, empty } = state.selection;
+        const commandName = `toggle${markName.charAt(0).toUpperCase() + markName.slice(1)}`;
+
+        if (empty) {
+            editor.chain().focus()[commandName]().run();
+            return;
+        }
+        const selectedText = state.doc.textBetween(from, to);
+        const leadingSpaces = selectedText.match(/^\s*/)[0].length;
+        const trailingSpaces = selectedText.match(/\s*$/)[0].length;
+        const newFrom = from + leadingSpaces;
+        const newTo = to - trailingSpaces;
+        if (newFrom >= newTo) return;
+        editor.chain().focus().setTextSelection({ from: newFrom, to: newTo })[commandName]().setTextSelection({ from: from, to: to }).run();
+    };
+
+    function handleToolbarClick(action, editor) {
+        switch (action) {
+            case 'bold':
+            case 'italic':
+            case 'underline':
+            case 'strike':
+                applyMarkWithTrim(editor, action);
+                break;
+            case 'h1':
+                editor.chain().focus().toggleHeading({ level: 1 }).run();
+                break;
+            case 'h2':
+                editor.chain().focus().toggleHeading({ level: 2 }).run();
+                break;
+            case 'h3':
+                editor.chain().focus().toggleHeading({ level: 3 }).run();
+                break;
+            case 'link':
+                if (editor.isActive('link')) {
+                    editor.chain().focus().unsetLink().run();
+                    return;
+                }
+                const previousUrl = editor.getAttributes('link').href || '';
+                const url = window.prompt('URL', previousUrl);
+                if (url === null) return;
+                if (url === '') {
+                    editor.chain().focus().extendMarkRange('link').unsetLink().run();
+                    return;
+                }
+                editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+                break;
+        }
+    }
+
+    function updateToolbar(editor, toolbarContainer) {
+        if (!toolbarContainer) return;
+        const buttons = toolbarContainer.querySelectorAll('button');
+        buttons.forEach(button => {
+            const action = button.dataset.action;
+            let isActive = false;
+            switch (action) {
+                case 'bold':
+                case 'italic':
+                case 'strike':
+                case 'underline':
+                case 'link':
+                    isActive = editor.isActive(action);
+                    break;
+                case 'h1':
+                    isActive = editor.isActive('heading', { level: 1 });
+                    break;
+                case 'h2':
+                    isActive = editor.isActive('heading', { level: 2 });
+                    break;
+                case 'h3':
+                    isActive = editor.isActive('heading', { level: 3 });
+                    break;
+            }
+            button.classList.toggle('is-active', isActive);
+        });
+    }
+
+    function buildToolbar(toolbarContainer, editor) {
+        toolbarContainer.innerHTML = `
+            <button data-action="bold" title="Bold">B</button>
+            <button data-action="italic" title="Italic">I</button>
+            <button data-action="underline" title="Underline">U</button>
+            <button data-action="strike" title="Strikethrough">S</button>
+            <button data-action="link" title="Link">🔗</button>
+            <button data-action="h1" title="Heading 1">H1</button>
+            <button data-action="h2" title="Heading 2">H2</button>
+            <button data-action="h3" title="Heading 3">H3</button>
+        `;
+
+        toolbarContainer.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const action = e.currentTarget.dataset.action;
+                handleToolbarClick(action, editor);
+            });
+        });
+    }
+
+    function setupTiptapEditor(element, toolbarContainer, content, onUpdate) {
+        const { Editor } = Tiptap;
+        const StarterKit = window.TiptapStarterKit;
+        const Underline = window.TiptapUnderline;
+        const Link = window.TiptapLink;
+
+        const editor = new Editor({
+            element: element,
+            extensions: [
+                StarterKit,
+                Underline,
+                Link.configure({
+                    openOnClick: false,
+                    autolink: true,
+                }),
+            ],
+            content: content,
+            autofocus: 'end',
+            editable: true,
+            onUpdate: ({ editor }) => {
+                updateToolbar(editor, toolbarContainer);
+                if (onUpdate) {
+                    onUpdate(editor.getHTML());
+                }
+            },
+            onSelectionUpdate: ({ editor }) => {
+                updateToolbar(editor, toolbarContainer);
+            }
+        });
+
+        buildToolbar(toolbarContainer, editor);
+        updateToolbar(editor, toolbarContainer);
+
+        return editor;
+    }
+
 
     const SIDEBAR_ID = 'highlighter-sidebar-instance';
     const RESIZE_COVER_ID = 'highlighter-resize-cover';
     const RESIZE_GUIDE_ID = 'highlighter-resize-guide';
     const MIN_WIDTH = 380;
     const MAX_WIDTH = 1000;
+
+    function debounce(func, wait) {
+        let timeout;
+        const debounced = function(...args) {
+            const context = this;
+            const later = () => {
+                timeout = null;
+                func.apply(context, args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+        debounced.cancel = function() {
+            clearTimeout(timeout);
+        };
+        return debounced;
+    }
 
     function toggleSidebar() {
         let sidebar = document.getElementById(SIDEBAR_ID);
@@ -382,6 +542,21 @@
             this.contextMenu.className = 'highlighter-context-menu';
             this.contextMenu.style.display = 'none';
             document.body.appendChild(this.contextMenu);
+
+            this.resizeObserver = new ResizeObserver(() => {
+                if (this.isVisible()) {
+                    this.updateCloseButtonPosition();
+                }
+            });
+        }
+
+        updateCloseButtonPosition() {
+            computePosition(this.element, this.closeButton, {
+                placement: 'bottom-end',
+                middleware: [offset(1.5)],
+            }).then(({ x, y }) => {
+                Object.assign(this.closeButton.style, { left: `${x}px`, top: `${y}px` });
+            });
         }
 
         updateLanguage(newLang) {
@@ -397,20 +572,33 @@
             let typesHTML = types ? `<div class="menu-row types">${this._createButtons(types)}</div>` : '';
             let colorsHTML = colors ? `<div class="menu-row colors">${this._createButtons(colors)}</div>` : '';
             let actionsHTML = actions ? `<div class="menu-row actions">${this._createButtons(actions)}</div>` : '';
-            let warningHTML = config.showWarning ? `<div class="highlighter-shortcut-warning">${this.lang.shortcutsDisabled}</div>` : '';
-
-            this.element.innerHTML = `<div id="highlighter-arrow"></div>${colorsHTML}${typesHTML}${actionsHTML}${warningHTML}`;
+            let commentBoxHTML = config.commentBox ? config.commentBox.html : '';
+        
+            this.element.innerHTML = `<div id="highlighter-arrow"></div>${colorsHTML}${typesHTML}${actionsHTML}${commentBoxHTML}`;
             this.arrowElement = this.element.querySelector('#highlighter-arrow');
-
+        
             this.element.onclick = (e) => {
                 const button = e.target.closest('button');
                 if (!button) return;
-                e.stopPropagation();
+                 if (!button.closest('.tiptap-toolbar')) {
+                    e.stopPropagation();
+                }
                 const { action, value } = button.dataset;
                 if (action && config.callbacks[action]) {
                     config.callbacks[action](value, button);
                 }
             };
+        
+            if (config.commentBox) {
+                const commentBoxWrapper = this.element.querySelector('.highlighter-comment-box');
+                if (commentBoxWrapper) {
+                    commentBoxWrapper.addEventListener('click', e => e.stopPropagation());
+                }
+
+                if (config.callbacks.onCommentBoxReady) {
+                    setTimeout(() => config.callbacks.onCommentBoxReady(), 0);
+                }
+            }
         }
 
         _createButtons(buttons) {
@@ -423,6 +611,8 @@
             this.element.style.animation = 'popup-bounce-in 150ms ease-out forwards';
             this.element.classList.add('show');
             
+            this.resizeObserver.observe(this.element);
+
             const { x, y, placement, middlewareData } = await computePosition(referenceEl, this.element, {
                 placement: 'bottom',
                 middleware: [offset(12), flip(), shift({ padding: 10 }), arrow({ element: this.arrowElement })],
@@ -439,13 +629,8 @@
 
             this.element.addEventListener('animationend', (e) => {
                 if (e.animationName === 'popup-bounce-in') {
-                    computePosition(this.element, this.closeButton, {
-                        placement: 'bottom-end',
-                        middleware: [offset(1.5)],
-                    }).then(({ x, y }) => {
-                        Object.assign(this.closeButton.style, { left: `${x}px`, top: `${y}px` });
-                        this.closeButton.classList.add('show');
-                    });
+                    this.updateCloseButtonPosition();
+                    this.closeButton.classList.add('show');
                 }
             }, { once: true });
 
@@ -464,6 +649,8 @@
                 if (!this.element.classList.contains('show')) {
                     return resolve();
                 }
+
+                this.resizeObserver.disconnect();
 
                 this.element.style.animation = 'popup-bounce-out 150ms ease-in forwards';
                 this.element.classList.add('closing');
@@ -535,6 +722,8 @@
             this.shortcutsEnabled = true;
             this.isTemporarilyHidden = false;
             this.isGloballyDisabled = false; // New flag for instant disabling
+            this.activeDebouncedUpdate = null;
+            this.tiptapEditor = null;
             // Load annotations asynchronously
             this.storage.load((loadedAnnotations) => {
                 this.annotations = loadedAnnotations;
@@ -595,6 +784,9 @@
 
         _onFocusChange(event) {
             const target = event.target;
+            if (target.closest('.highlighter-menu')) {
+                return;
+            }
             this.shortcutsEnabled = !(target.isContentEditable || target.matches('input, textarea, select'));
         }
 
@@ -602,8 +794,7 @@
             if (this.isGloballyDisabled || !this.shortcutsEnabled || this.isTemporarilyHidden) return;
             if (event.key === 'Escape') {
                 if (this.activeAnnotationId) {
-                    this.menu.hide();
-                    this.activeAnnotationId = null;
+                    this._closeOrFinalizeContextMenu();
                 } else {
                     window.getSelection()?.removeAllRanges();
                     this.menu.hide();
@@ -623,9 +814,12 @@
             if (annotationEl) {
                 event.preventDefault();
                 event.stopPropagation();
+                if (this.activeAnnotationId && this.activeAnnotationId !== annotationEl.dataset.annotationId) {
+                    this._closeOrFinalizeContextMenu();
+                }
                 this._showContextMenuFor(annotationEl);
             } else {
-                this.menu.hide();
+                this._closeOrFinalizeContextMenu();
             }
         }
 
@@ -670,8 +864,7 @@
                         { action: 'setType', value: 'highlight', label: this.lang.highlight, content: 'A', className: `highlighter-type-selector ${this.currentAnnotationType === 'highlight' ? 'active' : ''}` },
                         { action: 'setType', value: 'underline', label: this.lang.underline, content: '<span class="underline">A</span>', className: `highlighter-type-selector ${this.currentAnnotationType === 'underline' ? 'active' : ''}` }
                     ]
-                },
-                showWarning: !this.shortcutsEnabled
+                }
             });
             this.menu.show({ getBoundingClientRect: () => rect }, this._getContextMenuCallbacks());
         }
@@ -679,11 +872,45 @@
         _showContextMenuFor(element) {
             this.activeAnnotationId = element.dataset.annotationId;
             const annotation = this.annotations.get(this.activeAnnotationId);
+        
+            if (this.activeDebouncedUpdate) {
+                this.activeDebouncedUpdate.cancel();
+            }
+        
+            this.activeDebouncedUpdate = debounce((commentHTML) => {
+                this.updateAnnotation({ comment: commentHTML }, this.activeAnnotationId, true);
+            }, 500);
+        
+            const commentBoxId = `comment-box-${this.activeAnnotationId}`;
+            const editorElementId = `tiptap-editor-${this.activeAnnotationId}`;
+            const toolbarElementId = `tiptap-toolbar-${this.activeAnnotationId}`;
+
+            const commentBoxHTML = `
+                <div id="${commentBoxId}" class="highlighter-comment-box">
+                    <div id="${toolbarElementId}" class="tiptap-toolbar"></div>
+                    <div id="${editorElementId}" class="tiptap-editor"></div>
+                </div>
+            `;
+        
             this.menu.configure({
                 callbacks: {
                     changeColor: (color) => this.updateAnnotation({ color }),
                     changeType: (type) => this.updateAnnotation({ type }),
                     delete: () => this.deleteAnnotation(),
+                    onCommentBoxReady: () => {
+                        const editorElement = document.getElementById(editorElementId);
+                        const toolbarElement = document.getElementById(toolbarElementId);
+                        if (editorElement && toolbarElement && !this.tiptapEditor) {
+                            this.tiptapEditor = setupTiptapEditor(
+                                editorElement, 
+                                toolbarElement, 
+                                annotation.comment || '', 
+                                (html) => {
+                                    this.activeDebouncedUpdate(html);
+                                }
+                            );
+                        }
+                    }
                 },
                 buttons: {
                     colors: Object.entries(this.colors).map(([name, color]) => ({
@@ -693,11 +920,44 @@
                         { action: 'changeType', value: 'highlight', label: this.lang.highlight, content: 'A', className: `highlighter-type-selector ${annotation.type === 'highlight' ? 'active' : ''}` },
                         { action: 'changeType', value: 'underline', label: this.lang.underline, content: '<span class="underline">A</span>', className: `highlighter-type-selector ${annotation.type === 'underline' ? 'active' : ''}` }
                     ],
-                    actions: [{ action: 'delete', label: this.lang.delete, content: this.lang.delete, className: 'highlighter-delete-btn' }]
+                    actions: [
+                        { action: 'delete', label: this.lang.delete, content: this.lang.delete, className: 'highlighter-delete-btn' }
+                    ]
                 },
-                showWarning: !this.shortcutsEnabled
+                commentBox: {
+                    html: commentBoxHTML,
+                }
             });
             this.menu.show(element, this._getContextMenuCallbacks());
+        }
+
+        _closeOrFinalizeContextMenu() {
+            if (!this.activeAnnotationId) {
+                this.menu.hide();
+                return;
+            }
+        
+            if (this.activeDebouncedUpdate) {
+                this.activeDebouncedUpdate.cancel();
+                this.activeDebouncedUpdate = null;
+            }
+        
+            const annotation = this.annotations.get(this.activeAnnotationId);
+        
+            if (annotation && this.tiptapEditor) {
+                const sanitizedComment = this.tiptapEditor.getHTML();
+                if (annotation.comment !== sanitizedComment) {
+                    this.updateAnnotation({ comment: sanitizedComment }, this.activeAnnotationId, false);
+                }
+            }
+            
+            if (this.tiptapEditor) {
+                this.tiptapEditor.destroy();
+                this.tiptapEditor = null;
+            }
+        
+            this.menu.hide();
+            this.activeAnnotationId = null;
         }
 
         _getContextMenuCallbacks() {
@@ -787,8 +1047,8 @@
             this.activeRange = null;
         }
 
-        updateAnnotation(updates) {
-            const id = this.activeAnnotationId;
+        updateAnnotation(updates, idToUpdate, keepMenuOpen = false) {
+            const id = idToUpdate || this.activeAnnotationId;
             if (!id) return;
             const annotation = this.annotations.get(id);
             if (!annotation) return;
@@ -800,8 +1060,10 @@
             this.storage.save(this.annotations, () => {
                 this._notifySidebarOfUpdate();
             });
-            this.menu.hide();
-            this.activeAnnotationId = null;
+        
+            if (!keepMenuOpen) {
+                this._closeOrFinalizeContextMenu();
+            }
         }
 
         deleteAnnotation(idToDelete) {
@@ -819,8 +1081,7 @@
             }
 
             if (id === this.activeAnnotationId) {
-                this.menu.hide();
-                this.activeAnnotationId = null;
+                this._closeOrFinalizeContextMenu();
             }
         }
 
@@ -932,6 +1193,8 @@
             window.highlighterInstance?.scrollToAnnotation(annotationId);
         } else if (action === 'deleteAnnotation' && annotationId) {
             window.highlighterInstance?.deleteAnnotation(annotationId);
+        } else if (action === 'updateAnnotation' && annotationId) {
+            window.highlighterInstance?.updateAnnotation(request.updates, annotationId);
         } else if (action === 'languageChanged' && language) {
             window.highlighterInstance?.updateLanguage(language);
         } else if (action === 'settingChanged' && settings) {

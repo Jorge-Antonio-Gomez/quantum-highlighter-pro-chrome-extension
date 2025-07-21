@@ -24,6 +24,7 @@
             "js": [
                 "libs/floating-ui-core.js",
                 "libs/floating-ui-dom.umd.js",
+                "libs/tiptap.js",
                 "i18n.js",
                 "script.js"
             ],
@@ -38,7 +39,8 @@
             "resources": [
                 "sidebar.html",
                 "sidebar.css",
-                "sidebar.js"
+                "sidebar.js",
+                "libs/tiptap.js"
             ],
             "matches": [
                 "<all_urls>"
@@ -46,6 +48,6 @@
         }
     ],
     "action": {
-        "default_title": "Show Highlighter Panel"
+        "default_title": "Show Highlighter Pcanel"
     }
 }

@@ -1,4 +1,11 @@
+
 document.addEventListener('DOMContentLoaded', () => {
+    // --- TIPTAP ---
+    const { Editor } = Tiptap;
+    const StarterKit = window.TiptapStarterKit;
+    const Underline = window.TiptapUnderline;
+    const Link = window.TiptapLink;
+
     // --- ELEMENTS ---
     const resizeHandle = document.getElementById('resize-handle');
     const lockButton = document.getElementById('lock-button');
@@ -25,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         language: 'en',
         useDarkText: false,
     };
+    let editorInstances = {}; // To store tiptap editor instances
 
     // --- FLOATING UI ---
     const { computePosition, offset, flip, shift } = FloatingUIDOM;
@@ -145,16 +153,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderAnnotations(annotations) {
         const langStrings = translations[settings.language] || translations.en;
-        
-        // Clear previous state
-        annotationsList.innerHTML = '';
-        annotationsList.classList.remove('empty-state');
+        const annotationsContainer = annotationsList;
 
         if (!annotations || annotations.length === 0) {
-            annotationsList.classList.add('empty-state');
-            const emptyView = document.createElement('div');
-            emptyView.className = 'empty-state-content';
-            emptyView.innerHTML = `
+            if (!annotationsContainer.classList.contains('empty-state')) {
+                annotationsContainer.innerHTML = ''; // Clear only if not already empty
+                annotationsContainer.classList.add('empty-state');
+                const emptyView = document.createElement('div');
+                emptyView.className = 'empty-state-content';
+                emptyView.innerHTML = `
                 <div class="empty-state-icon">
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" clip-rule="evenodd" d="M5 7C5 6.44772 5.44772 6 6 6H18C18.5523 6 19 6.44772 19 7C19 7.55228 18.5523 8 18 8H6C5.44772 8 5 7.55228 5 7ZM5 12C5 11.4477 5.44772 11 6 11H18C18.5523 11 19 11.4477 19 12C19 12.5523 18.5523 13 18 13H6C5.44772 13 5 12.5523 5 12ZM5 17C5 16.4477 5.44772 16 6 16H11C11.5523 16 12 16.4477 12 17C12 17.5523 11.5523 18 11 18H6C5.44772 18 5 17.5523 5 17Z" fill="currentColor"/>
@@ -163,49 +170,72 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h3 class="empty-state-title">${langStrings.noAnnotationsTitle || 'No Annotations Yet'}</h3>
                 <p class="empty-state-text">${langStrings.noAnnotations || 'Highlight text on the page to get started!'}</p>
             `;
-            annotationsList.appendChild(emptyView);
+                annotationsContainer.appendChild(emptyView);
+            }
             return;
         }
-        
-        const existingIds = new Set(Array.from(annotationsList.querySelectorAll('.annotation-card')).map(el => el.dataset.annotationId));
-        const receivedIds = new Set(annotations.map(([id]) => id));
 
+        annotationsContainer.classList.remove('empty-state');
+
+        const existingIds = new Set(Array.from(annotationsContainer.querySelectorAll('.annotation-card')).map(el => el.dataset.annotationId));
+        const receivedAnnotationsMap = new Map(annotations);
+
+        // 1. Remove annotations that are no longer present
         for (const id of existingIds) {
-            if (!receivedIds.has(id)) {
-                const cardToRemove = annotationsList.querySelector(`[data-annotation-id="${id}"]`);
+            if (!receivedAnnotationsMap.has(id)) {
+                const cardToRemove = annotationsContainer.querySelector(`[data-annotation-id="${id}"]`);
                 if (cardToRemove && !cardToRemove.classList.contains('deleting')) {
                     cardToRemove.classList.add('deleting');
-                    cardToRemove.addEventListener('animationend', () => cardToRemove.remove(), { once: true });
+                    cardToRemove.addEventListener('animationend', () => {
+                        if (editorInstances[id]) {
+                            editorInstances[id].destroy();
+                            delete editorInstances[id];
+                        }
+                        cardToRemove.remove()
+                    }, { once: true });
                 }
             }
         }
-        
-        annotations.forEach(([id, annotation], index) => {
-            let card = annotationsList.querySelector(`[data-annotation-id="${id}"]`);
+
+        // 2. Update existing and add new annotations
+        let lastElement = null; // Keep track of the last processed element for insertion order
+        annotations.forEach(([id, annotation]) => {
+            let card = annotationsContainer.querySelector(`[data-annotation-id="${id}"]`);
+
             if (card) {
+                // Element exists, check for updates
                 const textEl = card.querySelector('.text');
                 const commentEl = card.querySelector('.comment');
-                if (textEl.innerHTML !== annotation.text) textEl.innerHTML = annotation.text;
-                if (commentEl.textContent !== (annotation.comment || langStrings.noComment)) {
-                    commentEl.textContent = annotation.comment || langStrings.noComment;
-                }
                 const colorBar = card.querySelector('.annotation-color-bar');
-                if (colorBar) colorBar.style.backgroundColor = annotation.color;
-            } else {
-                card = createAnnotationCard(id, annotation);
-                let nextCard = null;
-                for (let i = index + 1; i < annotations.length; i++) {
-                    const nextAnnotationId = annotations[i][0];
-                    const potentialNextCard = annotationsList.querySelector(`[data-annotation-id="${nextAnnotationId}"]`);
-                    if (potentialNextCard) {
-                        nextCard = potentialNextCard;
-                        break;
-                    }
+
+                // Only update if content has actually changed
+                if (textEl.innerHTML !== annotation.text) {
+                    textEl.innerHTML = annotation.text;
                 }
-                annotationsList.insertBefore(card, nextCard);
+                const newCommentHtml = annotation.comment || `<span class="no-comment-placeholder">${langStrings.noComment}</span>`;
+                if (commentEl.innerHTML !== newCommentHtml) {
+                    commentEl.innerHTML = newCommentHtml;
+                }
+                if (colorBar.style.backgroundColor !== annotation.color) {
+                    colorBar.style.backgroundColor = annotation.color;
+                }
+                // Update the data attribute to ensure the editor gets the latest content
+                card.dataset.comment = annotation.comment || '';
+            } else {
+                // Element is new, create and insert it
+                card = createAnnotationCard(id, annotation);
                 card.classList.add('newly-added');
+
+                // Insert in the correct order
+                if (lastElement) {
+                    lastElement.after(card);
+                } else {
+                    annotationsContainer.prepend(card);
+                }
+
                 card.addEventListener('animationend', () => card.classList.remove('newly-added'), { once: true });
             }
+            lastElement = card; // Update the last element reference
         });
     }
 
@@ -214,6 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const card = document.createElement('div');
         card.className = 'annotation-card';
         card.dataset.annotationId = id;
+        card.dataset.comment = annotation.comment || ''; // Store initial comment
 
         const colorBar = document.createElement('div');
         colorBar.className = 'annotation-color-bar';
@@ -222,35 +253,119 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const mainContent = document.createElement('div');
         mainContent.className = 'main-content';
+        
         const text = document.createElement('div');
         text.className = 'text';
         text.innerHTML = annotation.text;
-        const comment = document.createElement('div');
-        comment.className = 'comment';
-        comment.textContent = annotation.comment || langStrings.noComment;
-        mainContent.appendChild(text);
-        mainContent.appendChild(comment);
+        
+        const commentDisplay = document.createElement('div');
+        commentDisplay.className = 'comment';
+        if (annotation.comment) {
+            commentDisplay.innerHTML = annotation.comment;
+        } else {
+            commentDisplay.innerHTML = `<span class="no-comment-placeholder">${langStrings.noComment}</span>`;
+        }
 
+        const commentEditorContainer = document.createElement('div');
+        commentEditorContainer.className = 'comment-editor-container';
+        commentEditorContainer.innerHTML = `
+            <div class="tiptap-toolbar"></div>
+            <div class="tiptap-editor"></div>
+            <div class="comment-editor-actions">
+                <button class="comment-cancel-btn">${langStrings.cancel || 'Cancel'}</button>
+                <button class="comment-save-btn">${langStrings.save || 'Save'}</button>
+            </div>
+        `;
+        
+        mainContent.appendChild(text);
+        mainContent.appendChild(commentDisplay);
+        mainContent.appendChild(commentEditorContainer);
+
+        const actionsContainer = document.createElement('div');
+        actionsContainer.className = 'actions-container';
+
+        const commentBtn = document.createElement('button');
+        commentBtn.className = 'comment-btn';
+        commentBtn.setAttribute('aria-label', langStrings.addComment || 'Add comment');
+        commentBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7.5 9.5H16.5M7.5 13.5H12.5M21 12C21 16.9706 16.9706 21 12 21C10.517 21 9.11249 20.6318 7.88573 19.9679L3 21L4.0321 16.1143C3.36821 14.8875 3 13.483 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        `;
+        
         const divider = document.createElement('div');
         divider.className = 'divider';
-        const deleteArea = document.createElement('div');
-        deleteArea.className = 'delete-area';
+        actionsContainer.appendChild(divider);
+        
+        actionsContainer.appendChild(commentBtn);
+        
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-btn';
-        const deleteLabel = langStrings.deleteAnnotation || 'Delete annotation';
-        deleteBtn.setAttribute('aria-label', deleteLabel);
+        deleteBtn.setAttribute('aria-label', langStrings.deleteAnnotation || 'Delete annotation');
         deleteBtn.innerHTML = `
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path fill-rule="evenodd" clip-rule="evenodd" d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V6H17H19C19.5523 6 20 6.44772 20 7C20 7.55228 19.5523 8 19 8H18V18C18 19.6569 16.6569 21 15 21H9C7.34315 21 6 19.6569 6 18V8H5C4.44772 8 4 7.55228 4 7C4 6.44772 4.44772 6 5 6H7H9V5ZM10 8H8V18C8 18.5523 8.44772 19 9 19H15C15.5523 19 16 18.5523 16 18V8H14H10ZM13 6H11V5H13V6ZM10 9C10.5523 9 11 9.44772 11 10V17C11 17.5523 10.5523 18 10 18C9.44772 18 9 17.5523 9 17V10C9 9.44772 9.44772 9 10 9ZM14 9C14.5523 9 15 9.44772 15 10V17C15 17.5523 14.5523 18 14 18C13.4477 18 13 17.5523 13 17V10C13 9.44772 13.4477 9 14 9Z" fill="currentColor"/>
             </svg>
         `;
-        deleteArea.appendChild(deleteBtn);
+        actionsContainer.appendChild(deleteBtn);
 
         card.appendChild(mainContent);
-        card.appendChild(divider);
-        card.appendChild(deleteArea);
+        card.appendChild(actionsContainer);
+
+        const editorElement = commentEditorContainer.querySelector('.tiptap-editor');
+        const toolbarElement = commentEditorContainer.querySelector('.tiptap-toolbar');
+        const saveBtn = commentEditorContainer.querySelector('.comment-save-btn');
+        const cancelBtn = commentEditorContainer.querySelector('.comment-cancel-btn');
+
+        commentBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const card = e.target.closest('.annotation-card');
+            if (!card) return;
+
+            const isEditing = card.classList.toggle('editing');
+
+            if (isEditing) {
+                if (!editorInstances[id]) {
+                    const editor = setupEditor(editorElement, toolbarElement, card.dataset.comment);
+                    editorInstances[id] = editor;
+                }
+                editorInstances[id].commands.focus();
+            }
+        });
+
+        cancelBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const card = e.target.closest('.annotation-card');
+            if (card) card.classList.remove('editing');
+        });
+
+        saveBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const card = e.target.closest('.annotation-card');
+            if (!card || !editorInstances[id]) return;
+
+            const editor = editorInstances[id];
+            const newComment = editor.getHTML();
+            
+            card.dataset.comment = newComment;
+            commentDisplay.innerHTML = newComment || `<span class="no-comment-placeholder">${langStrings.noComment}</span>`;
+            card.classList.remove('editing');
+
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                if (tabs.length > 0 && tabs[0].id) {
+                    chrome.tabs.sendMessage(tabs[0].id, { 
+                        action: 'updateAnnotation', 
+                        annotationId: id,
+                        updates: { comment: newComment }
+                    });
+                }
+            });
+        });
 
         mainContent.addEventListener('click', () => {
+            const card = mainContent.closest('.annotation-card');
+            if (card.classList.contains('editing')) return; // Don't scroll if editing
+
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                 if (tabs.length > 0 && tabs[0].id) {
                     chrome.tabs.sendMessage(tabs[0].id, { action: 'scrollToAnnotation', annotationId: id });
@@ -268,6 +383,135 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         return card;
+    }
+
+    function setupEditor(element, toolbarContainer, content) {
+        const editor = new Editor({
+            element: element,
+            extensions: [
+                StarterKit,
+                Underline,
+                Link.configure({
+                    openOnClick: false,
+                    autolink: true,
+                }),
+            ],
+            content: content,
+            autofocus: 'end',
+            editable: true,
+            onUpdate: ({ editor }) => {
+                updateToolbar(editor, toolbarContainer);
+            },
+            onSelectionUpdate: ({ editor }) => {
+                updateToolbar(editor, toolbarContainer);
+            }
+        });
+
+        buildToolbar(toolbarContainer, editor);
+        updateToolbar(editor, toolbarContainer);
+
+        return editor;
+    }
+
+    function buildToolbar(toolbarContainer, editor) {
+        toolbarContainer.innerHTML = `
+            <button data-action="bold" title="Negrita">B</button>
+            <button data-action="italic" title="Cursiva">I</button>
+            <button data-action="underline" title="Subrayado">U</button>
+            <button data-action="strike" title="Tachado">S</button>
+            <button data-action="link" title="Enlace">🔗</button>
+            <button data-action="h1" title="Título 1">H1</button>
+            <button data-action="h2" title="Título 2">H2</button>
+            <button data-action="h3" title="Título 3">H3</button>
+        `;
+
+        toolbarContainer.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const action = e.currentTarget.dataset.action;
+                handleToolbarClick(action, editor);
+            });
+        });
+    }
+
+    function updateToolbar(editor, toolbarContainer) {
+        if (!toolbarContainer) return;
+        const buttons = toolbarContainer.querySelectorAll('button');
+        buttons.forEach(button => {
+            const action = button.dataset.action;
+            let isActive = false;
+            switch (action) {
+                case 'bold':
+                case 'italic':
+                case 'strike':
+                case 'underline':
+                case 'link':
+                    isActive = editor.isActive(action);
+                    break;
+                case 'h1':
+                    isActive = editor.isActive('heading', { level: 1 });
+                    break;
+                case 'h2':
+                    isActive = editor.isActive('heading', { level: 2 });
+                    break;
+                case 'h3':
+                    isActive = editor.isActive('heading', { level: 3 });
+                    break;
+            }
+            button.classList.toggle('is-active', isActive);
+        });
+    }
+
+    const applyMarkWithTrim = (editor, markName) => {
+        const { state } = editor;
+        const { from, to, empty } = state.selection;
+        const commandName = `toggle${markName.charAt(0).toUpperCase() + markName.slice(1)}`;
+
+        if (empty) {
+            editor.chain().focus()[commandName]().run();
+            return;
+        }
+        const selectedText = state.doc.textBetween(from, to);
+        const leadingSpaces = selectedText.match(/^\s*/)[0].length;
+        const trailingSpaces = selectedText.match(/\s*$/)[0].length;
+        const newFrom = from + leadingSpaces;
+        const newTo = to - trailingSpaces;
+        if (newFrom >= newTo) return;
+        editor.chain().focus().setTextSelection({ from: newFrom, to: newTo })[commandName]().setTextSelection({ from: from, to: to }).run();
+    };
+
+    function handleToolbarClick(action, editor) {
+        switch (action) {
+            case 'bold':
+            case 'italic':
+            case 'underline':
+            case 'strike':
+                applyMarkWithTrim(editor, action);
+                break;
+            case 'h1':
+                editor.chain().focus().toggleHeading({ level: 1 }).run();
+                break;
+            case 'h2':
+                editor.chain().focus().toggleHeading({ level: 2 }).run();
+                break;
+            case 'h3':
+                editor.chain().focus().toggleHeading({ level: 3 }).run();
+                break;
+            case 'link':
+                if (editor.isActive('link')) {
+                    editor.chain().focus().unsetLink().run();
+                    return;
+                }
+                const previousUrl = editor.getAttributes('link').href || '';
+                const url = window.prompt('URL', previousUrl);
+                if (url === null) return;
+                if (url === '') {
+                    editor.chain().focus().extendMarkRange('link').unsetLink().run();
+                    return;
+                }
+                editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+                break;
+        }
     }
 
     function loadAnnotations() {
@@ -335,6 +579,16 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (request.action === 'annotationsUpdated') {
             renderAnnotations(request.data);
+        } else if (request.action === 'openCommentEditor') {
+            const card = annotationsList.querySelector(`[data-annotation-id="${request.annotationId}"]`);
+            if (card) {
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const commentBtn = card.querySelector('.comment-btn');
+                // Open editor if it's not already open
+                if (commentBtn && !card.classList.contains('editing')) {
+                    commentBtn.click();
+                }
+            }
         }
     });
 
