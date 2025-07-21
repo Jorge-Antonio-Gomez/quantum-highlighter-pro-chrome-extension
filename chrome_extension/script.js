@@ -199,7 +199,6 @@
         static applyAnnotationStyle(element, annotation, nodeContext) {
             const colorWithOpacity = annotation.color.startsWith('#') ? `${annotation.color}80` : annotation.color;
             const settings = window.highlighterInstance ? window.highlighterInstance.settings : { useDarkText: false };
-            const isLink = (nodeContext && nodeContext.nodeType === Node.TEXT_NODE ? nodeContext.parentNode.closest('a') : (nodeContext ? nodeContext.closest('a') : element.closest('a')));
 
             // Set base style based on annotation type
             if (annotation.type === 'highlight') {
@@ -210,14 +209,31 @@
                 element.style.borderBottom = `2px solid ${colorWithOpacity}`;
             }
 
-            // Determine text color, giving !important priority to the useDarkText setting
+            const linksInElement = element.getElementsByTagName('a');
+
             if (settings.useDarkText) {
+                // Force all text, including links, to be dark.
                 element.style.setProperty('color', '#1a1a1a', 'important');
+                for (const link of linksInElement) {
+                    // Force the link to inherit the color from its parent (<mark>)
+                    link.style.setProperty('color', 'inherit', 'important');
+                }
             } else {
-                // When the setting is off, remove the !important property by setting a new, regular style
+                // Restore default behavior and apply user's visibility logic.
+                // Remove our overrides first.
+                element.style.removeProperty('color');
+                for (const link of linksInElement) {
+                    link.style.removeProperty('color');
+                }
+
+                // Now apply the original logic for the non-dark-text mode.
+                const isLink = (nodeContext && nodeContext.nodeType === Node.TEXT_NODE ? nodeContext.parentNode.closest('a') : (nodeContext ? nodeContext.closest('a') : element.closest('a'))) || element.querySelector('a');
+
                 if (isLink) {
+                    // Let links be links. Setting color to inherit on the mark is enough.
                     element.style.color = 'inherit';
                 } else if (annotation.type === 'highlight') {
+                    // User's visibility feature for regular text.
                     const bodyColor = window.getComputedStyle(document.body).color;
                     element.style.color = DOMManager.isColorLight(bodyColor) ? '#1a1a1a' : 'inherit';
                 } else {
@@ -794,10 +810,7 @@
             if (!annotation) return;
             Object.assign(annotation, updates);
             document.querySelectorAll(`[data-annotation-id="${id}"]`).forEach(el => {
-                DOMManager.applyAnnotationStyle(el, annotation, null);
-                if (annotation.type === 'highlight' && el.getElementsByTagName('a').length > 0) {
-                    el.style.color = 'inherit';
-                }
+                DOMManager.applyAnnotationStyle(el, annotation, el);
             });
             this.annotations.set(id, annotation);
             this.storage.save(this.annotations, () => {
