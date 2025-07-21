@@ -1,7 +1,8 @@
 const translations = {
     en: {
         sidebarTitle: "Annotations",
-        noAnnotations: "No annotations yet. Highlight text on the page to get started!",
+        noAnnotationsTitle: "No annotations yet",
+        noAnnotations: "Highlight text on the page to get started!",
         noComment: "No comment",
         deleteAnnotation: "Delete annotation",
         lockSidebarWidth: "Lock sidebar width",
@@ -27,7 +28,8 @@ const translations = {
     },
     es: {
         sidebarTitle: "Anotaciones",
-        noAnnotations: "Aún no hay anotaciones. ¡Resalta texto en la página para comenzar!",
+        noAnnotationsTitle: "Aún no hay anotaciones",
+        noAnnotations: "¡Resalta texto en la página para comenzar!",
         noComment: "Sin comentario",
         deleteAnnotation: "Eliminar anotación",
         lockSidebarWidth: "Bloquear ancho de la barra",
@@ -53,7 +55,8 @@ const translations = {
     },
     fr: {
         sidebarTitle: "Annotations",
-        noAnnotations: "Pas encore d'annotations. Surlignez du texte sur la page pour commencer !",
+        noAnnotationsTitle: "Aucune annotation pour le moment",
+        noAnnotations: "Surlignez du texte sur la page pour commencer !",
         noComment: "Aucun commentaire",
         deleteAnnotation: "Supprimer l'annotation",
         lockSidebarWidth: "Verrouiller la largeur de la barre latérale",
@@ -79,7 +82,8 @@ const translations = {
     },
     pt: {
         sidebarTitle: "Anotações",
-        noAnnotations: "Ainda não há anotações. Destaque o texto na página para começar!",
+        noAnnotationsTitle: "Ainda não há anotações",
+        noAnnotations: "Destaque o texto na página para começar!",
         noComment: "Nenhum comentário",
         deleteAnnotation: "Excluir anotação",
         lockSidebarWidth: "Bloquear largura da barra lateral",
@@ -105,7 +109,8 @@ const translations = {
     },
     ru: {
         sidebarTitle: "Аннотации",
-        noAnnotations: "Аннотаций пока нет. Выделите текст на странице, чтобы начать!",
+        noAnnotationsTitle: "Пока нет аннотаций",
+        noAnnotations: "Выделите текст на странице, чтобы начать!",
         noComment: "Нет комментария",
         deleteAnnotation: "Удалить аннотацию",
         lockSidebarWidth: "Заблокировать ширину боковой панели",
@@ -131,7 +136,8 @@ const translations = {
     },
     zh: {
         sidebarTitle: "注释",
-        noAnnotations: "暂无注释。在页面上突出显示文本以开始！",
+        noAnnotationsTitle: "暂无注释",
+        noAnnotations: "在页面上突出显示文本以开始！",
         noComment: "无评论",
         deleteAnnotation: "删除注释",
         lockSidebarWidth: "锁定侧边栏宽度",

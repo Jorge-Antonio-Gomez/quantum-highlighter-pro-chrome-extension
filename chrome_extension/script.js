@@ -914,6 +914,20 @@
                 sendResponse({ data: [] });
             }
             return true; // Async response
+        } else if (action === 'getPageInfo') {
+            const title = document.title;
+            const description = document.querySelector('meta[name="description"]')?.content || '';
+            const image = document.querySelector('meta[property="og:image"]')?.content || '';
+            let favicon = document.querySelector('link[rel="shortcut icon"]')?.href || document.querySelector('link[rel="icon"]')?.href;
+            const domain = window.location.hostname;
+            
+            // Resolve relative favicon URL
+            if (favicon && !favicon.startsWith('http')) {
+                favicon = new URL(favicon, window.location.href).href;
+            }
+
+            sendResponse({ title, description, image, favicon, domain });
+            return true;
         } else if (action === 'scrollToAnnotation' && annotationId) {
             window.highlighterInstance?.scrollToAnnotation(annotationId);
         } else if (action === 'deleteAnnotation' && annotationId) {
@@ -943,6 +957,6 @@
             }
         }
         // Return true for async responses, otherwise the channel might close.
-        return ["getAnnotations", "getSidebarWidth"].includes(action);
+        return ["getAnnotations", "getSidebarWidth", "getPageInfo"].includes(action);
     });
 })();

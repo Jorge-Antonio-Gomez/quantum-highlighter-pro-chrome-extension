@@ -12,6 +12,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const forceBlackSwitch = document.getElementById('force-black-switch');
     const disablePageSwitch = document.getElementById('disable-page-switch');
     const disableDomainSwitch = document.getElementById('disable-domain-switch');
+    const websiteInfoCard = document.getElementById('website-info-card');
+    const websiteFavicon = document.getElementById('website-favicon');
+    const websiteTitle = document.getElementById('website-title');
+    const websiteDescription = document.getElementById('website-description');
+    const websiteDomain = document.getElementById('website-domain');
 
     // --- STATE ---
     let isLocked = false;
@@ -140,6 +145,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderAnnotations(annotations) {
         const langStrings = translations[settings.language] || translations.en;
+        
+        // Clear previous state
+        annotationsList.innerHTML = '';
+        annotationsList.classList.remove('empty-state');
+
+        if (!annotations || annotations.length === 0) {
+            annotationsList.classList.add('empty-state');
+            const emptyView = document.createElement('div');
+            emptyView.className = 'empty-state-content';
+            emptyView.innerHTML = `
+                <div class="empty-state-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 7C5 6.44772 5.44772 6 6 6H18C18.5523 6 19 6.44772 19 7C19 7.55228 18.5523 8 18 8H6C5.44772 8 5 7.55228 5 7ZM5 12C5 11.4477 5.44772 11 6 11H18C18.5523 11 19 11.4477 19 12C19 12.5523 18.5523 13 18 13H6C5.44772 13 5 12.5523 5 12ZM5 17C5 16.4477 5.44772 16 6 16H11C11.5523 16 12 16.4477 12 17C12 17.5523 11.5523 18 11 18H6C5.44772 18 5 17.5523 5 17Z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <h3 class="empty-state-title">${langStrings.noAnnotationsTitle || 'No Annotations Yet'}</h3>
+                <p class="empty-state-text">${langStrings.noAnnotations || 'Highlight text on the page to get started!'}</p>
+            `;
+            annotationsList.appendChild(emptyView);
+            return;
+        }
+        
         const existingIds = new Set(Array.from(annotationsList.querySelectorAll('.annotation-card')).map(el => el.dataset.annotationId));
         const receivedIds = new Set(annotations.map(([id]) => id));
 
@@ -151,16 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     cardToRemove.addEventListener('animationend', () => cardToRemove.remove(), { once: true });
                 }
             }
-        }
-
-        if (!annotations || annotations.length === 0) {
-            if (!annotationsList.querySelector('p')) {
-                annotationsList.innerHTML = `<p data-i18n-key="noAnnotations">${langStrings.noAnnotations}</p>`;
-            }
-            return;
-        } else {
-            const p = annotationsList.querySelector('p');
-            if (p) p.remove();
         }
         
         annotations.forEach(([id, annotation], index) => {
@@ -272,6 +289,43 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
                 renderAnnotations(response?.data || []);
+            });
+        });
+    }
+
+    function loadPageInfo() {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (!tabs || tabs.length === 0 || !tabs[0].id) return;
+            const tabId = tabs[0].id;
+            chrome.tabs.sendMessage(tabId, { action: 'getPageInfo' }, (response) => {
+                if (chrome.runtime.lastError) {
+                    console.warn(`Highlighter: Could not get page info. ${chrome.runtime.lastError.message}`);
+                    websiteInfoCard.style.display = 'none';
+                    return;
+                }
+                if (response) {
+                    websiteTitle.textContent = response.title || 'No Title';
+                    websiteDescription.textContent = response.description || 'No description available.';
+                    websiteDomain.textContent = response.domain || '';
+                    
+                    if (response.favicon) {
+                        websiteFavicon.src = response.favicon;
+                        websiteFavicon.style.display = 'block';
+                    } else {
+                        websiteFavicon.style.display = 'none';
+                    }
+
+                    if (response.image) {
+                        websiteInfoCard.style.backgroundImage = `url('${response.image}')`;
+                        websiteInfoCard.classList.add('has-image');
+                    } else {
+                        websiteInfoCard.style.backgroundImage = '';
+                        websiteInfoCard.classList.remove('has-image');
+                    }
+                    websiteInfoCard.style.display = 'flex';
+                } else {
+                    websiteInfoCard.style.display = 'none';
+                }
             });
         });
     }
@@ -390,6 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- INITIALIZATION ---
     const initialize = () => {
+        loadPageInfo(); // Load page info on startup
         chrome.storage.sync.get(['sidebarLocked', 'sidebarWidth', 'highlighter-settings', 'disabledSites', 'disabledPages'], (data) => {
             // Set up sidebar lock and width
             const isLocked = data.sidebarLocked === undefined ? true : data.sidebarLocked;
