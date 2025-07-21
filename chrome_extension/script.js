@@ -116,12 +116,14 @@
         const editor = new Editor({
             element: element,
             extensions: [
-                StarterKit,
-                Underline,
-                Link.configure({
-                    openOnClick: false,
-                    autolink: true,
+                window.Tiptap.StarterKit.configure({
+                    // Configure the Link extension directly within the StarterKit
+                    link: {
+                        openOnClick: false,
+                    },
                 }),
+                // Underline is already included in StarterKit, so no need to add it again.
+                // window.Tiptap.Highlight.configure({ multicolor: true }), // ERROR: Highlight is not included in the custom tiptap.js bundle. You must rebuild it and include @tiptap/extension-highlight
             ],
             content: content,
             autofocus: 'end',
@@ -872,6 +874,11 @@
         _showContextMenuFor(element) {
             this.activeAnnotationId = element.dataset.annotationId;
             const annotation = this.annotations.get(this.activeAnnotationId);
+
+            if (!annotation) {
+                console.warn(`Highlighter: Annotation with ID "${this.activeAnnotationId}" not found.`);
+                return;
+            }
         
             if (this.activeDebouncedUpdate) {
                 this.activeDebouncedUpdate.cancel();
