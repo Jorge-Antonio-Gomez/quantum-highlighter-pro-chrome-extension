@@ -148,17 +148,62 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function renderAnnotations(annotations) {
-        annotationsList.innerHTML = '';
         const langStrings = translations[currentLanguage];
+        const existingIds = new Set(Array.from(annotationsList.querySelectorAll('.annotation-card')).map(el => el.dataset.annotationId));
+        const receivedIds = new Set(annotations.map(([id]) => id));
 
-        if (!annotations || annotations.length === 0) {
-            annotationsList.innerHTML = `<p data-i18n-key="noAnnotations">${langStrings.noAnnotations}</p>`;
-            return;
+        // 1. Animate and remove cards that are no longer in the annotations list
+        for (const id of existingIds) {
+            if (!receivedIds.has(id)) {
+                const cardToRemove = annotationsList.querySelector(`[data-annotation-id="${id}"]`);
+                // Check if the card exists and is not already being deleted
+                if (cardToRemove && !cardToRemove.classList.contains('deleting')) {
+                    cardToRemove.classList.add('deleting');
+                    cardToRemove.addEventListener('animationend', () => {
+                        cardToRemove.remove();
+                    }, { once: true });
+                }
+            }
         }
 
-        annotations.forEach(([id, annotation]) => {
-            const card = createAnnotationCard(id, annotation);
-            annotationsList.appendChild(card);
+        // 2. Add or update cards
+        if (!annotations || annotations.length === 0) {
+            if (!annotationsList.querySelector('p')) {
+                annotationsList.innerHTML = `<p data-i18n-key="noAnnotations">${langStrings.noAnnotations}</p>`;
+            }
+            return;
+        } else {
+            const p = annotationsList.querySelector('p');
+            if (p) p.remove();
+        }
+        
+        annotations.forEach(([id, annotation], index) => {
+            let card = annotationsList.querySelector(`[data-annotation-id="${id}"]`);
+            if (card) {
+                // Card exists, update its content if necessary
+                const textEl = card.querySelector('.text');
+                const commentEl = card.querySelector('.comment');
+                if (textEl.textContent !== annotation.text) textEl.textContent = annotation.text;
+                if (commentEl.textContent !== (annotation.comment || langStrings.noComment)) {
+                    commentEl.textContent = annotation.comment || langStrings.noComment;
+                }
+            } else {
+                // Card doesn't exist, create and insert it
+                card = createAnnotationCard(id, annotation);
+                
+                const nextAnnotation = annotations[index + 1];
+                if (nextAnnotation) {
+                    const nextCard = annotationsList.querySelector(`[data-annotation-id="${nextAnnotation[0]}"]`);
+                    annotationsList.insertBefore(card, nextCard);
+                } else {
+                    annotationsList.appendChild(card);
+                }
+
+                card.classList.add('newly-added');
+                card.addEventListener('animationend', () => {
+                    card.classList.remove('newly-added');
+                }, { once: true });
+            }
         });
     }
 
@@ -213,7 +258,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         deleteBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            // The message listener for 'annotationDeleted' will handle the animation and removal.
+            // The 'renderAnnotations' function will now handle the animation
+            // when it receives the 'annotationsUpdated' message.
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                 if (tabs.length > 0 && tabs[0].id) {
                     chrome.tabs.sendMessage(tabs[0].id, { action: 'deleteAnnotation', annotationId: id });

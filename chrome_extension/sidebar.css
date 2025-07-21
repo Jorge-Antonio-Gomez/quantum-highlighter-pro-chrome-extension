@@ -177,11 +177,11 @@ body:not(.locked) #resize-handle {
 }
 
 .annotation-card.newly-added {
-    animation: slideIn 0.35s ease-out forwards;
+    animation: slideIn 0.25s ease forwards;
 }
 
 .annotation-card.deleting {
-    animation: slideOut 0.35s ease-in forwards;
+    animation: slideOut 0.25s ease forwards;
 }
 
 @keyframes slideIn {

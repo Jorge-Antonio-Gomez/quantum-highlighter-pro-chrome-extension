@@ -1,4 +1,4 @@
-# Quantum Highlighter WEB
+# Quantum Highlighter PRO
 
 Un script de usuario (UserScript) para navegadores web que permite resaltar y tomar notas en cualquier página web, inspirado en el sistema de anotaciones de Zotero.
 

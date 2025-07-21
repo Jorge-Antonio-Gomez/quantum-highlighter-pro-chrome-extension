@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Quantum Highlighter WEB
+// @name         Quantum Highlighter PRO
 // @namespace    http://tampermonkey.net/
 // @version      18.07.2025.13
 // @description  Web annotation system inspired by Zotero. Highlight, underline, and manage annotations on any page.
