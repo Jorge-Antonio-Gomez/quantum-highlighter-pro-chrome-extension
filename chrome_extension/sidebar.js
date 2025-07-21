@@ -9,71 +9,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const languageSelectWrapper = document.getElementById('language-select-wrapper');
     const languageSelectTrigger = document.getElementById('language-select-trigger');
     const languageOptions = document.getElementById('language-options');
+    const forceBlackSwitch = document.getElementById('force-black-switch');
+    const disablePageSwitch = document.getElementById('disable-page-switch');
+    const disableDomainSwitch = document.getElementById('disable-domain-switch');
 
     // --- STATE ---
     let isLocked = false;
-    let currentLanguage = 'en'; // Default language
     let lastStoredWidth = 420; // Default width
+    let settings = {
+        language: 'en',
+        useDarkText: false,
+    };
 
     // --- FLOATING UI ---
     const { computePosition, offset, flip, shift } = FloatingUIDOM;
 
-    // --- RESIZE AND LOCK LOGIC ---
+    // --- CORE FUNCTIONS ---
 
-    const setLockedState = (locked) => {
-        isLocked = locked;
-        document.body.classList.toggle('locked', locked);
-        
-        const labelKey = locked ? 'unlockSidebarWidth' : 'lockSidebarWidth';
-        const fallbackLabel = locked ? 'Unlock sidebar width' : 'Lock sidebar width';
-        const label = translations[currentLanguage]?.[labelKey] || fallbackLabel;
-        lockButton.setAttribute('aria-label', label);
-        chrome.storage.sync.set({ sidebarLocked: locked });
-
-        if (locked) {
-            // When locking, save the current width
-            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                if (tabs.length > 0 && tabs[0].id) {
-                    chrome.tabs.sendMessage(tabs[0].id, { action: 'getSidebarWidth' }, (response) => {
-                        if (response && response.width) {
-                            lastStoredWidth = response.width;
-                            chrome.storage.sync.set({ sidebarWidth: response.width });
-                        }
-                    });
-                }
-            });
-        } else {
-            // When unlocking, revert to the last stored width
-            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                if (tabs.length > 0 && tabs[0].id) {
-                    chrome.tabs.sendMessage(tabs[0].id, { action: 'setSidebarWidth', width: lastStoredWidth });
-                }
-            });
-        }
-    };
-
-    lockButton.addEventListener('mousedown', (e) => {
-        e.stopPropagation();
-    });
-
-    lockButton.addEventListener('click', () => {
-        setLockedState(!isLocked);
-    });
-
-    resizeHandle.addEventListener('mousedown', (e) => {
-        if (isLocked) return;
-        e.preventDefault();
-        // Ask the content script to start handling the resize process
+    function saveSettings() {
+        chrome.storage.sync.set({ 'highlighter-settings': settings });
+        // Notify content script of the change
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             if (tabs.length > 0 && tabs[0].id) {
-                chrome.tabs.sendMessage(tabs[0].id, { action: 'startSidebarResize' });
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    action: 'settingChanged',
+                    settings: settings
+                });
             }
         });
-    });
+    }
 
-    // --- TRANSLATION & UI FUNCTIONS ---
-
-    const applyTranslations = (lang) => {
+    const applyTranslations = () => {
+        const lang = settings.language;
         document.querySelectorAll('[data-i18n-key]').forEach(el => {
             const key = el.dataset.i18nKey;
             if (translations[lang] && translations[lang][key]) {
@@ -85,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
-        // Update lock button label
         const lockLabelKey = isLocked ? 'unlockSidebarWidth' : 'lockSidebarWidth';
         const fallbackLockLabel = isLocked ? 'Unlock sidebar width' : 'Lock sidebar width';
         const lockLabel = translations[lang]?.[lockLabelKey] || fallbackLockLabel;
@@ -93,40 +59,63 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const setLanguage = (lang) => {
-        if (translations[lang]) {
-            currentLanguage = lang;
-            
-            const triggerSpan = languageSelectTrigger.querySelector('span');
-            const selectedOption = document.querySelector(`.custom-select-option[data-lang="${lang}"]`);
-            if (triggerSpan && selectedOption) {
-                triggerSpan.textContent = selectedOption.textContent;
+        if (!translations[lang]) lang = 'en'; // Fallback to English
+        settings.language = lang;
+
+        const triggerSpan = languageSelectTrigger.querySelector('span');
+        const selectedOption = document.querySelector(`.custom-select-option[data-lang="${lang}"]`);
+        if (triggerSpan && selectedOption) {
+            triggerSpan.textContent = selectedOption.textContent;
+        }
+
+        applyTranslations();
+
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs.length > 0 && tabs[0].id) {
+                chrome.tabs.sendMessage(tabs[0].id, { action: 'languageChanged', language: lang });
             }
-            
-            chrome.storage.sync.set({ language: lang });
-            
-            applyTranslations(lang);
-            
+        });
+
+        document.querySelectorAll('.custom-select-option').forEach(opt => {
+            opt.classList.toggle('active', opt.dataset.lang === lang);
+        });
+
+        loadAnnotations();
+    };
+
+    function updateAnnotationTextStyles() {
+        annotationsList.classList.toggle('dark-text', settings.useDarkText);
+    }
+
+    // --- RESIZE AND LOCK LOGIC ---
+
+    const setLockedState = (locked) => {
+        isLocked = locked;
+        document.body.classList.toggle('locked', locked);
+        applyTranslations(); // Re-apply translations to update lock button label
+        chrome.storage.sync.set({ sidebarLocked: locked });
+
+        if (locked) {
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                 if (tabs.length > 0 && tabs[0].id) {
-                    chrome.tabs.sendMessage(tabs[0].id, { action: 'languageChanged', language: lang });
+                    chrome.tabs.sendMessage(tabs[0].id, { action: 'getSidebarWidth' }, (response) => {
+                        if (response && response.width) {
+                            lastStoredWidth = response.width;
+                            chrome.storage.sync.set({ sidebarWidth: response.width });
+                        }
+                    });
                 }
             });
-
-            document.querySelectorAll('.custom-select-option').forEach(opt => {
-                opt.classList.toggle('active', opt.dataset.lang === lang);
+        } else {
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                if (tabs.length > 0 && tabs[0].id) {
+                    chrome.tabs.sendMessage(tabs[0].id, { action: 'setSidebarWidth', width: lastStoredWidth });
+                }
             });
-
-            loadAnnotations();
         }
     };
 
-    const loadLanguage = () => {
-        chrome.storage.sync.get('language', (data) => {
-            let lang = data.language || navigator.language.split('-')[0];
-            if (!translations[lang]) lang = 'en';
-            setLanguage(lang);
-        });
-    };
+    // --- POPUP AND UI LOGIC ---
 
     const showPopup = () => {
         configPopup.style.display = 'block';
@@ -147,26 +136,23 @@ document.addEventListener('DOMContentLoaded', () => {
         languageOptions.classList.toggle('show');
     };
 
+    // --- ANNOTATION RENDERING ---
+
     function renderAnnotations(annotations) {
-        const langStrings = translations[currentLanguage] || translations.en;
+        const langStrings = translations[settings.language] || translations.en;
         const existingIds = new Set(Array.from(annotationsList.querySelectorAll('.annotation-card')).map(el => el.dataset.annotationId));
         const receivedIds = new Set(annotations.map(([id]) => id));
 
-        // 1. Animate and remove cards that are no longer in the annotations list
         for (const id of existingIds) {
             if (!receivedIds.has(id)) {
                 const cardToRemove = annotationsList.querySelector(`[data-annotation-id="${id}"]`);
-                // Check if the card exists and is not already being deleted
                 if (cardToRemove && !cardToRemove.classList.contains('deleting')) {
                     cardToRemove.classList.add('deleting');
-                    cardToRemove.addEventListener('animationend', () => {
-                        cardToRemove.remove();
-                    }, { once: true });
+                    cardToRemove.addEventListener('animationend', () => cardToRemove.remove(), { once: true });
                 }
             }
         }
 
-        // 2. Add or update cards
         if (!annotations || annotations.length === 0) {
             if (!annotationsList.querySelector('p')) {
                 annotationsList.innerHTML = `<p data-i18n-key="noAnnotations">${langStrings.noAnnotations}</p>`;
@@ -180,25 +166,16 @@ document.addEventListener('DOMContentLoaded', () => {
         annotations.forEach(([id, annotation], index) => {
             let card = annotationsList.querySelector(`[data-annotation-id="${id}"]`);
             if (card) {
-                // Card exists, update its content if necessary
                 const textEl = card.querySelector('.text');
                 const commentEl = card.querySelector('.comment');
-                if (textEl.textContent !== annotation.text) textEl.textContent = annotation.text;
+                if (textEl.innerHTML !== annotation.text) textEl.innerHTML = annotation.text;
                 if (commentEl.textContent !== (annotation.comment || langStrings.noComment)) {
                     commentEl.textContent = annotation.comment || langStrings.noComment;
                 }
-                // Also update the color bar if the color has changed
                 const colorBar = card.querySelector('.annotation-color-bar');
-                if (colorBar) {
-                    colorBar.style.backgroundColor = annotation.color;
-                }
+                if (colorBar) colorBar.style.backgroundColor = annotation.color;
             } else {
-                // Card doesn't exist, create and insert it
                 card = createAnnotationCard(id, annotation);
-
-                // Find the correct position to insert the new card.
-                // We look for the first subsequent annotation in the sorted list
-                // that already has a card in the DOM.
                 let nextCard = null;
                 for (let i = index + 1; i < annotations.length; i++) {
                     const nextAnnotationId = annotations[i][0];
@@ -208,20 +185,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         break;
                     }
                 }
-                
-                // If we found a next card, insert before it. Otherwise, append to the end.
                 annotationsList.insertBefore(card, nextCard);
-
                 card.classList.add('newly-added');
-                card.addEventListener('animationend', () => {
-                    card.classList.remove('newly-added');
-                }, { once: true });
+                card.addEventListener('animationend', () => card.classList.remove('newly-added'), { once: true });
             }
         });
     }
 
     function createAnnotationCard(id, annotation) {
-        const langStrings = translations[currentLanguage] || translations.en;
+        const langStrings = translations[settings.language] || translations.en;
         const card = document.createElement('div');
         card.className = 'annotation-card';
         card.dataset.annotationId = id;
@@ -233,29 +205,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const mainContent = document.createElement('div');
         mainContent.className = 'main-content';
-
         const text = document.createElement('div');
         text.className = 'text';
-        text.textContent = annotation.text;
-
+        text.innerHTML = annotation.text;
         const comment = document.createElement('div');
         comment.className = 'comment';
         comment.textContent = annotation.comment || langStrings.noComment;
-
         mainContent.appendChild(text);
         mainContent.appendChild(comment);
 
         const divider = document.createElement('div');
         divider.className = 'divider';
-
         const deleteArea = document.createElement('div');
         deleteArea.className = 'delete-area';
-
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-btn';
         const deleteLabel = langStrings.deleteAnnotation || 'Delete annotation';
         deleteBtn.setAttribute('aria-label', deleteLabel);
-        
         const deleteIcon = document.createElement('img');
         deleteIcon.src = 'images/trash-svgrepo-com.svg';
         deleteIcon.alt = deleteLabel;
@@ -276,8 +242,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         deleteBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            // The 'renderAnnotations' function will now handle the animation
-            // when it receives the 'annotationsUpdated' message.
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                 if (tabs.length > 0 && tabs[0].id) {
                     chrome.tabs.sendMessage(tabs[0].id, { action: 'deleteAnnotation', annotationId: id });
@@ -294,22 +258,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderAnnotations([]);
                 return;
             }
-
             const currentTab = tabs[0];
-            const langStrings = translations[currentLanguage] || translations.en;
-
+            const langStrings = translations[settings.language] || translations.en;
             if (currentTab.url && currentTab.url.startsWith('chrome-extension://')) {
                 annotationsList.innerHTML = `<p data-i18n-key="noAnnotations">${langStrings.noAnnotations}</p>`;
                 return;
             }
-
             chrome.tabs.sendMessage(currentTab.id, { action: 'getAnnotations' }, (response) => {
                 if (chrome.runtime.lastError) {
                     console.warn(`Highlighter: Could not connect. ${chrome.runtime.lastError.message}`);
                     annotationsList.innerHTML = `<p data-i18n-key="errorLoading">${langStrings.errorLoading}</p>`;
                     return;
                 }
-                
                 renderAnnotations(response?.data || []);
             });
         });
@@ -321,6 +281,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (request.action === 'annotationsUpdated') {
             renderAnnotations(request.data);
         }
+    });
+
+    lockButton.addEventListener('mousedown', (e) => {
+        // Prevent this event from bubbling up to the resize handle
+        e.stopPropagation();
+    });
+    lockButton.addEventListener('click', () => setLockedState(!isLocked));
+    resizeHandle.addEventListener('mousedown', (e) => {
+        if (isLocked) return;
+        e.preventDefault();
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs.length > 0 && tabs[0].id) {
+                chrome.tabs.sendMessage(tabs[0].id, { action: 'startSidebarResize' });
+            }
+        });
     });
 
     configButton.addEventListener('click', (e) => {
@@ -345,7 +320,54 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.custom-select-option').forEach(option => {
         option.addEventListener('click', (e) => {
             setLanguage(e.target.dataset.lang);
+            saveSettings(); // Save after changing the language
             languageOptions.classList.remove('show');
+        });
+    });
+
+    forceBlackSwitch.addEventListener('change', () => {
+        settings.useDarkText = forceBlackSwitch.checked;
+        updateAnnotationTextStyles();
+        saveSettings(); // Save after changing the switch
+    });
+
+    disablePageSwitch.addEventListener('change', (e) => {
+        const checked = e.target.checked;
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs.length > 0 && tabs[0].url) {
+                const href = tabs[0].url;
+                chrome.storage.sync.get({ disabledPages: [] }, (data) => {
+                    let disabledPages = data.disabledPages;
+                    if (checked) {
+                        if (!disabledPages.includes(href)) disabledPages.push(href);
+                    } else {
+                        disabledPages = disabledPages.filter(page => page !== href);
+                    }
+                    chrome.storage.sync.set({ disabledPages }, () => {
+                        chrome.tabs.sendMessage(tabs[0].id, { action: 'toggleActivation', disabled: checked });
+                    });
+                });
+            }
+        });
+    });
+
+    disableDomainSwitch.addEventListener('change', (e) => {
+        const checked = e.target.checked;
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs.length > 0 && tabs[0].url) {
+                const hostname = new URL(tabs[0].url).hostname;
+                chrome.storage.sync.get({ disabledSites: [] }, (data) => {
+                    let disabledSites = data.disabledSites;
+                    if (checked) {
+                        if (!disabledSites.includes(hostname)) disabledSites.push(hostname);
+                    } else {
+                        disabledSites = disabledSites.filter(site => site !== hostname);
+                    }
+                    chrome.storage.sync.set({ disabledSites }, () => {
+                        chrome.tabs.sendMessage(tabs[0].id, { action: 'toggleActivation', disabled: checked });
+                    });
+                });
+            }
         });
     });
 
@@ -367,19 +389,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- INITIALIZATION ---
     const initialize = () => {
-        chrome.storage.sync.get(['sidebarLocked', 'language', 'sidebarWidth'], (data) => {
-            // If sidebarLocked is undefined (first run), default to true (locked).
+        chrome.storage.sync.get(['sidebarLocked', 'sidebarWidth', 'highlighter-settings', 'disabledSites', 'disabledPages'], (data) => {
+            // Set up sidebar lock and width
             const isLocked = data.sidebarLocked === undefined ? true : data.sidebarLocked;
             setLockedState(isLocked);
-            
             lastStoredWidth = Math.max(data.sidebarWidth || 420, 380);
-            let lang = data.language || navigator.language.split('-')[0];
-            if (!translations[lang]) lang = 'en';
-            setLanguage(lang);
+
+            // Safely load and merge settings
+            const defaultSettings = {
+                language: navigator.language.split('-')[0] || 'en',
+                useDarkText: false
+            };
+            settings = { ...defaultSettings, ...data['highlighter-settings'] };
+            
+            // Apply loaded settings to the UI
+            setLanguage(settings.language);
+            forceBlackSwitch.checked = settings.useDarkText;
+            updateAnnotationTextStyles();
+
+            // Save the potentially merged/cleaned settings back to storage
+            saveSettings();
+
+            // Set initial state for disable switches
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                if (tabs.length > 0 && tabs[0].url) {
+                    const url = new URL(tabs[0].url);
+                    const disabledSites = data.disabledSites || [];
+                    const disabledPages = data.disabledPages || [];
+                    disableDomainSwitch.checked = disabledSites.includes(url.hostname);
+                    disablePageSwitch.checked = disabledPages.includes(url.href);
+                }
+            });
+        });
+
+        // Tooltip logic
+        const tooltip = document.getElementById('tooltip');
+        document.querySelectorAll('[data-tooltip-key]').forEach(el => {
+            el.addEventListener('mouseenter', (e) => {
+                const tooltipKey = e.target.dataset.tooltipKey;
+                const langStrings = translations[settings.language] || translations.en;
+                if (langStrings[tooltipKey]) {
+                    tooltip.textContent = langStrings[tooltipKey];
+                    tooltip.style.display = 'block';
+                    computePosition(e.target, tooltip, {
+                        placement: 'top',
+                        middleware: [offset(8), flip(), shift({padding: 5})],
+                    }).then(({x, y}) => {
+                        tooltip.style.left = `${x}px`;
+                        tooltip.style.top = `${y}px`;
+                    });
+                }
+            });
+            el.addEventListener('mouseleave', () => {
+                tooltip.style.display = 'none';
+            });
         });
     };
 
     initialize();
 });
-
-

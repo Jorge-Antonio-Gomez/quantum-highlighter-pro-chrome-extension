@@ -335,11 +335,49 @@ body:not(.locked) #resize-handle {
     font-size: 14px;
 }
 
+.label-with-tooltip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.info-icon {
+    display: inline-block;
+    min-width: 16px;
+    width: 16px;
+    min-height: 16px;
+    height: 16px;
+    border-radius: 50%;
+    /* background-color: var(--text-color-secondary); */
+    background-color: #ccc;
+    color: var(--background-color);
+    text-align: center;
+    line-height: 16px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: help;
+    margin-right: 5px;
+}
+
+.tooltip {
+    position: absolute;
+    background-color: #333;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    max-width: 250px;
+    display: none; /* Hidden by default */
+    z-index: 100;
+    pointer-events: none;
+}
+
 /* Modern Switch */
 .switch {
     position: relative;
     display: inline-block;
     width: 44px;
+    min-width: 44px;
     height: 24px;
 }
 
@@ -456,4 +494,8 @@ input:checked + .slider:before {
     background-color: var(--primary-color);
     color: white;
     font-weight: 500;
+}
+
+#annotations-list.dark-text .annotation-card .text {
+    color: #1a1a1a;
 }

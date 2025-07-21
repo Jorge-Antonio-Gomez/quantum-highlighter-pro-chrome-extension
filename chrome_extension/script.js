@@ -198,20 +198,31 @@
         }
         static applyAnnotationStyle(element, annotation, nodeContext) {
             const colorWithOpacity = annotation.color.startsWith('#') ? `${annotation.color}80` : annotation.color;
+            const settings = window.highlighterInstance ? window.highlighterInstance.settings : { useDarkText: false };
+            const isLink = (nodeContext && nodeContext.nodeType === Node.TEXT_NODE ? nodeContext.parentNode.closest('a') : (nodeContext ? nodeContext.closest('a') : element.closest('a')));
+
+            // Set base style based on annotation type
             if (annotation.type === 'highlight') {
                 element.style.backgroundColor = colorWithOpacity;
                 element.style.borderBottom = 'none';
-                const isLink = nodeContext && nodeContext.parentNode.closest('a');
+            } else { // underline
+                element.style.backgroundColor = 'transparent';
+                element.style.borderBottom = `2px solid ${colorWithOpacity}`;
+            }
+
+            // Determine text color, giving !important priority to the useDarkText setting
+            if (settings.useDarkText) {
+                element.style.setProperty('color', '#1a1a1a', 'important');
+            } else {
+                // When the setting is off, remove the !important property by setting a new, regular style
                 if (isLink) {
                     element.style.color = 'inherit';
-                } else {
+                } else if (annotation.type === 'highlight') {
                     const bodyColor = window.getComputedStyle(document.body).color;
                     element.style.color = DOMManager.isColorLight(bodyColor) ? '#1a1a1a' : 'inherit';
+                } else {
+                    element.style.color = 'inherit';
                 }
-            } else {
-                element.style.backgroundColor = 'transparent';
-                element.style.color = 'inherit';
-                element.style.borderBottom = `2px solid ${colorWithOpacity}`;
             }
         }
         static wrapRange(range, annotation) {
@@ -271,13 +282,99 @@
                 return ((r * 299) + (g * 587) + (b * 114)) / 1000 > 155;
             } catch (e) { return false; }
         }
+
+        static getSanitizedHtmlFromRange(range) {
+            const allowedTags = ['B', 'STRONG', 'I', 'EM'];
+            const content = range.cloneContents();
+            const tempDiv = document.createElement('div');
+            tempDiv.appendChild(content);
+
+            const allElements = tempDiv.querySelectorAll('*');
+            
+            // Iterate backwards to safely remove or modify nodes
+            for (let i = allElements.length - 1; i >= 0; i--) {
+                const el = allElements[i];
+                if (allowedTags.includes(el.tagName)) {
+                    // It's an allowed tag, just remove its attributes for security
+                    while (el.attributes.length > 0) {
+                        el.removeAttribute(el.attributes[0].name);
+                    }
+                } else {
+                    // It's not an allowed tag, so "unwrap" it.
+                    // Move all its children out, then remove the empty tag.
+                    const parent = el.parentNode;
+                    while (el.firstChild) {
+                        parent.insertBefore(el.firstChild, el);
+                    }
+                    parent.removeChild(el);
+                }
+            }
+            return tempDiv.innerHTML;
+        }
     }
 
     class HighlightStorage {
-        constructor() { this.key = `highlighter-annotations-${window.location.hostname}${window.location.pathname}`; }
+        constructor() { this.keyPrefix = `highlighter-annotations-`; }
+        
+        getKey() {
+            return `${this.keyPrefix}${window.location.hostname}${window.location.pathname}`;
+        }
+
         generateId() { return `h-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`; }
-        save(annotations) { try { localStorage.setItem(this.key, JSON.stringify(Array.from(annotations.entries()))); } catch (e) { console.error("Error saving annotations:", e); } }
-        load() { try { const d = localStorage.getItem(this.key); return d ? new Map(JSON.parse(d)) : new Map(); } catch (e) { return new Map(); } }
+        
+        save(annotations, callback) {
+            const key = this.getKey();
+            const dataToSave = { [key]: JSON.stringify(Array.from(annotations.entries())) };
+            chrome.storage.local.set(dataToSave, () => {
+                if (chrome.runtime.lastError) {
+                    console.error("Error saving annotations:", chrome.runtime.lastError);
+                }
+                if (callback) callback();
+            });
+        }
+
+        load(callback) {
+            const newKey = this.getKey();
+            const oldKey = `highlighter-annotations-${window.location.hostname}${window.location.pathname}`; // The literal old key
+
+            // 1. Try loading from the new storage
+            chrome.storage.local.get(newKey, (data) => {
+                if (chrome.runtime.lastError) {
+                    console.error("Error loading annotations:", chrome.runtime.lastError);
+                    callback(new Map());
+                    return;
+                }
+
+                const d = data[newKey];
+                if (d) {
+                    // Found in new storage, normal path
+                    const annotations = new Map(JSON.parse(d));
+                    callback(annotations);
+                } else {
+                    // 2. Not found in new storage, try migrating from old localStorage
+                    try {
+                        const oldData = localStorage.getItem(oldKey);
+                        if (oldData) {
+                            console.log("Highlighter: Found old annotations in localStorage. Migrating now.");
+                            const annotations = new Map(JSON.parse(oldData));
+                            
+                            // 3. Save to new location and delete from old
+                            this.save(annotations, () => {
+                                console.log("Highlighter: Migration successful. Deleting old data from localStorage.");
+                                localStorage.removeItem(oldKey);
+                                callback(annotations); // Return the migrated annotations
+                            });
+                        } else {
+                            // No data in old storage either, just return empty
+                            callback(new Map());
+                        }
+                    } catch (e) {
+                        console.error("Highlighter: Error during migration from localStorage.", e);
+                        callback(new Map());
+                    }
+                }
+            });
+        }
     }
 
     class HighlightMenu {
@@ -422,10 +519,11 @@
     }
 
     class Highlighter {
-        constructor(initialLang) {
+        constructor(initialLang, initialSettings) {
             this.lang = initialLang;
+            this.settings = initialSettings || { useDarkText: false };
             this.storage = new HighlightStorage();
-            this.annotations = this.storage.load();
+            this.annotations = new Map(); // Initialize as empty, will be loaded async
             this.colors = {
                 yellow: 'var(--highlighter-color-yellow)', red: 'var(--highlighter-color-red)',
                 green: 'var(--highlighter-color-green)', blue: 'var(--highlighter-color-blue)',
@@ -436,9 +534,40 @@
             this.menu = new HighlightMenu(this.lang);
             this.shortcutsEnabled = true;
             this.isTemporarilyHidden = false;
+            this.isGloballyDisabled = false; // New flag for instant disabling
             this._injectStyles();
-            this._loadAnnotations();
+            // Load annotations asynchronously
+            this.storage.load((loadedAnnotations) => {
+                this.annotations = loadedAnnotations;
+                this._loadAnnotations();
+            });
             this._setupEventListeners();
+        }
+
+        disableGlobally() {
+            this.isGloballyDisabled = true;
+            this.menu.hide();
+            // Unwrap all existing marks to make them disappear
+            document.querySelectorAll('.highlighter-mark').forEach(el => DOMManager.unwrap(el));
+        }
+
+        enableGlobally() {
+            this.isGloballyDisabled = false;
+            // Reload annotations to make them reappear
+            this._loadAnnotations();
+        }
+
+        updateSettings(newSettings) {
+            this.settings = { ...this.settings, ...newSettings };
+            this._reapplyAllAnnotationStyles();
+        }
+    
+        _reapplyAllAnnotationStyles() {
+            this.annotations.forEach(annotation => {
+                document.querySelectorAll(`[data-annotation-id="${annotation.id}"]`).forEach(el => {
+                    DOMManager.applyAnnotationStyle(el, annotation, el);
+                });
+            });
         }
 
         updateLanguage(newLangCode) {
@@ -478,7 +607,7 @@
         }
 
         _onKeyDown(event) {
-            if (!this.shortcutsEnabled || this.isTemporarilyHidden) return;
+            if (this.isGloballyDisabled || !this.shortcutsEnabled || this.isTemporarilyHidden) return;
             if (event.key === 'Escape') {
                 if (this.activeAnnotationId) {
                     this.menu.hide();
@@ -495,7 +624,7 @@
         }
 
         _onMouseDown(event) {
-            if (this.isTemporarilyHidden) return;
+            if (this.isGloballyDisabled || this.isTemporarilyHidden) return;
             const target = event.target;
             if (target.closest('.highlighter-menu, .highlighter-close-btn, .highlighter-context-menu')) return;
             const annotationEl = target.closest('.highlighter-mark');
@@ -509,7 +638,7 @@
         }
 
         _onMouseUp(event) {
-            if (this.isTemporarilyHidden || event.target.closest('.highlighter-menu, .highlighter-mark, .highlighter-close-btn, .highlighter-context-menu')) return;
+            if (this.isGloballyDisabled || this.isTemporarilyHidden || event.target.closest('.highlighter-menu, .highlighter-mark, .highlighter-close-btn, .highlighter-context-menu')) return;
             setTimeout(() => {
                 const selection = window.getSelection();
                 if (!selection || selection.isCollapsed || selection.rangeCount === 0) return;
@@ -624,49 +753,33 @@
         }
 
         _notifySidebarOfUpdate() {
-            const annotations = this.storage.load();
-            const sortedAnnotations = Array.from(annotations.entries()).sort(([, a], [, b]) => {
-                const elementA = document.querySelector(`[data-annotation-id="${a.id}"]`);
-                const elementB = document.querySelector(`[data-annotation-id="${b.id}"]`);
-
-                // If for any reason the elements are not in the DOM, we can't compare them.
-                // This might happen during initial creation. In such cases, we don't change their order.
-                if (!elementA || !elementB) {
+            this.storage.load((annotations) => {
+                const sortedAnnotations = Array.from(annotations.entries()).sort(([, a], [, b]) => {
+                    const elementA = document.querySelector(`[data-annotation-id="${a.id}"]`);
+                    const elementB = document.querySelector(`[data-annotation-id="${b.id}"]`);
+                    if (!elementA || !elementB) return 0;
+                    const position = elementA.compareDocumentPosition(elementB);
+                    if (position & Node.DOCUMENT_POSITION_FOLLOWING) return -1;
+                    if (position & Node.DOCUMENT_POSITION_PRECEDING) return 1;
                     return 0;
-                }
-
-                // Compare the position of the actual DOM elements.
-                // This is the most reliable way to sort, as it reflects the current state of the page.
-                const position = elementA.compareDocumentPosition(elementB);
-
-                if (position & Node.DOCUMENT_POSITION_FOLLOWING) {
-                    // elementB comes after elementA in the DOM, so A is first.
-                    return -1;
-                }
-                
-                if (position & Node.DOCUMENT_POSITION_PRECEDING) {
-                    // elementB comes before elementA in the DOM, so B is first.
-                    return 1;
-                }
-
-                // The elements are the same, or one contains the other.
-                return 0;
+                });
+                chrome.runtime.sendMessage({ action: 'annotationsUpdated', data: sortedAnnotations });
             });
-            chrome.runtime.sendMessage({ action: 'annotationsUpdated', data: sortedAnnotations });
         }
 
         createAnnotation(color, type) {
             if (!this.activeRange) return;
             const id = this.storage.generateId();
             const pointers = DOMManager.getRangePointers(this.activeRange);
-            const text = this.activeRange.toString();
+            const text = DOMManager.getSanitizedHtmlFromRange(this.activeRange);
             const annotation = { id, color, type, pointers, text, comment: '' };
             const marks = DOMManager.wrapRange(this.activeRange, annotation);
             
             if (marks.length > 0) {
                 this.annotations.set(id, annotation);
-                this.storage.save(this.annotations);
-                this._notifySidebarOfUpdate();
+                this.storage.save(this.annotations, () => {
+                    this._notifySidebarOfUpdate();
+                });
             }
 
             window.getSelection()?.removeAllRanges();
@@ -687,8 +800,9 @@
                 }
             });
             this.annotations.set(id, annotation);
-            this.storage.save(this.annotations);
-            this._notifySidebarOfUpdate();
+            this.storage.save(this.annotations, () => {
+                this._notifySidebarOfUpdate();
+            });
             this.menu.hide();
             this.activeAnnotationId = null;
         }
@@ -702,8 +816,9 @@
             const deleted = this.annotations.delete(id);
 
             if (deleted) {
-                this.storage.save(this.annotations);
-                this._notifySidebarOfUpdate();
+                this.storage.save(this.annotations, () => {
+                    this._notifySidebarOfUpdate();
+                });
             }
 
             if (id === this.activeAnnotationId) {
@@ -741,20 +856,29 @@
     
 
     function initializeHighlighter() {
-        // The 'translations' object is now available globally from i18n.js
-        let lang;
+        chrome.storage.sync.get(['highlighter-settings'], (data) => {
+            const defaultSettings = {
+                language: navigator.language.split('-')[0] || 'en',
+                useDarkText: false
+            };
+            const settings = { ...defaultSettings, ...data['highlighter-settings'] };
 
-        chrome.storage.sync.get('language', (data) => {
-            let userLang = data.language || navigator.language.split('-')[0];
+            // The 'translations' object is now available globally from i18n.js
+            let userLang = settings.language;
             if (!translations[userLang]) userLang = 'en';
-            lang = translations[userLang];
+            const lang = translations[userLang];
+
+            const start = () => {
+                if (window.highlighterInstance) return; // Already initialized
+                window.highlighterInstance = new Highlighter(lang, settings);
+                // Re-apply styles after initialization to ensure settings are respected
+                window.highlighterInstance._reapplyAllAnnotationStyles();
+            };
 
             if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', () => {
-                    window.highlighterInstance = new Highlighter(lang);
-                });
+                document.addEventListener('DOMContentLoaded', start);
             } else {
-                window.highlighterInstance = new Highlighter(lang);
+                start();
             }
         });
     }
@@ -771,20 +895,24 @@
     });
 
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-        const { action, annotationId, language, width } = request;
+        const { action, annotationId, language, width, settings } = request;
 
         if (action === 'toggleSidebar') {
             toggleSidebar();
         } else if (action === 'getAnnotations') {
             if (window.highlighterInstance) {
-                const annotations = window.highlighterInstance.storage.load();
-                const sortedAnnotations = Array.from(annotations.entries()).sort(([, a], [, b]) => {
-                    const rangeA = DOMManager.getRangeFromPointers(a.pointers);
-                    const rangeB = DOMManager.getRangeFromPointers(b.pointers);
-                    if (!rangeA || !rangeB) return 0;
-                    return rangeA.compareBoundaryPoints(Range.START_TO_START, rangeB);
+                window.highlighterInstance.storage.load((annotations) => {
+                    const sortedAnnotations = Array.from(annotations.entries()).sort(([, a], [, b]) => {
+                        const elementA = document.querySelector(`[data-annotation-id="${a.id}"]`);
+                        const elementB = document.querySelector(`[data-annotation-id="${b.id}"]`);
+                        if (!elementA || !elementB) return 0;
+                        const position = elementA.compareDocumentPosition(elementB);
+                        if (position & Node.DOCUMENT_POSITION_FOLLOWING) return -1;
+                        if (position & Node.DOCUMENT_POSITION_PRECEDING) return 1;
+                        return 0;
+                    });
+                    sendResponse({ data: sortedAnnotations });
                 });
-                sendResponse({ data: sortedAnnotations });
             } else {
                 sendResponse({ data: [] });
             }
@@ -795,6 +923,14 @@
             window.highlighterInstance?.deleteAnnotation(annotationId);
         } else if (action === 'languageChanged' && language) {
             window.highlighterInstance?.updateLanguage(language);
+        } else if (action === 'settingChanged' && settings) {
+            window.highlighterInstance?.updateSettings(settings);
+        } else if (action === 'toggleActivation') {
+            if (request.disabled) {
+                window.highlighterInstance?.disableGlobally();
+            } else {
+                window.highlighterInstance?.enableGlobally();
+            }
         } else if (action === 'startSidebarResize') {
             startSidebarResize();
         } else if (action === 'getSidebarWidth') {
