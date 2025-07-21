@@ -190,14 +190,22 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 // Card doesn't exist, create and insert it
                 card = createAnnotationCard(id, annotation);
-                
-                const nextAnnotation = annotations[index + 1];
-                if (nextAnnotation) {
-                    const nextCard = annotationsList.querySelector(`[data-annotation-id="${nextAnnotation[0]}"]`);
-                    annotationsList.insertBefore(card, nextCard);
-                } else {
-                    annotationsList.appendChild(card);
+
+                // Find the correct position to insert the new card.
+                // We look for the first subsequent annotation in the sorted list
+                // that already has a card in the DOM.
+                let nextCard = null;
+                for (let i = index + 1; i < annotations.length; i++) {
+                    const nextAnnotationId = annotations[i][0];
+                    const potentialNextCard = annotationsList.querySelector(`[data-annotation-id="${nextAnnotationId}"]`);
+                    if (potentialNextCard) {
+                        nextCard = potentialNextCard;
+                        break;
+                    }
                 }
+                
+                // If we found a next card, insert before it. Otherwise, append to the end.
+                annotationsList.insertBefore(card, nextCard);
 
                 card.classList.add('newly-added');
                 card.addEventListener('animationend', () => {

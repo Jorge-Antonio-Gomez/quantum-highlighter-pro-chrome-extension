@@ -626,11 +626,31 @@
         _notifySidebarOfUpdate() {
             const annotations = this.storage.load();
             const sortedAnnotations = Array.from(annotations.entries()).sort(([, a], [, b]) => {
-                const rangeA = DOMManager.getRangeFromPointers(a.pointers);
-                const rangeB = DOMManager.getRangeFromPointers(b.pointers);
-                if (!rangeA || !rangeB) return 0;
-                // compareBoundaryPoints returns -1, 0, or 1, which is perfect for sorting.
-                return rangeA.compareBoundaryPoints(Range.START_TO_START, rangeB);
+                const elementA = document.querySelector(`[data-annotation-id="${a.id}"]`);
+                const elementB = document.querySelector(`[data-annotation-id="${b.id}"]`);
+
+                // If for any reason the elements are not in the DOM, we can't compare them.
+                // This might happen during initial creation. In such cases, we don't change their order.
+                if (!elementA || !elementB) {
+                    return 0;
+                }
+
+                // Compare the position of the actual DOM elements.
+                // This is the most reliable way to sort, as it reflects the current state of the page.
+                const position = elementA.compareDocumentPosition(elementB);
+
+                if (position & Node.DOCUMENT_POSITION_FOLLOWING) {
+                    // elementB comes after elementA in the DOM, so A is first.
+                    return -1;
+                }
+                
+                if (position & Node.DOCUMENT_POSITION_PRECEDING) {
+                    // elementB comes before elementA in the DOM, so B is first.
+                    return 1;
+                }
+
+                // The elements are the same, or one contains the other.
+                return 0;
             });
             chrome.runtime.sendMessage({ action: 'annotationsUpdated', data: sortedAnnotations });
         }
