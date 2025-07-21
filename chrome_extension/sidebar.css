@@ -9,6 +9,16 @@
     --text-color-secondary: #6a6a6a;
     --border-color: #e0e0e0;
     --danger-color: #e53935;
+
+    /* Highlighter Colors */
+    --highlighter-color-yellow: #FDEE87;
+    --highlighter-color-red: #FF9A9A;
+    --highlighter-color-green: #A8E6A8;
+    --highlighter-color-blue: #A8D1E6;
+    --highlighter-color-purple: #D1A8E6;
+    --highlighter-color-pink: #E6A8D1;
+    --highlighter-color-orange: #F9C9A1;
+    --highlighter-color-grey: #D8D8D8;
 }
 
 body, html {
@@ -159,7 +169,7 @@ body:not(.locked) #resize-handle {
 .annotation-card {
     background-color: var(--surface-color);
     border-radius: 8px;
-    padding: 12px;
+    padding: 12px 12px 12px 20px; /* Adjusted for 5px bar + 15px space */
     margin-bottom: 12px;
     border: 1px solid var(--border-color);
     transition: background-color 0.2s, border-color 0.2s, transform 0.3s ease-out, opacity 0.3s ease-out;
@@ -169,6 +179,15 @@ body:not(.locked) #resize-handle {
     grid-template-columns: 1fr auto auto; /* Content | Divider | Button */
     align-items: center; /* Vertically center all items */
     column-gap: 12px; /* Space between items */
+}
+
+.annotation-color-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    filter: brightness(0.9) saturate(170%); /* Darken the color slightly */
 }
 
 .annotation-card:hover {

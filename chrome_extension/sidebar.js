@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function renderAnnotations(annotations) {
-        const langStrings = translations[currentLanguage];
+        const langStrings = translations[currentLanguage] || translations.en;
         const existingIds = new Set(Array.from(annotationsList.querySelectorAll('.annotation-card')).map(el => el.dataset.annotationId));
         const receivedIds = new Set(annotations.map(([id]) => id));
 
@@ -187,6 +187,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (commentEl.textContent !== (annotation.comment || langStrings.noComment)) {
                     commentEl.textContent = annotation.comment || langStrings.noComment;
                 }
+                // Also update the color bar if the color has changed
+                const colorBar = card.querySelector('.annotation-color-bar');
+                if (colorBar) {
+                    colorBar.style.backgroundColor = annotation.color;
+                }
             } else {
                 // Card doesn't exist, create and insert it
                 card = createAnnotationCard(id, annotation);
@@ -216,10 +221,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function createAnnotationCard(id, annotation) {
-        const langStrings = translations[currentLanguage];
+        const langStrings = translations[currentLanguage] || translations.en;
         const card = document.createElement('div');
         card.className = 'annotation-card';
         card.dataset.annotationId = id;
+
+        const colorBar = document.createElement('div');
+        colorBar.className = 'annotation-color-bar';
+        colorBar.style.backgroundColor = annotation.color;
+        card.appendChild(colorBar);
 
         const mainContent = document.createElement('div');
         mainContent.className = 'main-content';
@@ -286,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const currentTab = tabs[0];
-            const langStrings = translations[currentLanguage];
+            const langStrings = translations[currentLanguage] || translations.en;
 
             if (currentTab.url && currentTab.url.startsWith('chrome-extension://')) {
                 annotationsList.innerHTML = `<p data-i18n-key="noAnnotations">${langStrings.noAnnotations}</p>`;
