@@ -67,7 +67,7 @@ body, html {
     opacity: 0.8;
 }
 
-#lock-button img {
+#lock-button svg {
     width: 14px;
     height: 14px;
 }
@@ -146,16 +146,19 @@ body:not(.locked) #resize-handle {
     background: none;
     border: none;
     color: var(--text-color-secondary);
-    font-size: 24px;
+    font-size: 30px;
     cursor: pointer;
     transition: color 0.2s;
+
+    display: flex;
+    align-items: center;
 }
 
 .icon-button:hover {
     color: var(--primary-color);
 }
 
-.icon-button img {
+.icon-button svg {
     width: 20px;
     height: 20px;
     vertical-align: middle; /* Align image better */
@@ -292,17 +295,20 @@ body:not(.locked) #resize-handle {
 
 .delete-btn:hover {
     background-color: rgba(229, 57, 53, 0.15);
+    color: var(--danger-color);
 }
 
-.delete-btn img {
+.delete-btn svg {
     width: 16px;
     height: 16px;
-    filter: invert(88%) sepia(24%) saturate(835%) hue-rotate(308deg) brightness(98%) contrast(92%);
-    transition: filter 0.2s;
+    color: var(--primary-color);
+    opacity: 0.7;
+    transition: color 0.2s;
 }
 
-.delete-btn:hover img {
-    filter: invert(32%) sepia(71%) saturate(2456%) hue-rotate(340deg) brightness(92%) contrast(93%);
+.delete-btn:hover svg {
+    color: var(--danger-color);
+    opacity: 1;
 }
 
 

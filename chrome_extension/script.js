@@ -21,17 +21,7 @@
                 sidebar = document.createElement('iframe');
                 sidebar.id = SIDEBAR_ID;
                 sidebar.src = chrome.runtime.getURL('sidebar.html');
-                sidebar.style.cssText = `
-                    position: fixed;
-                    top: 0;
-                    right: 0;
-                    width: ${initialWidth}px;
-                    height: 100%;
-                    border: none;
-                    z-index: 9999999;
-                    transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
-                    transform: translateX(100%);
-                `;
+                sidebar.style.width = `${initialWidth}px`;
                 document.body.appendChild(sidebar);
                 void sidebar.offsetWidth; 
                 sidebar.style.transform = 'translateX(0)';
@@ -89,10 +79,6 @@
             if (!cover) {
                 cover = document.createElement('div');
                 cover.id = RESIZE_COVER_ID;
-                cover.style.cssText = `
-                    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-                    background: transparent; cursor: col-resize; z-index: 10000000;
-                `;
                 document.body.appendChild(cover);
             }
 
@@ -100,13 +86,6 @@
             if (!guide) {
                 guide = document.createElement('div');
                 guide.id = RESIZE_GUIDE_ID;
-                guide.style.cssText = `
-                    position: fixed; top: 0; height: 100vh; width: 2px;
-                    background-image: linear-gradient(to bottom, #444 4px, transparent 4px);
-                    background-size: 100% 8px;
-                    z-index: 10000001;
-                    pointer-events: none;
-                `;
                 const sidebarRect = sidebar.getBoundingClientRect();
                 guide.style.left = `${sidebarRect.left}px`;
                 document.body.appendChild(guide);
@@ -121,39 +100,6 @@
 
 
     const { computePosition, offset, flip, shift, arrow } = FloatingUIDOM;
-
-    const styles = `
-        :root {
-            --highlighter-z-index: 10001;
-            --highlighter-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-            --highlighter-radius: 8px;
-            --highlighter-transition: all 0.15s ease-in-out;
-            --highlighter-color-yellow: #FDEE87;
-            --highlighter-color-red: #FF9A9A;
-            --highlighter-color-green: #A8E6A8;
-            --highlighter-color-blue: #A8D1E6;
-            --highlighter-color-purple: #D1A8E6;
-            --highlighter-color-pink: #E6A8D1;
-            --highlighter-color-orange: #F9C9A1;
-            --highlighter-color-grey: #D8D8D8;
-        }
-        .highlighter-mark { cursor: pointer; transition: var(--highlighter-transition); background-color: transparent; }
-        .highlighter-mark:hover { opacity: 1; }
-        .highlighter-menu { position: absolute; display: none; flex-direction: column; gap: 4px; background: white; border-radius: var(--highlighter-radius); box-shadow: var(--highlighter-shadow); z-index: var(--highlighter-z-index); font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 6px; transition: opacity 0.1s ease-in-out; width: auto; transform-origin: top center; }
-        .highlighter-menu.show { display: flex; }
-        #highlighter-arrow { position: absolute; background: white; width: 8px; height: 8px; transform: rotate(45deg); }
-        .highlighter-menu .menu-row { display: flex; gap: 5px; justify-content: center; align-items: center; }
-        .highlighter-menu .menu-row.types { background-color: #f0f0f0; padding: 3px; border-radius: 6px; }
-        .highlighter-menu button { background: none; border: none; border-radius: 5px; cursor: pointer; transition: var(--highlighter-transition); display: flex; align-items: center; justify-content: center; }
-        .highlighter-color-selector { width: 22px; height: 22px; border: 1px solid rgba(0,0,0,0.1); padding: 0; flex-shrink: 0; }
-        .highlighter-color-selector.active { box-shadow: 0 0 0 3px #57b4dfff; }
-        .highlighter-type-selector { flex: 1; height: 25px; font-size: 16px; font-weight: bold; color: #555; background-color: transparent; }
-        .highlighter-type-selector.active { background-color: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .highlighter-type-selector .underline { text-decoration: underline; text-decoration-thickness: 2px; }
-        .highlighter-delete-btn { flex: 1; height: 25px; background-color: #f0f0f0; color: #333; }
-        .highlighter-delete-btn:hover { background-color: #FFE0E0; color: #D8000C; }
-        .highlighter-shortcut-warning { font-size: 11px; color: #888; text-align: center; padding: 4px 0 0 0; border-top: 1px solid #f0f0f0; margin-top: 4px; }
-    `;
 
     class DOMManager {
         static getXPathForNode(node) {
@@ -327,6 +273,32 @@
             }
             return tempDiv.innerHTML;
         }
+
+        static trimRange(range) {
+            let { startContainer, startOffset, endContainer, endOffset } = range;
+            
+            // Trim start
+            while (startContainer.nodeType === Node.TEXT_NODE && startOffset < startContainer.length && /\s/.test(startContainer.data[startOffset])) {
+                startOffset++;
+            }
+            if (startContainer.nodeType === Node.TEXT_NODE && startOffset === startContainer.length) {
+                // This logic could be expanded to jump to the next non-empty text node
+            }
+
+            // Trim end
+            while (endContainer.nodeType === Node.TEXT_NODE && endOffset > 0 && /\s/.test(endContainer.data[endOffset - 1])) {
+                endOffset--;
+            }
+            if (endContainer.nodeType === Node.TEXT_NODE && endOffset === 0) {
+                // This logic could be expanded to jump to the previous non-empty text node
+            }
+
+            const newRange = document.createRange();
+            newRange.setStart(startContainer, startOffset);
+            newRange.setEnd(endContainer, endOffset);
+            
+            return newRange;
+        }
     }
 
     class HighlightStorage {
@@ -488,31 +460,43 @@
         }
 
         hide() {
-            this.element.style.animation = 'popup-bounce-out 150ms ease-in forwards';
-            this.element.classList.add('closing');
-            
-            this.element.addEventListener('animationend', (e) => {
-                if (e.animationName === 'popup-bounce-out') {
-                    this.element.classList.remove('show');
-                    this.closeButton.classList.remove('show');
-                    this.hideContextMenu();
+            return new Promise(resolve => {
+                if (!this.element.classList.contains('show')) {
+                    return resolve();
                 }
-            }, { once: true });
+
+                this.element.style.animation = 'popup-bounce-out 150ms ease-in forwards';
+                this.element.classList.add('closing');
+                
+                this.element.addEventListener('animationend', (e) => {
+                    if (e.animationName === 'popup-bounce-out') {
+                        this.element.classList.remove('show');
+                        this.closeButton.classList.remove('show');
+                        this.hideContextMenu();
+                        resolve();
+                    }
+                }, { once: true });
+            });
         }
 
         showContextMenu(callbacks) {
+            const sidebarOpen = document.getElementById(SIDEBAR_ID);
+            const toggleSidebarText = sidebarOpen ? this.lang.closeSidebar : this.lang.openSidebar;
+
             this.contextMenu.innerHTML = `
                 <button data-action="hide">${this.lang.hideUntilNextVisit}</button>
                 <button data-action="disablePage">${this.lang.disableOnThisPage}</button>
                 <button data-action="disableSite">${this.lang.disableOnThisWebsite}</button>
+                <button data-action="toggleSidebar">${toggleSidebarText}</button>
             `;
             this.contextMenu.onclick = (e) => {
                 const button = e.target.closest('button');
                 if (!button) return;
                 e.stopPropagation();
                 const { action } = button.dataset;
-                if (action && callbacks[action]) callbacks[action]();
-                this.hide();
+                if (action && callbacks[action]) {
+                    callbacks[action]();
+                }
             };
             this.contextMenu.style.display = 'block';
             this.contextMenu.style.animation = 'popup-bounce-in 150ms ease-out forwards';
@@ -551,7 +535,6 @@
             this.shortcutsEnabled = true;
             this.isTemporarilyHidden = false;
             this.isGloballyDisabled = false; // New flag for instant disabling
-            this._injectStyles();
             // Load annotations asynchronously
             this.storage.load((loadedAnnotations) => {
                 this.annotations = loadedAnnotations;
@@ -602,13 +585,6 @@
             }
         }
 
-        _injectStyles() {
-            const styleSheet = document.createElement("style");
-            styleSheet.type = "text/css";
-            styleSheet.innerText = styles;
-            document.head.appendChild(styleSheet);
-        }
-
         _setupEventListeners() {
             document.addEventListener('mouseup', this._onMouseUp.bind(this));
             document.addEventListener('mousedown', this._onMouseDown.bind(this), true);
@@ -654,22 +630,25 @@
         }
 
         _onMouseUp(event) {
-            if (this.isGloballyDisabled || this.isTemporarilyHidden || event.target.closest('.highlighter-menu, .highlighter-mark, .highlighter-close-btn, .highlighter-context-menu')) return;
+            if (this.isGloballyDisabled || !this.shortcutsEnabled || this.isTemporarilyHidden || event.target.closest('.highlighter-menu, .highlighter-mark, .highlighter-close-btn, .highlighter-context-menu')) return;
             setTimeout(() => {
                 const selection = window.getSelection();
                 if (!selection || selection.isCollapsed || selection.rangeCount === 0) return;
+                
                 let range = selection.getRangeAt(0);
-                if (range.toString().trim().length === 0) return;
+                let trimmedRange = DOMManager.trimRange(range);
+
+                if (trimmedRange.collapsed) return;
 
                 if (range.endOffset === 0 && range.endContainer.nodeType === Node.ELEMENT_NODE) {
                     const previousSibling = range.endContainer.previousSibling;
                     if (previousSibling) {
-                        range.setEnd(previousSibling, previousSibling.nodeType === Node.TEXT_NODE ? previousSibling.length : previousSibling.childNodes.length);
+                        trimmedRange.setEnd(previousSibling, previousSibling.nodeType === Node.TEXT_NODE ? previousSibling.length : previousSibling.childNodes.length);
                     }
                 }
                 
-                this.activeRange = range;
-                this._showCreationMenu(range.getBoundingClientRect());
+                this.activeRange = trimmedRange;
+                this._showCreationMenu(trimmedRange.getBoundingClientRect());
             }, 10);
         }
 
@@ -726,6 +705,11 @@
                 hide: () => this.hideTemporarily(),
                 disablePage: () => this.disableForPage(),
                 disableSite: () => this.disableForSite(),
+                toggleSidebar: async () => {
+                    window.getSelection()?.removeAllRanges();
+                    await this.menu.hide();
+                    toggleSidebar();
+                },
             };
         }
 

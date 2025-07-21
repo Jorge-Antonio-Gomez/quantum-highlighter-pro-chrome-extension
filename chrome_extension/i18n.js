@@ -21,7 +21,9 @@ const translations = {
         shortcutsDisabled: "Shortcuts disabled in input fields.",
         hideUntilNextVisit: "Hide until next visit",
         disableOnThisPage: "Disable on this page",
-        disableOnThisWebsite: "Disable on this website"
+        disableOnThisWebsite: "Disable on this website",
+        openSidebar: "Open sidebar",
+        closeSidebar: "Close sidebar"
     },
     es: {
         sidebarTitle: "Anotaciones",
@@ -45,7 +47,9 @@ const translations = {
         shortcutsDisabled: "Atajos desactivados en campos de texto.",
         hideUntilNextVisit: "Ocultar hasta la próxima visita",
         disableOnThisPage: "Desactivar en esta página",
-        disableOnThisWebsite: "Desactivar en este sitio web"
+        disableOnThisWebsite: "Desactivar en este sitio web",
+        openSidebar: "Abrir menú lateral",
+        closeSidebar: "Cerrar menú lateral"
     },
     fr: {
         sidebarTitle: "Annotations",
@@ -69,7 +73,9 @@ const translations = {
         shortcutsDisabled: "Raccourcis désactivés dans les champs de saisie.",
         hideUntilNextVisit: "Masquer jusqu'à la prochaine visite",
         disableOnThisPage: "Désactiver sur cette page",
-        disableOnThisWebsite: "Désactiver sur ce site web"
+        disableOnThisWebsite: "Désactiver sur ce site web",
+        openSidebar: "Ouvrir le panneau latéral",
+        closeSidebar: "Fermer le panneau latéral"
     },
     pt: {
         sidebarTitle: "Anotações",
@@ -93,7 +99,9 @@ const translations = {
         shortcutsDisabled: "Atalhos desativados em campos de entrada.",
         hideUntilNextVisit: "Ocultar até a próxima visita",
         disableOnThisPage: "Desativar nesta página",
-        disableOnThisWebsite: "Desativar neste site"
+        disableOnThisWebsite: "Desativar neste site",
+        openSidebar: "Abrir menu lateral",
+        closeSidebar: "Fechar menu lateral"
     },
     ru: {
         sidebarTitle: "Аннотации",
@@ -117,7 +125,9 @@ const translations = {
         shortcutsDisabled: "Горячие клавиши отключены в полях ввода.",
         hideUntilNextVisit: "Скрыть до следующего визита",
         disableOnThisPage: "Отключить на этой странице",
-        disableOnThisWebsite: "Отключить на этом веб-сайте"
+        disableOnThisWebsite: "Отключить на этом веб-сайте",
+        openSidebar: "Открыть боковую панель",
+        closeSidebar: "Закрыть боковую панель"
     },
     zh: {
         sidebarTitle: "注释",
@@ -141,6 +151,8 @@ const translations = {
         shortcutsDisabled: "在输入字段中禁用快捷方式。",
         hideUntilNextVisit: "隐藏直至下次访问",
         disableOnThisPage: "在此页面上禁用",
-        disableOnThisWebsite: "在此网站上禁用"
+        disableOnThisWebsite: "在此网站上禁用",
+        openSidebar: "打开侧边栏",
+        closeSidebar: "关闭侧边栏"
     }
 };
