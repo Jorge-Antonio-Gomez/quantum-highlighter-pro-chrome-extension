@@ -1317,7 +1317,15 @@
                 }
 
                 const selection = window.getSelection();
-                if (!selection || selection.isCollapsed || selection.rangeCount === 0) return;
+                if (!selection || selection.isCollapsed || selection.rangeCount === 0) {
+                    // If the creation menu was open (indicated by activeRange), hide it.
+                    // This handles the case where the user clicks away, collapsing the selection.
+                    if (this.activeRange) {
+                        this.menu.hide();
+                        this.activeRange = null;
+                    }
+                    return;
+                }
                 
                 let range = selection.getRangeAt(0);
                 let trimmedRange = DOMManager.trimRange(range);
