@@ -1044,10 +1044,19 @@
             this.element.innerHTML = `<div id="highlighter-arrow"></div>${colorsHTML}${typesHTML}${commentBoxHTML}${actionsHTML}`;
             this.arrowElement = this.element.querySelector('#highlighter-arrow');
         
-            this.element.onclick = (e) => {
+            this.element.onmousedown = (e) => {
                 const button = e.target.closest('button');
                 if (!button) return;
-                 if (!button.closest('.tiptap-toolbar')) {
+
+                // If the click is on a menu button and the Tiptap editor is focused,
+                // prevent the default mousedown behavior. This stops the editor from blurring,
+                // which avoids the race condition with the _onMouseUp handler that closes the menu.
+                const editorProseMirror = this.element.querySelector('.ProseMirror');
+                if (editorProseMirror && editorProseMirror.matches(':focus-within')) {
+                    e.preventDefault();
+                }
+
+                if (!button.closest('.tiptap-toolbar')) {
                     e.stopPropagation();
                 }
                 const { action, value } = button.dataset;
