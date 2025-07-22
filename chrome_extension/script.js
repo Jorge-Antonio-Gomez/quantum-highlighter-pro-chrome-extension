@@ -1041,7 +1041,7 @@
             let actionsHTML = actions ? `<div class="menu-row actions">${this._createButtons(actions)}</div>` : '';
             let commentBoxHTML = config.commentBox ? config.commentBox.html : '';
         
-            this.element.innerHTML = `<div id="highlighter-arrow"></div>${colorsHTML}${typesHTML}${actionsHTML}${commentBoxHTML}`;
+            this.element.innerHTML = `<div id="highlighter-arrow"></div>${colorsHTML}${typesHTML}${commentBoxHTML}${actionsHTML}`;
             this.arrowElement = this.element.querySelector('#highlighter-arrow');
         
             this.element.onclick = (e) => {
