@@ -1084,13 +1084,8 @@
             return buttons.map(btn => `<button title="${btn.label}" data-action="${btn.action}" ${btn.value ? `data-value="${btn.value}"` : ''} class="${btn.className || ''}">${btn.content || ''}</button>`).join('');
         }
 
-        async show(referenceEl, contextMenuCallbacks) {
-            this.hideContextMenu();
-            this.element.classList.remove('closing');
-            this.element.style.animation = 'popup-bounce-in 150ms ease-out forwards';
-            this.element.classList.add('show');
-            
-            this.resizeObserver.observe(this.element);
+        async updatePosition(referenceEl) {
+            if (!this.isVisible() || !referenceEl) return;
 
             const { x, y, placement, middlewareData } = await computePosition(referenceEl, this.element, {
                 placement: 'bottom',
@@ -1105,6 +1100,17 @@
                 top: arrowY != null ? `${arrowY}px` : '',
                 [staticSide]: '-4px',
             });
+        }
+
+        async show(referenceEl, contextMenuCallbacks) {
+            this.hideContextMenu();
+            this.element.classList.remove('closing');
+            this.element.style.animation = 'popup-bounce-in 150ms ease-out forwards';
+            this.element.classList.add('show');
+            
+            this.resizeObserver.observe(this.element);
+
+            await this.updatePosition(referenceEl);
 
             this.element.addEventListener('animationend', (e) => {
                 if (e.animationName === 'popup-bounce-in') {
@@ -1437,6 +1443,7 @@
                                 },
                                 this.lang
                             );
+                            this.menu.updatePosition(element);
                         }
                     }
                 },
