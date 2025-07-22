@@ -999,6 +999,9 @@
             this.element.className = 'highlighter-menu';
             document.body.appendChild(this.element);
             this.arrowElement = null;
+            this.referenceEl = null;
+            this.currentPlacement = null;
+            this.lastHeight = 0;
 
             this.closeButton = document.createElement('button');
             this.closeButton.className = 'highlighter-close-btn';
@@ -1010,16 +1013,31 @@
             this.contextMenu.style.display = 'none';
             document.body.appendChild(this.contextMenu);
 
-            this.resizeObserver = new ResizeObserver(() => {
-                if (this.isVisible()) {
-                    this.updateCloseButtonPosition();
+            this.resizeObserver = new ResizeObserver((entries) => {
+                if (!this.isVisible() || !entries.length) return;
+
+                const newHeight = this.element.offsetHeight;
+
+                // lastHeight > 0 check prevents this from running on the initial render,
+                // avoiding a jump if the initial height calculation was slightly off.
+                if (this.currentPlacement && this.currentPlacement.startsWith('top') && this.lastHeight > 0) {
+                    const heightDifference = newHeight - this.lastHeight;
+                    this.element.style.top = `${parseFloat(this.element.style.top) - heightDifference}px`;
                 }
+
+                this.lastHeight = newHeight;
+                this.updateCloseButtonPosition();
             });
         }
 
         updateCloseButtonPosition() {
+            // When the menu is on top, place the button to the right, aligned with the bottom.
+            // Otherwise, use the default bottom-right position.
+            const placement = this.currentPlacement?.startsWith('top') ? 'right-end' : 'bottom-end';
+
             computePosition(this.element, this.closeButton, {
-                placement: 'bottom-end',
+                placement: placement,
+                // Add a small offset to push it away from the menu corner
                 middleware: [offset(1.5)],
             }).then(({ x, y }) => {
                 Object.assign(this.closeButton.style, { left: `${x}px`, top: `${y}px` });
@@ -1086,12 +1104,24 @@
 
         async updatePosition(referenceEl) {
             if (!this.isVisible() || !referenceEl) return;
+            this.referenceEl = referenceEl; // Store the reference element
 
             const { x, y, placement, middlewareData } = await computePosition(referenceEl, this.element, {
                 placement: 'bottom',
                 middleware: [offset(12), flip(), shift({ padding: 10 }), arrow({ element: this.arrowElement })],
             });
+
+            this.currentPlacement = placement; // Store the calculated placement
             Object.assign(this.element.style, { left: `${x}px`, top: `${y}px` });
+
+            // We set the initial lastHeight *after* positioning, so the observer doesn't over-correct on the first render.
+            this.lastHeight = this.element.offsetHeight;
+
+            // Reposition toolbar when menu is on top
+            const commentBoxWrapper = this.element.querySelector('.highlighter-comment-box-wrapper');
+            if (commentBoxWrapper) {
+                commentBoxWrapper.classList.toggle('toolbar-on-top', this.currentPlacement?.startsWith('top'));
+            }
 
             const { x: arrowX, y: arrowY } = middlewareData.arrow;
             const staticSide = { top: 'bottom', right: 'left', bottom: 'top', left: 'right' }[placement.split('-')[0]];
@@ -1136,6 +1166,9 @@
                 }
 
                 this.resizeObserver.disconnect();
+                this.lastHeight = 0; // Reset height tracking
+                this.currentPlacement = null; // Reset placement
+                this.referenceEl = null; // Reset reference element
 
                 this.element.style.animation = 'popup-bounce-out 150ms ease-in forwards';
                 this.element.classList.add('closing');
@@ -1209,6 +1242,7 @@
             this.activeDebouncedUpdate = null;
             this.tiptapEditor = null;
             this.tiptapToolbarPopup = null;
+
             // Load annotations asynchronously
             this.storage.load((loadedAnnotations) => {
                 this.annotations = loadedAnnotations;

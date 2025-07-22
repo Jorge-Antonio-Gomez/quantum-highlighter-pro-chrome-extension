@@ -206,9 +206,14 @@ body.highlighter-sidebar-open {
     flex-direction: column;
 }
 
+/* New rule to move toolbar to the top */
+.highlighter-comment-box-wrapper.toolbar-on-top {
+    flex-direction: column-reverse;
+}
+
 .tiptap-editor .ProseMirror {
     width: 100%;
-    min-height: 80px;
+    min-height: 57px;
     max-height: 240px; /* Set max height for the editor area */
     overflow-y: auto; /* Apply scroll only to the editor */
     border-radius: 0.375rem;
@@ -263,6 +268,11 @@ body.highlighter-sidebar-open {
     margin: 0;
 }
 
+.toolbar-on-top .tiptap-toolbar.is-visible {
+    padding-top: 0;
+    padding-bottom: 4px;
+}
+
 .tiptap-toolbar button {
     width: 35px;
     height: 25px;
@@ -305,6 +315,14 @@ body.highlighter-sidebar-open {
 
 /* Prevents double placeholder on empty blockquotes */
 .tiptap-editor .ProseMirror blockquote.is-empty > p:first-child.is-empty::before {
+    content: none;
+}
+
+/* Hides placeholders on the root list and inner paragraph, showing only the list item's. */
+.tiptap-editor .ProseMirror > ul:first-child.is-empty::before,
+.tiptap-editor .ProseMirror > ol:first-child.is-empty::before,
+.tiptap-editor .ProseMirror > ul:first-child.is-empty > li.is-empty > p.is-empty::before,
+.tiptap-editor .ProseMirror > ol:first-child.is-empty > li.is-empty > p.is-empty::before {
     content: none;
 }
 
