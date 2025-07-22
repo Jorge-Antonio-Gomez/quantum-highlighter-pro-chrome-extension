@@ -23,7 +23,7 @@
         editor.chain().focus().setTextSelection({ from: newFrom, to: newTo })[commandName]().setTextSelection({ from: from, to: to }).run();
     };
 
-    function handleToolbarClick(action, editor) {
+    function handleToolbarClick(action, editor, lang) {
         switch (action) {
             case 'bold':
             case 'italic':
@@ -47,7 +47,7 @@
                 editor.chain().focus().toggleHeading({ level: 3 }).run();
                 break;
             case 'link':
-                promptForLink(editor);
+                promptForLink(editor, lang);
                 break;
         }
     }
@@ -82,18 +82,18 @@
         });
     }
 
-    function buildToolbar(toolbarContainer, editor) {
+    function buildToolbar(toolbarContainer, editor, lang) {
         toolbarContainer.innerHTML = `
-                    <button data-action="bold" title="Bold"><strong>B</strong></button>
-                    <button data-action="italic" title="Italic"><em>I</em></button>
-                    <button data-action="underline" title="Underline"><u>U</u></button>
-                    <button data-action="strike" title="Strikethrough"><s>S</s></button>
-                    <button data-action="blockquote" title="Blockquote"><span style="font-size: 1.3em; font-weight: bold;">"</span></button>
-                    <button data-action="codeBlock" title="Code Block"><strong>{}</strong></button>
-                    <button data-action="link" title="Link">🔗</button>
-                    <button data-action="h1" title="Heading 1">h1</button>
-                    <button data-action="h2" title="Heading 2">h2</button>
-                    <button data-action="h3" title="Heading 3">h3</button>
+                    <button data-action="bold" title="${lang.toolbarBold}"><strong>B</strong></button>
+                    <button data-action="italic" title="${lang.toolbarItalic}"><em>I</em></button>
+                    <button data-action="underline" title="${lang.toolbarUnderline}"><u>U</u></button>
+                    <button data-action="strike" title="${lang.toolbarStrike}"><s>S</s></button>
+                    <button data-action="blockquote" title="${lang.toolbarBlockquote}"><span style="font-size: 1.3em; font-weight: bold;">"</span></button>
+                    <button data-action="codeBlock" title="${lang.toolbarCodeBlock}"><strong>{}</strong></button>
+                    <button data-action="link" title="${lang.toolbarLink}">🔗</button>
+                    <button data-action="h1" title="${lang.heading} 1">h1</button>
+                    <button data-action="h2" title="${lang.heading} 2">h2</button>
+                    <button data-action="h3" title="${lang.heading} 3">h3</button>
                 `;
 
         toolbarContainer.querySelectorAll('button').forEach(button => {
@@ -101,7 +101,7 @@
                 e.preventDefault();
                 e.stopPropagation();
                 const action = e.currentTarget.dataset.action;
-                handleToolbarClick(action, editor);
+                handleToolbarClick(action, editor, lang);
                 updateToolbar(editor, toolbarContainer); // Update toolbar state immediately after action
             });
         });
@@ -455,7 +455,7 @@
                     }
                     if (event.ctrlKey && !event.altKey && !event.shiftKey && event.key === 'k') {
                         event.preventDefault();
-                        promptForLink(editor);
+                        promptForLink(editor, lang);
                         return true;
                     }
 
@@ -464,14 +464,14 @@
             }
         });
 
-        buildToolbar(toolbarContainer, editor);
+        buildToolbar(toolbarContainer, editor, lang);
         updateToolbar(editor, toolbarContainer);
 
         return editor;
     }
 
 
-    function showLinkEditor(previousUrl = '', previousText = '') {
+    function showLinkEditor(previousUrl = '', previousText = '', lang) {
         return new Promise((resolve) => {
             const overlay = document.createElement('div');
             overlay.className = 'highlighter-modal-overlay';
@@ -479,22 +479,22 @@
             const modal = document.createElement('div');
             modal.className = 'highlighter-link-modal';
             modal.innerHTML = `
-                <h3>Edit Link</h3>
+                <h3>${lang.editLinkTitle}</h3>
                 <div class="form-group">
-                    <label for="link-text">Text</label>
-                    <input type="text" id="link-text" placeholder="Link text" value="${previousText}">
+                    <label for="link-text">${lang.textLabel}</label>
+                    <input type="text" id="link-text" placeholder="${lang.linkTextPlaceholder}" value="${previousText}">
                 </div>
                 <div class="form-group">
-                    <label for="link-url">URL</label>
+                    <label for="link-url">${lang.urlLabel}</label>
                     <input type="text" id="link-url" placeholder="https://example.com" value="${previousUrl}">
                 </div>
                 <div class="modal-actions">
                     <div class="left-actions">
-                        <button class="unlink-btn">Unlink</button>
+                        <button class="unlink-btn">${lang.unlinkButton}</button>
                     </div>
                     <div class="right-actions">
-                        <button class="cancel-btn">Cancel</button>
-                        <button class="save-btn">Save</button>
+                        <button class="cancel-btn">${lang.cancel}</button>
+                        <button class="save-btn">${lang.save}</button>
                     </div>
                 </div>
             `;
@@ -565,7 +565,7 @@
         });
     }
 
-    async function promptForLink(editor) {
+    async function promptForLink(editor, lang) {
         // First, extend the selection to the entire link, if one exists at the cursor.
         editor.chain().focus().extendMarkRange('link').run();
 
@@ -575,7 +575,7 @@
         const selectedText = state.doc.textBetween(from, to, ' ');
         const previousUrl = editor.getAttributes('link').href || '';
         
-        const result = await showLinkEditor(previousUrl, selectedText);
+        const result = await showLinkEditor(previousUrl, selectedText, lang);
 
         if (result === null) { // Canceled
             // Set the cursor to the end of the selection
