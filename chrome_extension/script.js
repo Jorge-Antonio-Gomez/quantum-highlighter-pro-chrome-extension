@@ -31,6 +31,12 @@
             case 'strike':
                 applyMarkWithTrim(editor, action);
                 break;
+            case 'blockquote':
+                editor.chain().focus().toggleBlockquote().run();
+                break;
+            case 'codeBlock':
+                editor.chain().focus().toggleCodeBlock().run();
+                break;
             case 'h1':
                 editor.chain().focus().toggleHeading({ level: 1 }).run();
                 break;
@@ -41,18 +47,7 @@
                 editor.chain().focus().toggleHeading({ level: 3 }).run();
                 break;
             case 'link':
-                if (editor.isActive('link')) {
-                    editor.chain().focus().unsetLink().run();
-                    return;
-                }
-                const previousUrl = editor.getAttributes('link').href || '';
-                const url = window.prompt('URL', previousUrl);
-                if (url === null) return;
-                if (url === '') {
-                    editor.chain().focus().extendMarkRange('link').unsetLink().run();
-                    return;
-                }
-                editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+                promptForLink(editor);
                 break;
         }
     }
@@ -69,6 +64,8 @@
                 case 'strike':
                 case 'underline':
                 case 'link':
+                case 'blockquote':
+                case 'codeBlock':
                     isActive = editor.isActive(action);
                     break;
                 case 'h1':
@@ -87,15 +84,17 @@
 
     function buildToolbar(toolbarContainer, editor) {
         toolbarContainer.innerHTML = `
-            <button data-action="bold" title="Bold">B</button>
-            <button data-action="italic" title="Italic">I</button>
-            <button data-action="underline" title="Underline">U</button>
-            <button data-action="strike" title="Strikethrough">S</button>
-            <button data-action="link" title="Link">🔗</button>
-            <button data-action="h1" title="Heading 1">H1</button>
-            <button data-action="h2" title="Heading 2">H2</button>
-            <button data-action="h3" title="Heading 3">H3</button>
-        `;
+                    <button data-action="bold" title="Bold"><strong>B</strong></button>
+                    <button data-action="italic" title="Italic"><em>I</em></button>
+                    <button data-action="underline" title="Underline"><u>U</u></button>
+                    <button data-action="strike" title="Strikethrough"><s>S</s></button>
+                    <button data-action="blockquote" title="Blockquote"><span style="font-size: 1.3em; font-weight: bold;">"</span></button>
+                    <button data-action="codeBlock" title="Code Block"><strong>{}</strong></button>
+                    <button data-action="link" title="Link">🔗</button>
+                    <button data-action="h1" title="Heading 1">h1</button>
+                    <button data-action="h2" title="Heading 2">h2</button>
+                    <button data-action="h3" title="Heading 3">h3</button>
+                `;
 
         toolbarContainer.querySelectorAll('button').forEach(button => {
             button.addEventListener('click', (e) => {
@@ -103,39 +102,365 @@
                 e.stopPropagation();
                 const action = e.currentTarget.dataset.action;
                 handleToolbarClick(action, editor);
+                updateToolbar(editor, toolbarContainer); // Update toolbar state immediately after action
             });
         });
     }
 
-    function setupTiptapEditor(element, toolbarContainer, content, onUpdate) {
-        const { Editor } = Tiptap;
-        const StarterKit = window.TiptapStarterKit;
-        const Underline = window.TiptapUnderline;
-        const Link = window.TiptapLink;
+    function setupTiptapEditor(element, toolbarContainer, content, onUpdate, lang) {
+        const { Editor, Extension, InputRule, wrappingInputRule, Plugin, PluginKey, TextSelection } = Tiptap;
+
+        const CustomInputRules = Extension.create({
+            name: 'customInputRules',
+            addInputRules() {
+                return [
+                    wrappingInputRule({
+                        find: /^\s*\|\s$/,
+                        type: this.editor.schema.nodes.blockquote,
+                    }),
+                    new InputRule({
+                        find: /^--- $/,
+                        handler: ({ state, range }) => {
+                            state.tr.delete(range.from, range.to)
+                                .insert(range.from, state.schema.nodes.horizontal_rule.create())
+                                .scrollIntoView();
+                        },
+                    }),
+                ];
+            },
+        });
+
+        const ExitLinkOnTwoSpaces = Extension.create({
+            name: 'exitLinkOnTwoSpaces',
+            addProseMirrorPlugins() {
+                return [
+                    new Plugin({
+                        key: new PluginKey('exitLinkOnTwoSpaces'),
+                        appendTransaction: (transactions, oldState, newState) => {
+                            const tr = newState.tr;
+                            const { selection } = tr;
+                            if (!selection.empty || !selection.$cursor) return null;
+
+                            const lastTransaction = transactions[transactions.length - 1];
+                            if (!lastTransaction || !lastTransaction.docChanged) return null;
+                            
+                            const textBefore = newState.doc.textBetween(Math.max(0, selection.$cursor.pos - 2), selection.$cursor.pos, null, ' ');
+                            if (textBefore !== '  ') return null;
+
+                            const { $from } = selection;
+                            const linkMark = this.editor.schema.marks.link.isInSet($from.marks());
+                            if (!linkMark) return null;
+
+                            // Find the end position of the current link mark
+                            let markEndPos = $from.pos;
+                            $from.parent.nodesBetween($from.parentOffset, $from.parent.content.size, (node, pos) => {
+                                if (($from.start() + pos) < $from.pos - node.nodeSize) return;
+
+                                if (linkMark.isInSet(node.marks)) {
+                                    markEndPos = $from.start() + pos + node.nodeSize;
+                                } else {
+                                    return false; // Stop after the first node without the mark
+                                }
+                            });
+
+                            const deleteStart = $from.pos - 2;
+                            const deleteEnd = $from.pos;
+                            const insertPos = markEndPos - 2;
+
+                            const finalTr = tr.delete(deleteStart, deleteEnd);
+                            const spaceNode = this.editor.schema.text(' ', []); // Create a text node with a space and NO marks
+                            
+                            // Use replaceWith to insert the node correctly, avoiding the RangeError
+                            finalTr.replaceWith(insertPos, insertPos, spaceNode);
+
+                            // The cursor will automatically be placed after the inserted node.
+                            return finalTr;
+                        }
+                    })
+                ];
+            }
+        });
+
+        const RemoveEmptyLink = Extension.create({
+            name: 'removeEmptyLink',
+            addKeyboardShortcuts() {
+                return {
+                    'Backspace': () => {
+                        const { state } = this.editor;
+                        const { selection } = state;
+
+                        if (!selection.empty || !selection.$cursor) { return false; }
+
+                        const { $cursor } = selection;
+                        const nodeBefore = $cursor.nodeBefore;
+                        const linkMarkType = this.editor.schema.marks.link;
+
+                        if (nodeBefore && linkMarkType.isInSet(nodeBefore.marks) && nodeBefore.nodeSize === 1) {
+                            // We are at the end of a link, and the node before us is the last character.
+                            // We need to delete it, which will also remove the link context.
+                            return this.editor.chain().focus()
+                                .deleteRange({ from: $cursor.pos - 1, to: $cursor.pos })
+                                .run();
+                        }
+
+                        return false;
+                    },
+                    'Delete': () => {
+                        const { state } = this.editor;
+                        const { selection } = state;
+
+                        if (!selection.empty || !selection.$cursor) { return false; }
+
+                        const { $cursor } = selection;
+                        const nodeAfter = $cursor.nodeAfter;
+                        const linkMarkType = this.editor.schema.marks.link;
+
+                        if (nodeAfter && linkMarkType.isInSet(nodeAfter.marks) && nodeAfter.nodeSize === 1) {
+                            // We are before the last character of a link.
+                            // We need to delete it, which will also remove the link context.
+                            return this.editor.chain().focus()
+                                .deleteRange({ from: $cursor.pos, to: $cursor.pos + 1 })
+                                .run();
+                        }
+
+                        return false;
+                    }
+                }
+            }
+        });
+
+        const LinkTooltip = Extension.create({
+            name: 'linkTooltip',
+
+            addProseMirrorPlugins() {
+                return [
+                    new Plugin({
+                        key: new PluginKey('linkTooltip'),
+                        props: {
+                            handleDOMEvents: {
+                                mouseover: (view, event) => {
+                                    const link = event.target.closest('a');
+                                    if (!link || !view.dom.contains(link)) return false;
+
+                                    if (!this.editor.options.linkTooltipElement) {
+                                        this.editor.options.linkTooltipElement = document.createElement('div');
+                                        this.editor.options.linkTooltipElement.className = 'tiptap-link-tooltip';
+                                        document.body.appendChild(this.editor.options.linkTooltipElement);
+                                    }
+
+                                    const tooltip = this.editor.options.linkTooltipElement;
+                                    tooltip.textContent = link.getAttribute('href');
+
+                                    computePosition(link, tooltip, {
+                                        placement: 'bottom',
+                                        middleware: [offset(8), flip(), shift({ padding: 5 })],
+                                    }).then(({ x, y }) => {
+                                        Object.assign(tooltip.style, {
+                                            left: `${x}px`,
+                                            top: `${y}px`,
+                                        });
+                                        tooltip.classList.add('is-visible');
+                                    });
+
+                                    return true;
+                                },
+                                mouseout: (view, event) => {
+                                    const link = event.target.closest('a');
+                                    if (!link || !view.dom.contains(link)) return false;
+
+                                    const tooltip = this.editor.options.linkTooltipElement;
+                                    if (tooltip) {
+                                        tooltip.classList.remove('is-visible');
+                                    }
+
+                                    return true;
+                                },
+                            },
+                        },
+                    }),
+                ];
+            },
+
+            onDestroy() {
+                const tooltip = this.editor.options.linkTooltipElement;
+                if (tooltip) {
+                    tooltip.remove();
+                    this.editor.options.linkTooltipElement = null;
+                }
+            },
+        });
 
         const editor = new Editor({
             element: element,
             extensions: [
                 window.Tiptap.StarterKit.configure({
-                    // Configure the Link extension directly within the StarterKit
                     link: {
                         openOnClick: false,
+                        HTMLAttributes: {
+                            target: '_blank',
+                            rel: 'noopener noreferrer',
+                        },
+                    },
+                    heading: {
+                        levels: [1, 2, 3, 4, 5, 6],
                     },
                 }),
-                // Underline is already included in StarterKit, so no need to add it again.
-                // window.Tiptap.Highlight.configure({ multicolor: true }), // ERROR: Highlight is not included in the custom tiptap.js bundle. You must rebuild it and include @tiptap/extension-highlight
+                window.Tiptap.Placeholder.configure({
+                    includeChildren: true, // This is ESSENTIAL for placeholders on list items and blockquotes.
+                    placeholder: ({ editor, node }) => {
+                        // Highest priority: The main placeholder for a completely empty editor.
+                        if (editor.isEmpty) {
+                            return lang.commentPlaceholder;
+                        }
+
+                        const nodeType = node.type.name;
+
+                        // Rule #1: A paragraph inside a list or quote should NOT have its own placeholder
+                        // if it's the first and only child. This prevents the double-placeholder bug.
+                        if (nodeType === 'paragraph') {
+                            const parent = node.parent;
+                            const parentType = parent ? parent.type.name : null;
+                            
+                            if (parentType === 'listItem' || parentType === 'blockquote') {
+                                const isFirstAndOnlyChild = parent.childCount === 1 && parent.firstChild === node;
+                                if (isFirstAndOnlyChild) {
+                                    return null; // Let the parent container show the placeholder.
+                                }
+                            }
+                        }
+
+                        // Rule #2: A container (list/quote) gets a placeholder if it only contains one empty paragraph.
+                        const isNodeWithOneEmptyChild = node.childCount === 1 && node.firstChild.content.size === 0;
+                        if (isNodeWithOneEmptyChild) {
+                            if (nodeType === 'listItem') {
+                                return lang.listPlaceholder;
+                            }
+                            if (nodeType === 'blockquote') {
+                                return lang.quotePlaceholder;
+                            }
+                        }
+
+                        // Rule #3: Any other node gets a placeholder only if it's completely empty.
+                        if (node.content.size === 0) {
+                            if (nodeType === 'heading') {
+                                return `${lang.heading} ${node.attrs.level}`;
+                            }
+                            if (nodeType === 'codeBlock') {
+                                return lang.codePlaceholder;
+                            }
+                            if (nodeType === 'paragraph') {
+                                // This will apply to top-level paragraphs and subsequent empty paragraphs in lists/quotes.
+                                return lang.paragraphPlaceholder;
+                            }
+                        }
+
+                        return null;
+                    },
+                }),
+                CustomInputRules,
+                ExitLinkOnTwoSpaces,
+                RemoveEmptyLink,
+                LinkTooltip,
             ],
             content: content,
-            autofocus: 'end',
             editable: true,
+            onCreated: ({ editor }) => {
+                const proseMirror = editor.view.dom;
+                proseMirror.classList.toggle('is-empty', editor.isEmpty);
+            },
             onUpdate: ({ editor }) => {
-                updateToolbar(editor, toolbarContainer);
+                editor.view.dom.classList.toggle('is-empty', editor.isEmpty);
                 if (onUpdate) {
                     onUpdate(editor.getHTML());
                 }
+                updateToolbar(editor, toolbarContainer);
+            },
+            onFocus: () => {
+                toolbarContainer.classList.add('is-visible');
+            },
+            onBlur: ({ event }) => {
+                if (event.relatedTarget && toolbarContainer.contains(event.relatedTarget)) {
+                    return;
+                }
+                toolbarContainer.classList.remove('is-visible');
             },
             onSelectionUpdate: ({ editor }) => {
                 updateToolbar(editor, toolbarContainer);
+            },
+            editorProps: {
+                handleClick: (view, pos, event) => {
+                    const link = event.target.closest('a');
+
+                    if (link && view.dom.contains(link)) {
+                        if (event.ctrlKey) {
+                            // This is a CTRL+Click, handle it.
+                            event.preventDefault();
+                            event.stopPropagation();
+                            chrome.runtime.sendMessage({ action: 'openTab', url: link.href });
+                            return true; // We handled it.
+                        }
+                    }
+                    // For any other click, or a simple click on a link, let Tiptap do its thing.
+                    return false;
+                },
+                handleKeyDown: (view, event) => {
+                    if (!toolbarContainer.classList.contains('is-visible')) {
+                        return false;
+                    }
+
+                    if (event.ctrlKey && !event.altKey && !event.shiftKey && event.key === 'b') {
+                        event.preventDefault();
+                        editor.chain().focus().toggleBold().run();
+                        return true;
+                    }
+                    if (event.ctrlKey && !event.altKey && !event.shiftKey && event.key === 'i') {
+                        event.preventDefault();
+                        editor.chain().focus().toggleItalic().run();
+                        return true;
+                    }
+                    if (event.ctrlKey && !event.altKey && !event.shiftKey && event.key === 'u') {
+                        event.preventDefault();
+                        editor.chain().focus().toggleUnderline().run();
+                        return true;
+                    }
+                    if (event.ctrlKey && event.shiftKey && !event.altKey && event.key === 'X') {
+                        event.preventDefault();
+                        editor.chain().focus().toggleStrike().run();
+                        return true;
+                    }
+                    if (event.ctrlKey && event.shiftKey && !event.altKey && event.key === '7') {
+                        event.preventDefault();
+                        editor.chain().focus().toggleBlockquote().run();
+                        return true;
+                    }
+                    if (event.ctrlKey && event.shiftKey && !event.altKey && event.key === '8') {
+                        event.preventDefault();
+                        editor.chain().focus().toggleCodeBlock().run();
+                        return true;
+                    }
+                    if (event.ctrlKey && event.altKey && !event.shiftKey && event.key === '1') {
+                        event.preventDefault();
+                        editor.chain().focus().toggleHeading({ level: 1 }).run();
+                        return true;
+                    }
+                    if (event.ctrlKey && event.altKey && !event.shiftKey && event.key === '2') {
+                        event.preventDefault();
+                        editor.chain().focus().toggleHeading({ level: 2 }).run();
+                        return true;
+                    }
+                    if (event.ctrlKey && event.altKey && !event.shiftKey && event.key === '3') {
+                        event.preventDefault();
+                        editor.chain().focus().toggleHeading({ level: 3 }).run();
+                        return true;
+                    }
+                    if (event.ctrlKey && !event.altKey && !event.shiftKey && event.key === 'k') {
+                        event.preventDefault();
+                        promptForLink(editor);
+                        return true;
+                    }
+
+                    return false;
+                }
             }
         });
 
@@ -143,6 +468,146 @@
         updateToolbar(editor, toolbarContainer);
 
         return editor;
+    }
+
+
+    function showLinkEditor(previousUrl = '', previousText = '') {
+        return new Promise((resolve) => {
+            const overlay = document.createElement('div');
+            overlay.className = 'highlighter-modal-overlay';
+
+            const modal = document.createElement('div');
+            modal.className = 'highlighter-link-modal';
+            modal.innerHTML = `
+                <h3>Edit Link</h3>
+                <div class="form-group">
+                    <label for="link-text">Text</label>
+                    <input type="text" id="link-text" placeholder="Link text" value="${previousText}">
+                </div>
+                <div class="form-group">
+                    <label for="link-url">URL</label>
+                    <input type="text" id="link-url" placeholder="https://example.com" value="${previousUrl}">
+                </div>
+                <div class="modal-actions">
+                    <div class="left-actions">
+                        <button class="unlink-btn">Unlink</button>
+                    </div>
+                    <div class="right-actions">
+                        <button class="cancel-btn">Cancel</button>
+                        <button class="save-btn">Save</button>
+                    </div>
+                </div>
+            `;
+
+            overlay.appendChild(modal);
+            document.body.appendChild(overlay);
+
+            const urlInput = modal.querySelector('#link-url');
+            const textInput = modal.querySelector('#link-text');
+            const saveBtn = modal.querySelector('.save-btn');
+            const cancelBtn = modal.querySelector('.cancel-btn');
+            const unlinkBtn = modal.querySelector('.unlink-btn');
+
+            urlInput.focus();
+            urlInput.select();
+
+            const cleanup = () => {
+                document.removeEventListener('keydown', handleEsc, true);
+                overlay.remove();
+            };
+
+            const handleSave = () => {
+                cleanup();
+                resolve({ url: urlInput.value, text: textInput.value });
+            };
+
+            const handleCancel = () => {
+                cleanup();
+                resolve(null);
+            };
+
+            const handleUnlink = () => {
+                cleanup();
+                resolve(''); // Resolve with empty string to indicate unlinking
+            };
+            
+            const handleEsc = (e) => {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleCancel();
+                }
+            };
+
+            saveBtn.addEventListener('click', handleSave);
+            cancelBtn.addEventListener('click', handleCancel);
+            unlinkBtn.addEventListener('click', handleUnlink);
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    handleCancel();
+                }
+            });
+            urlInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleSave();
+                }
+            });
+            textInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleSave();
+                }
+            });
+            
+            // Capture escape key at document level to ensure it works
+            document.addEventListener('keydown', handleEsc, true);
+        });
+    }
+
+    async function promptForLink(editor) {
+        // First, extend the selection to the entire link, if one exists at the cursor.
+        editor.chain().focus().extendMarkRange('link').run();
+
+        const { state } = editor;
+        const { from, to } = state.selection; // These are now the correct boundaries.
+        
+        const selectedText = state.doc.textBetween(from, to, ' ');
+        const previousUrl = editor.getAttributes('link').href || '';
+        
+        const result = await showLinkEditor(previousUrl, selectedText);
+
+        if (result === null) { // Canceled
+            // Set the cursor to the end of the selection
+            editor.chain().focus().setTextSelection({ from: to, to: to }).run();
+            return;
+        }
+
+        if (result === '') { // Unlink
+            // extendMarkRange already selected the link, so unsetting is easy.
+            editor.chain().focus().unsetLink().run();
+            return;
+        }
+
+        let { url, text } = result;
+
+        const linkText = text.trim() || url;
+        if (!linkText) {
+            return; // Nothing to do if both URL and Text are empty
+        }
+
+        // Prepend 'https://' if no protocol is present
+        if (url && !/^(https?:\/\/|mailto:|ftp:)/i.test(url)) {
+            url = 'https://' + url;
+        }
+
+        // The selection is already covering the old link text (or is a cursor).
+        // We can just insert the new content, which will replace the selection.
+        editor.chain().focus()
+            .insertContent(linkText)
+            .setTextSelection({ from: from, to: from + linkText.length }) // Select the newly inserted text
+            .setLink({ href: url }) // Apply the link to that selection
+            .run();
     }
 
 
@@ -595,6 +1060,9 @@
                 const commentBoxWrapper = this.element.querySelector('.highlighter-comment-box');
                 if (commentBoxWrapper) {
                     commentBoxWrapper.addEventListener('click', e => e.stopPropagation());
+                    if (config.callbacks.onCommentMousedown) {
+                        commentBoxWrapper.addEventListener('mousedown', config.callbacks.onCommentMousedown);
+                    }
                 }
 
                 if (config.callbacks.onCommentBoxReady) {
@@ -721,11 +1189,11 @@
             };
             this.currentAnnotationType = 'highlight';
             this.menu = new HighlightMenu(this.lang);
-            this.shortcutsEnabled = true;
             this.isTemporarilyHidden = false;
             this.isGloballyDisabled = false; // New flag for instant disabling
             this.activeDebouncedUpdate = null;
             this.tiptapEditor = null;
+            this.tiptapToolbarPopup = null;
             // Load annotations asynchronously
             this.storage.load((loadedAnnotations) => {
                 this.annotations = loadedAnnotations;
@@ -780,54 +1248,74 @@
             document.addEventListener('mouseup', this._onMouseUp.bind(this));
             document.addEventListener('mousedown', this._onMouseDown.bind(this), true);
             document.addEventListener('keydown', this._onKeyDown.bind(this));
-            document.addEventListener('focusin', this._onFocusChange.bind(this));
-            document.addEventListener('focusout', this._onFocusChange.bind(this));
+
+            // Add CTRL key listeners to toggle cursor style for links
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Control') {
+                    document.body.classList.add('ctrl-is-pressed');
+                }
+            });
+            document.addEventListener('keyup', (e) => {
+                if (e.key === 'Control') {
+                    document.body.classList.remove('ctrl-is-pressed');
+                }
+            });
+            window.addEventListener('blur', () => {
+                document.body.classList.remove('ctrl-is-pressed');
+            });
         }
 
-        _onFocusChange(event) {
-            const target = event.target;
-            if (target.closest('.highlighter-menu')) {
-                return;
-            }
-            this.shortcutsEnabled = !(target.isContentEditable || target.matches('input, textarea, select'));
-        }
+        async _onKeyDown(event) {
+            if (this.isGloballyDisabled || this.isTemporarilyHidden) return;
+            
+            const activeEl = document.activeElement;
+            const isEditable = activeEl.isContentEditable || activeEl.matches('input, textarea, select');
 
-        _onKeyDown(event) {
-            if (this.isGloballyDisabled || !this.shortcutsEnabled || this.isTemporarilyHidden) return;
             if (event.key === 'Escape') {
                 if (this.activeAnnotationId) {
-                    this._closeOrFinalizeContextMenu();
+                    if (isEditable) {
+                        activeEl.blur();
+                    } else {
+                        await this._closeOrFinalizeContextMenu();
+                    }
                 } else {
                     window.getSelection()?.removeAllRanges();
                     this.menu.hide();
                     this.activeRange = null;
                 }
             }
-            if (event.key === 'Delete' && this.activeAnnotationId) {
-                this.deleteAnnotation();
+            if (event.key === 'Delete' && this.activeAnnotationId && !isEditable) {
+                await this.deleteAnnotation();
             }
         }
 
-        _onMouseDown(event) {
+        async _onMouseDown(event) {
             if (this.isGloballyDisabled || this.isTemporarilyHidden) return;
             const target = event.target;
-            if (target.closest('.highlighter-menu, .highlighter-close-btn, .highlighter-context-menu')) return;
+            if (target.closest('.highlighter-menu, .highlighter-close-btn, .highlighter-context-menu, .tiptap-toolbar-popup')) return;
             const annotationEl = target.closest('.highlighter-mark');
             if (annotationEl) {
                 event.preventDefault();
                 event.stopPropagation();
                 if (this.activeAnnotationId && this.activeAnnotationId !== annotationEl.dataset.annotationId) {
-                    this._closeOrFinalizeContextMenu();
+                    await this._closeOrFinalizeContextMenu();
                 }
                 this._showContextMenuFor(annotationEl);
-            } else {
-                this._closeOrFinalizeContextMenu();
             }
         }
 
-        _onMouseUp(event) {
-            if (this.isGloballyDisabled || !this.shortcutsEnabled || this.isTemporarilyHidden || event.target.closest('.highlighter-menu, .highlighter-mark, .highlighter-close-btn, .highlighter-context-menu')) return;
-            setTimeout(() => {
+        async _onMouseUp(event) {
+            if (this.isDraggingInCommentBox) {
+                this.isDraggingInCommentBox = false;
+                return;
+            }
+            if (this.isGloballyDisabled || this.isTemporarilyHidden || event.target.closest('.highlighter-menu, .highlighter-mark, .highlighter-close-btn, .highlighter-context-menu, .highlighter-modal-overlay')) return;
+            
+            setTimeout(async () => {
+                if (this.activeAnnotationId) {
+                    await this._closeOrFinalizeContextMenu();
+                }
+
                 const selection = window.getSelection();
                 if (!selection || selection.isCollapsed || selection.rangeCount === 0) return;
                 
@@ -872,7 +1360,15 @@
         }
 
         _showContextMenuFor(element) {
-            this.activeAnnotationId = element.dataset.annotationId;
+            const annotationId = element.dataset.annotationId;
+            if (this.activeAnnotationId === annotationId) {
+                this._closeOrFinalizeContextMenu();
+                return;
+            }
+            if (this.activeAnnotationId) {
+                this._closeOrFinalizeContextMenu();
+            }
+            this.activeAnnotationId = annotationId;
             const annotation = this.annotations.get(this.activeAnnotationId);
 
             if (!annotation) {
@@ -894,8 +1390,10 @@
 
             const commentBoxHTML = `
                 <div id="${commentBoxId}" class="highlighter-comment-box">
-                    <div id="${toolbarElementId}" class="tiptap-toolbar"></div>
-                    <div id="${editorElementId}" class="tiptap-editor"></div>
+                    <div class="highlighter-comment-box-wrapper">
+                        <div id="${editorElementId}" class="tiptap-editor"></div>
+                        <div id="${toolbarElementId}" class="tiptap-toolbar"></div>
+                    </div>
                 </div>
             `;
         
@@ -904,17 +1402,23 @@
                     changeColor: (color) => this.updateAnnotation({ color }),
                     changeType: (type) => this.updateAnnotation({ type }),
                     delete: () => this.deleteAnnotation(),
+                    onCommentMousedown: () => {
+                        this.isDraggingInCommentBox = true;
+                    },
                     onCommentBoxReady: () => {
                         const editorElement = document.getElementById(editorElementId);
                         const toolbarElement = document.getElementById(toolbarElementId);
                         if (editorElement && toolbarElement && !this.tiptapEditor) {
                             this.tiptapEditor = setupTiptapEditor(
-                                editorElement, 
-                                toolbarElement, 
-                                annotation.comment || '', 
+                                editorElement,
+                                toolbarElement,
+                                annotation.comment || '',
                                 (html) => {
-                                    this.activeDebouncedUpdate(html);
-                                }
+                                    if (this.activeDebouncedUpdate) {
+                                        this.activeDebouncedUpdate(html);
+                                    }
+                                },
+                                this.lang
                             );
                         }
                     }
@@ -938,9 +1442,9 @@
             this.menu.show(element, this._getContextMenuCallbacks());
         }
 
-        _closeOrFinalizeContextMenu() {
+        async _closeOrFinalizeContextMenu() {
             if (!this.activeAnnotationId) {
-                this.menu.hide();
+                await this.menu.hide();
                 return;
             }
         
@@ -952,18 +1456,46 @@
             const annotation = this.annotations.get(this.activeAnnotationId);
         
             if (annotation && this.tiptapEditor) {
-                const sanitizedComment = this.tiptapEditor.getHTML();
+                const rawHtml = this.tiptapEditor.getHTML();
+                
+                // --- Trim and clean the HTML content ---
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = rawHtml;
+        
+                // Remove trailing empty block nodes (e.g., <p><br></p> or <p></p>)
+                while (tempDiv.lastChild && tempDiv.lastChild.nodeType === 1 && tempDiv.lastChild.textContent.trim() === '' && tempDiv.lastChild.tagName !== 'BR') {
+                    tempDiv.removeChild(tempDiv.lastChild);
+                }
+        
+                // Remove leading empty block nodes
+                while (tempDiv.firstChild && tempDiv.firstChild.nodeType === 1 && tempDiv.firstChild.textContent.trim() === '' && tempDiv.firstChild.tagName !== 'BR') {
+                    tempDiv.removeChild(tempDiv.firstChild);
+                }
+                
+                const sanitizedComment = tempDiv.innerHTML.trim();
+                // --- End of cleaning ---
+        
                 if (annotation.comment !== sanitizedComment) {
-                    this.updateAnnotation({ comment: sanitizedComment }, this.activeAnnotationId, false);
+                    // Manually update and save to avoid recursion from updateAnnotation()
+                    annotation.comment = sanitizedComment;
+                    this.annotations.set(this.activeAnnotationId, annotation);
+                    this.storage.save(this.annotations, () => {
+                        this._notifySidebarOfUpdate();
+                    });
                 }
             }
             
+            await this.menu.hide(); // Wait for the animation to finish
+
+            if (this.tiptapToolbarPopup) {
+                this.tiptapToolbarPopup.remove();
+                this.tiptapToolbarPopup = null;
+            }
             if (this.tiptapEditor) {
                 this.tiptapEditor.destroy();
                 this.tiptapEditor = null;
             }
         
-            this.menu.hide();
             this.activeAnnotationId = null;
         }
 
@@ -1054,7 +1586,7 @@
             this.activeRange = null;
         }
 
-        updateAnnotation(updates, idToUpdate, keepMenuOpen = false) {
+        async updateAnnotation(updates, idToUpdate, keepMenuOpen = false) {
             const id = idToUpdate || this.activeAnnotationId;
             if (!id) return;
             const annotation = this.annotations.get(id);
@@ -1069,11 +1601,11 @@
             });
         
             if (!keepMenuOpen) {
-                this._closeOrFinalizeContextMenu();
+                await this._closeOrFinalizeContextMenu();
             }
         }
 
-        deleteAnnotation(idToDelete) {
+        async deleteAnnotation(idToDelete) {
             const id = idToDelete || this.activeAnnotationId;
             if (!id) return;
 
@@ -1088,7 +1620,7 @@
             }
 
             if (id === this.activeAnnotationId) {
-                this._closeOrFinalizeContextMenu();
+                await this._closeOrFinalizeContextMenu();
             }
         }
 
