@@ -134,8 +134,33 @@ body.highlighter-sidebar-open {
 .highlighter-type-selector { flex: 1; height: 25px; font-size: 16px; font-weight: bold; color: #555; background-color: transparent; }
 .highlighter-type-selector.active { background-color: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 .highlighter-type-selector .underline { text-decoration: underline; text-decoration-thickness: 2px; }
-.highlighter-delete-btn { flex: 1; height: 25px; background-color: #f0f0f0; color: #333; }
-.highlighter-delete-btn:hover { background-color: #FFE0E0; color: #D8000C; }
+.highlighter-delete-btn {
+    flex: 1;
+    height: 25px;
+    background-color: #f0f0f0;
+    color: #333;
+    display: flex; /* Make it a flex container */
+    align-items: center; /* Vertically center content */
+    justify-content: center; /* Horizontally center content */
+    gap: 4px; /* Space between icon and text */
+    padding: 0 8px; /* Add some horizontal padding */
+}
+
+.highlighter-delete-btn .delete-icon {
+    width: 14px; /* Adjust size as needed */
+    height: 14px; /* Adjust size as needed */
+    fill: currentColor; /* Inherit color from parent */
+    flex-shrink: 0; /* Prevent icon from shrinking */
+}
+
+.highlighter-delete-btn span {
+    /* No specific styles needed here unless we want to override something */
+}
+
+.highlighter-delete-btn:hover {
+    background-color: #FFE0E0;
+    color: #D8000C; /* This will now apply to the SVG via currentColor */
+}
 .highlighter-shortcut-warning { font-size: 11px; color: #888; text-align: center; padding: 4px 0 0 0; border-top: 1px solid #f0f0f0; margin-top: 4px; }
 
 #highlighter-sidebar-instance {
