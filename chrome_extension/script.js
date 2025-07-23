@@ -240,46 +240,117 @@
                             handleDOMEvents: {
                                 mouseover: (view, event) => {
                                     const link = event.target.closest('a');
-                                    if (!link || !view.dom.contains(link)) return false;
+                                    // Only show tooltip for links within the editor content
+                                    if (!link || !view.dom.contains(link)) {
+                                        // If mouse leaves a link or is not over a link, hide the tooltip
+                                        const tooltip = this.editor.options.linkTooltipElement;
+                                        if (tooltip && tooltip.classList.contains('is-visible')) {
+                                            tooltip.classList.remove('is-visible', 'popup-bounce-in');
+                                            tooltip.classList.add('popup-bounce-out');
+                                        }
+                                        return false;
+                                    }
 
+                                    // Ensure tooltip element exists
                                     if (!this.editor.options.linkTooltipElement) {
                                         this.editor.options.linkTooltipElement = document.createElement('div');
                                         this.editor.options.linkTooltipElement.className = 'tiptap-link-tooltip';
                                         document.body.appendChild(this.editor.options.linkTooltipElement);
+                                        // Add event listener for animation end to clean up
+                                        this.editor.options.linkTooltipElement.addEventListener('animationend', (e) => {
+                                            if (tooltip && tooltip.classList.contains('popup-bounce-out')) {
+                                            e.target.classList.remove('popup-bounce-in', 'popup-bounce-out');
+                                            e.target.style.display = 'none'; // Hide it completely
+                                        }
+                                        });
                                     }
 
                                     const tooltip = this.editor.options.linkTooltipElement;
                                     tooltip.textContent = link.getAttribute('href');
+                                    tooltip.style.display = ''; // Ensure it's visible for positioning
 
-                                    computePosition(link, tooltip, {
+                                    // Create a virtual element at the mouse position
+                                    const virtualEl = {
+                                        getBoundingClientRect() {
+                                            return {
+                                                width: 0,
+                                                height: 0,
+                                                x: event.clientX,
+                                                y: event.clientY,
+                                                left: event.clientX,
+                                                right: event.clientX,
+                                                top: event.clientY,
+                                                bottom: event.clientY
+                                            };
+                                        }
+                                    };
+
+                                    computePosition(virtualEl, tooltip, {
                                         placement: 'bottom',
-                                        middleware: [offset(8), flip(), shift({ padding: 5 })],
+                                        middleware: [offset(12), flip(), shift({ padding: 5 })],
                                     }).then(({ x, y }) => {
                                         Object.assign(tooltip.style, {
                                             left: `${x}px`,
                                             top: `${y}px`,
                                         });
-                                        tooltip.classList.add('is-visible');
+                                        tooltip.classList.remove('popup-bounce-out'); // Remove hide animation if present
+                                        tooltip.classList.add('popup-bounce-in'); // Add show animation
                                     });
 
                                     return true;
                                 },
                                 mouseout: (view, event) => {
                                     const link = event.target.closest('a');
+                                    // Only hide tooltip if mouse leaves a link within the editor content
                                     if (!link || !view.dom.contains(link)) return false;
 
                                     const tooltip = this.editor.options.linkTooltipElement;
                                     if (tooltip) {
-                                        tooltip.classList.remove('is-visible');
+                                        tooltip.classList.remove('popup-bounce-in');
+                                        tooltip.classList.add('popup-bounce-out');
                                     }
 
                                     return true;
                                 },
-                            },
-                        },
-                    }),
-                ];
-            },
+                                // Add mousemove to update position
+                                mousemove: (view, event) => {
+                                    const link = event.target.closest('a');
+                                    if (!link || !view.dom.contains(link)) return false; // Only track mouse over links
+
+                                    const tooltip = this.editor.options.linkTooltipElement;
+                                    if (tooltip && tooltip.classList.contains('popup-bounce-in')) { // Only update position if currently visible
+                                        const virtualEl = {
+                                            getBoundingClientRect() {
+                                                return {
+                                                    width: 0,
+                                                    height: 0,
+                                                    x: event.clientX,
+                                                    y: event.clientY,
+                                                    left: event.clientX,
+                                                    right: event.clientX,
+                                                    top: event.clientY,
+                                                    bottom: event.clientY
+                                                };
+                                            }
+                                        };
+
+                                        computePosition(virtualEl, tooltip, {
+                                            placement: 'bottom',
+                                            middleware: [offset(12), flip(), shift({ padding: 5 })],
+                                        }).then(({ x, y }) => {
+                                            Object.assign(tooltip.style, {
+                                                left: `${x}px`,
+                                                top: `${y}px`,
+                                            });
+                                        });
+                                    }
+                                    return true;
+                                }
+                            } // Closing brace for handleDOMEvents
+                        } // Closing brace for props
+                    }) // Closing parenthesis for new Plugin
+                ]; // Closing bracket for return array
+            }, // Closing brace for addProseMirrorPlugins
 
             onDestroy() {
                 const tooltip = this.editor.options.linkTooltipElement;

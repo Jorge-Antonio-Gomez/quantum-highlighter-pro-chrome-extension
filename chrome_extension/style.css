@@ -37,21 +37,13 @@
 
 @keyframes popup-bounce-in {
     0% {
-        transform: scale(0);
+        transform: scale(0.8);
         opacity: 0;
     }
     
-    60% {
-        transform: scale(1.05);
-        opacity: 1;
-    }
-
-    80% {
-        transform: scale(0.98);
-    }
-
     100% {
         transform: scale(1);
+        opacity: 1;
     }
 }
 
@@ -61,16 +53,8 @@
         opacity: 1;
     }
 
-    20% {
-        transform: scale(0.98);
-    }
-
-    40% {
-        transform: scale(1.05);
-    }
-
     100% {
-        transform: scale(0);
+        transform: scale(0.8);
         opacity: 0;
     }
 }
@@ -474,26 +458,23 @@ body.ctrl-is-pressed .tiptap a {
 /* --- Link Editor Modal --- */
 .tiptap-link-tooltip {
     position: absolute;
-    background-color: #333;
+    background-color: #6e6e6e;
     color: white;
     padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 12px;
+    border-radius: 3px;
+    font-size: 10px;
     font-family: 'Rubik', sans-serif;
     z-index: 10005; /* Ensure it's above other elements */
-    opacity: 0;
-    transform: translateY(5px);
-    transition: opacity 150ms ease-in-out, transform 150ms ease-in-out;
-    max-width: 300px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
     pointer-events: none; /* It should not be interactive */
 }
 
-.tiptap-link-tooltip.is-visible {
-    opacity: 1;
-    transform: translateY(0);
+.tiptap-link-tooltip.popup-bounce-in {
+    animation: popup-bounce-in 150ms ease-out forwards;
+    display: block;
+}
+
+.tiptap-link-tooltip.popup-bounce-out {
+    animation: popup-bounce-out 300ms ease-in forwards;
 }
 
 .highlighter-modal-overlay {
