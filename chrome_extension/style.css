@@ -144,6 +144,7 @@ body.highlighter-sidebar-open {
     justify-content: center; /* Horizontally center content */
     gap: 4px; /* Space between icon and text */
     padding: 0 8px; /* Add some horizontal padding */
+    top: 1rem;
 }
 
 .highlighter-delete-btn .delete-icon {
@@ -151,6 +152,7 @@ body.highlighter-sidebar-open {
     height: 14px; /* Adjust size as needed */
     fill: currentColor; /* Inherit color from parent */
     flex-shrink: 0; /* Prevent icon from shrinking */
+    transform: translateY(-1px); /* Push icon up by 2px */
 }
 
 .highlighter-delete-btn span {
