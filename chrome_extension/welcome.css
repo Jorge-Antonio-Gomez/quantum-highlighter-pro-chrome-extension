@@ -1,5 +1,5 @@
-/* Importar RUBIK */
-@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap');
+/* Importar fuentes locales */
+@import url('libs/fonts.css');
 
 html {
     box-sizing: border-box;

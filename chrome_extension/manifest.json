@@ -29,6 +29,7 @@
                 "script.js"
             ],
             "css": [
+                "libs/fonts.css",
                 "style.css"
             ],
             "run_at": "document_idle"
@@ -40,7 +41,9 @@
                 "sidebar.html",
                 "sidebar.css",
                 "sidebar.js",
-                "libs/tiptap.js"
+                "libs/tiptap.js",
+                "libs/fonts.css",
+                "libs/fonts/*"
             ],
             "matches": [
                 "<all_urls>"
