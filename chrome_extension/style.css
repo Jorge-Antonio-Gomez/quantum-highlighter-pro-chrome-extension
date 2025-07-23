@@ -402,8 +402,9 @@ body.ctrl-is-pressed .tiptap a {
     border-left: 3px solid #d1d5db;
     margin-top: 0.4rem;
     margin-bottom: 0.4rem;
-    padding-left: 0.5rem;
-    padding-top: 0.5rem;
+    /* padding-left: 0.5rem; */
+    /* padding-top: 0.5rem; */
+    padding: 0.5rem;
     padding-bottom: 0.5rem !important;
     /* font-style: italic; */
     color: var(--text-secondary);
@@ -412,6 +413,11 @@ body.ctrl-is-pressed .tiptap a {
     border-bottom-right-radius: 6px;
     margin-inline: 0;
 }
+
+/* .tiptap blockquote blockquote {
+    margin-right: 0.5rem;
+} */
+
 .tiptap pre {
     position: relative;
     background: #1e293bc7;

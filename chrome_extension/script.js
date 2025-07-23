@@ -89,7 +89,7 @@
                     <button data-action="underline" title="${lang.toolbarUnderline}"><u>U</u></button>
                     <button data-action="strike" title="${lang.toolbarStrike}"><s>S</s></button>
                     <button data-action="blockquote" title="${lang.toolbarBlockquote}"><span style="font-size: 1.3em; font-weight: bold;">"</span></button>
-                    <button data-action="codeBlock" title="${lang.toolbarCodeBlock}"><strong>{}</strong></button>
+                    <button data-action="codeBlock" title="${lang.toolbarCodeBlock}"><strong>{ }</strong></button>
                     <button data-action="link" title="${lang.toolbarLink}">🔗</button>
                     <button data-action="h1" title="${lang.heading} 1">h1</button>
                     <button data-action="h2" title="${lang.heading} 2">h2</button>
@@ -501,7 +501,7 @@
                 </div>
                 <div class="form-group">
                     <label for="link-url">${lang.urlLabel}</label>
-                    <input type="text" id="link-url" placeholder="https://example.com" value="${previousUrl}">
+                    <input type="text" id="link-url" placeholder="${lang.urlPlaceholder}" value="${previousUrl}">
                 </div>
                 <div class="modal-actions">
                     <div class="left-actions">
