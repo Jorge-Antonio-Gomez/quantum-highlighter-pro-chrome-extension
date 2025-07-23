@@ -1,7 +1,7 @@
-/*
- * Este es el CSS principal de la extensión.
- * Las fuentes ahora se inyectan a través del manifest.json.
- */
+.highlighter-menu,
+.highlighter-menu * {
+    all: revert;
+}
 
 :root {
     --highlighter-z-index: 10001;
