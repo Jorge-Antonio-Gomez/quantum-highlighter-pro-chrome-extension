@@ -248,7 +248,7 @@ const translations = {
         disableOnThisWebsite: "Отключить на всём сайте",
         openSidebar: "Открыть боковую панель",
         closeSidebar: "Закрыть боковую панель"
-    },,
+    },
     zh: {
         sidebarTitle: "标注",
         noAnnotationsTitle: "暂无标注",
