@@ -43,7 +43,9 @@
                 "sidebar.js",
                 "libs/tiptap.js",
                 "libs/fonts.css",
-                "libs/fonts/*"
+                "libs/fonts/*",
+                "images/*",
+                "images/toolbar-icons/*"
             ],
             "matches": [
                 "<all_urls>"

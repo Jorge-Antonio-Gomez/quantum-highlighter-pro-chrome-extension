@@ -150,6 +150,15 @@ body.highlighter-sidebar-open {
     /* box-shadow: 0 0 0 3px color-mix(in srgb, var(--highlighter-primary) 50%, transparent); */
     box-shadow: 0 0 0 3px color-mix(in srgb, black 15%, transparent);
 }
+
+.highlighter-menu .menu-row.actions {
+    padding: 3px;
+    background-color: #f0f0f0;
+    border-radius: 6px;
+
+    margin-top: 2px;
+ }
+
 .highlighter-type-selector {
     flex: 1;
     height: 25px;
@@ -158,26 +167,36 @@ body.highlighter-sidebar-open {
     color: #555;
     background-color: transparent;
 }
-.highlighter-type-selector.active { background-color: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-.highlighter-type-selector .underline { text-decoration: underline; text-decoration-thickness: 2px; }
-.highlighter-delete-btn {
+
+.highlighter-type-selector.active {
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.highlighter-type-selector .underline {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+}
+
+.highlighter-menu .menu-row.actions button.highlighter-delete-btn {
     flex: 1;
     height: 25px;
-    background-color: #f0f0f0;
     color: #555;
     display: flex; /* Make it a flex container */
     align-items: center; /* Vertically center content */
     justify-content: center; /* Horizontally center content */
     gap: 4px; /* Space between icon and text */
-    padding: 0 8px; /* Add some horizontal padding */
+    /* padding: 0 8px; */
     top: 1rem;
 
     font-size: 13px;
-    margin-top: 2px;
-    margin-bottom: 3px;
+    /* margin-bottom: 3px; */
+    background-color: #fff;
+
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.highlighter-delete-btn .delete-icon {
+.highlighter-menu .menu-row.actions .highlighter-delete-btn .delete-icon {
     display: inline-block;
     width: 14px; /* Adjust size as needed */
     height: 14px; /* Adjust size as needed */
@@ -186,19 +205,19 @@ body.highlighter-sidebar-open {
     transform: translateY(-1px); /* Push icon up by 2px */
 }
 
-.highlighter-delete-btn .delete-icon path {
+.highlighter-menu .menu-row.actions .highlighter-delete-btn .delete-icon path {
     fill: currentColor;
 }
 
-.highlighter-delete-btn span {
+.highlighter-menu .menu-row.actions .highlighter-delete-btn span {
     /* No specific styles needed here unless we want to override something */
 }
 
-.highlighter-delete-btn:hover {
+.highlighter-menu .menu-row.actions .highlighter-delete-btn:hover {
     background-color: #FFE0E0;
     color: #D8000C; /* This will now apply to the SVG via currentColor */
 }
-.highlighter-shortcut-warning { font-size: 11px; color: #888; text-align: center; padding: 4px 0 0 0; border-top: 1px solid #f0f0f0; margin-top: 4px; }
+.highlighter-menu .highlighter-shortcut-warning { font-size: 11px; color: #888; text-align: center; padding: 4px 0 0 0; border-top: 1px solid #f0f0f0; margin-top: 4px; }
 
 #highlighter-sidebar-instance {
     position: fixed;
@@ -341,18 +360,24 @@ img.ProseMirror-separator {
 }
 
 .tiptap-editor .ProseMirror {
+    box-sizing: border-box;
+    
     width: 100%;
     min-height: 57px;
     max-height: 240px; /* Set max height for the editor area */
-    overflow-y: auto; /* Apply scroll only to the editor */
-    border-radius: 0.375rem;
+    
     padding: 6px;
-    box-sizing: border-box;
-    color: #334155;
+    
+    border-radius: 5px;
     font-size: 14px;
+    color: #334155;
     background-color: white;
+    
+    overflow-y: auto; /* Apply scroll only to the editor */
     overflow-wrap: break-word;
     word-wrap: break-word;
+
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 /* --- Compact & Styled Scrollbar for the Editor --- */
@@ -446,6 +471,7 @@ img.ProseMirror-separator {
     content: attr(data-placeholder);
     float: left;
     color: #adb5bd;
+    font-weight: 400;
     pointer-events: none;
     height: 0;
 }
@@ -715,6 +741,7 @@ body.ctrl-is-pressed .tiptap a {
     width: 100%;
     padding: 10px;
     border: 1px solid var(--highlighter-border-color, #e0e0e0);
+    background-color: #f5f5f5;
     border-radius: 6px;
     font-size: 14px;
     box-sizing: border-box;
@@ -741,7 +768,7 @@ body.ctrl-is-pressed .tiptap a {
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
-    padding: 8px;
+    padding: 8px 16px;
     border-radius: 6px;
     transition: background-color 0.2s;
 }
