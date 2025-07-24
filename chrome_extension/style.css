@@ -425,6 +425,7 @@ img.ProseMirror-separator {
     padding-right: 4px; */
     margin: 0;
     transition: max-height 150ms ease-in-out, opacity 150ms ease-in-out, padding 150ms ease-in-out, margin-top 150ms ease-in-out;
+    z-index: -1;
 }
 
 .tiptap-toolbar.is-visible {
@@ -433,6 +434,7 @@ img.ProseMirror-separator {
     padding-top: 0;
     margin: 0;
     margin-bottom: 3px;
+    z-index: 1;
 }
 
 .toolbar-on-top .tiptap-toolbar.is-visible {
@@ -496,19 +498,24 @@ img.ProseMirror-separator {
 .tiptap-editor .ProseMirror h5.is-empty::before,
 .tiptap-editor .ProseMirror h6.is-empty::before {
     content: attr(data-placeholder);
+    font-weight: 700;
     float: left;
     color: #d4d7da;
     pointer-events: none;
     height: 0;
 }
 
-/* Prevents double placeholder on empty list items */
-.tiptap-editor .ProseMirror li.is-empty > p.is-empty::before {
-    content: none;
+.tiptap-editor .ProseMirror blockquote h1.is-empty::before,
+.tiptap-editor .ProseMirror blockquote h2.is-empty::before,
+.tiptap-editor .ProseMirror blockquote h3.is-empty::before,
+.tiptap-editor .ProseMirror blockquote h4.is-empty::before,
+.tiptap-editor .ProseMirror blockquote h5.is-empty::before,
+.tiptap-editor .ProseMirror blockquote h6.is-empty::before {
+    color: #bbbec0;
 }
 
-/* Prevents double placeholder on empty blockquotes */
-.tiptap-editor .ProseMirror blockquote.is-empty > p:first-child.is-empty::before {
+/* Prevents double placeholder on empty list items */
+.tiptap-editor .ProseMirror li.is-empty > p.is-empty::before {
     content: none;
 }
 

@@ -379,48 +379,33 @@
                 window.Tiptap.Placeholder.configure({
                     includeChildren: true, // This is ESSENTIAL for placeholders on list items and blockquotes.
                     placeholder: ({ editor, node }) => {
-                        // Rule 1: When the editor is completely empty (contains only an empty paragraph, or is truly empty)
-                        if (editor.isEmpty) {
-                            // 'node' here refers to the first (and usually only) node in the document when editor.isEmpty is true.
-                            const firstNodeTypeName = node ? node.type.name : null; // Handle case where editor is truly empty (no nodes)
-
-                            if (firstNodeTypeName === 'paragraph') {
-                                return lang.commentPlaceholder; // "Añadir una nota..." for an empty paragraph at the root.
-                            } else if (firstNodeTypeName === 'blockquote') {
-                                return lang.quotePlaceholder;
-                            } else if (firstNodeTypeName === 'codeBlock') {
-                                return lang.codePlaceholder;
-                            } else if (firstNodeTypeName === 'listItem') {
-                                return lang.listPlaceholder;
-                            } else if (firstNodeTypeName === 'heading') {
-                                return `${lang.heading} ${node.attrs.level}`;
-                            }
-                            // Fallback for any other unexpected empty state or if firstNodeTypeName is null
-                            return lang.commentPlaceholder; // Default for truly empty or unhandled types
-                        }
-
-                        // Existing rules for when the editor is NOT completely empty, but specific nodes within it are empty.
                         const nodeType = node.type.name;
+                        const parent = node.parent;
+                        const parentType = parent ? parent.type.name : null;
 
-                        // Rule #2: A paragraph inside a list or quote should NOT have its own placeholder
-                        // if it's the first and only child. This prevents the double-placeholder bug.
-                        if (nodeType === 'paragraph') {
-                            const parent = node.parent;
-                            const parentType = parent ? parent.type.name : null;
-                            
-                            if (parentType === 'listItem' || parentType === 'blockquote') {
-                                const isFirstAndOnlyChild = parent.childCount === 1 && parent.firstChild === node;
-                                if (isFirstAndOnlyChild) {
-                                    return null; // Let the parent container show the placeholder.
-                                }
-                            }
+                        // Rule #1: Highest priority. If the node is an empty paragraph and the
+                        // FIRST child of a blockquote, it gets the quote placeholder.
+                        if (nodeType === 'paragraph' && parentType === 'blockquote' && parent.firstChild === node && node.content.size === 0) {
+                            return lang.quotePlaceholder;
                         }
 
-                        // Rule #3: If the node itself is empty, show its specific placeholder.
-                        // This applies to paragraphs, headings, and code blocks when the editor is NOT empty.
+                        // Rule #2: The main placeholder for a completely empty editor.
+                        // This applies only to the first node, which must be a paragraph.
+                        if (editor.isEmpty && nodeType === 'paragraph') {
+                            return lang.commentPlaceholder;
+                        }
+
+                        // Rule #3: Prevent double placeholders in list items.
+                        // If a paragraph is the only child of a list item, let the list item show the placeholder.
+                        if (nodeType === 'paragraph' && parentType === 'listItem' && parent.childCount === 1) {
+                            return null;
+                        }
+
+                        // Rule #4: Placeholders for other specific empty nodes.
                         if (node.content.size === 0) {
                             if (nodeType === 'paragraph') {
-                                return lang.paragraphPlaceholder; // "Escribir algo..."
+                                // This is for any other empty paragraph not covered by the rules above.
+                                return lang.paragraphPlaceholder;
                             }
                             if (nodeType === 'heading') {
                                 return `${lang.heading} ${node.attrs.level}`;
@@ -430,19 +415,17 @@
                             }
                         }
 
-                        // Rule #4: For container nodes (list items, blockquotes) that contain only one empty child,
-                        // show their specific placeholder.
+                        // Rule #5: Placeholders for container nodes that have one empty child.
                         const isNodeWithOneEmptyChild = node.childCount === 1 && node.firstChild.content.size === 0;
                         if (isNodeWithOneEmptyChild) {
                             if (nodeType === 'listItem') {
                                 return lang.listPlaceholder;
                             }
-                            if (nodeType === 'blockquote') {
-                                return lang.quotePlaceholder;
-                            }
+                            // The blockquote itself no longer shows a placeholder.
                         }
 
-                        return null; // No placeholder for other cases
+                        // Default: No placeholder
+                        return null;
                     },
                 }),
                 CustomInputRules,
