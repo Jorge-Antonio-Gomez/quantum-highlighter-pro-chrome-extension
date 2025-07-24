@@ -388,6 +388,8 @@
                                 return lang.commentPlaceholder; // "Añadir una nota..." for an empty paragraph at the root.
                             } else if (firstNodeTypeName === 'blockquote') {
                                 return lang.quotePlaceholder;
+                            } else if (firstNodeTypeName === 'codeBlock') {
+                                return lang.codePlaceholder;
                             } else if (firstNodeTypeName === 'listItem') {
                                 return lang.listPlaceholder;
                             } else if (firstNodeTypeName === 'heading') {
@@ -1585,7 +1587,7 @@
                         { action: 'changeType', value: 'underline', label: this.lang.underline, content: '<span class="underline">A</span>', className: `highlighter-type-selector ${annotation.type === 'underline' ? 'active' : ''}` }
                     ],
                     actions: [
-                        { action: 'delete', label: this.lang.delete, content: `<svg class="delete-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V6H17H19C19.5523 6 20 6.44772 20 7C20 7.55228 19.5523 8 19 8H18V18C18 19.6569 16.6569 21 15 21H9C7.34315 21 6 19.6569 6 18V8H5C4.44772 8 4 7.55228 4 7C4 6.44772 4.44772 6 5 6H7H9V5ZM10 8H8V18C8 18.5523 8.44772 19 9 19H15C15.5523 19 16 18.5523 16 18V8H14H10ZM13 6H11V5H13V6ZM12 10 L12 17Z"/></svg><span>${this.lang.delete}</span>`, className: 'highlighter-delete-btn' }
+                        { action: 'delete', label: this.lang.delete, content: `<svg class="delete-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V6H17H19C19.5523 6 20 6.44772 20 7C20 7.55228 19.5523 8 19 8H18V18C18 19.6569 16.6569 21 15 21H9C7.34315 21 6 19.6569 6 18V8H5C4.44772 8 4 7.55228 4 7C4 6.44772 4.44772 6 5 6H7H9V5ZM10 8H8V18C8 18.5523 8.44772 19 9 19H15C15.5523 19 16 18.5523 16 18V8H14H10ZM13 6H11V5H13V6Z"/></svg><span>${this.lang.delete}</span>`, className: 'highlighter-delete-btn' }
                     ]
                 },
                 commentBox: {
