@@ -1,11 +1,4 @@
-
 document.addEventListener('DOMContentLoaded', () => {
-    // --- TIPTAP ---
-    const { Editor } = Tiptap;
-    const StarterKit = window.TiptapStarterKit;
-    const Underline = window.TiptapUnderline;
-    const Link = window.TiptapLink;
-
     // --- ELEMENTS ---
     const resizeHandle = document.getElementById('resize-handle');
     const lockButton = document.getElementById('lock-button');
@@ -32,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
         language: 'en',
         useDarkText: false,
     };
-    let editorInstances = {}; // To store tiptap editor instances
 
     // --- FLOATING UI ---
     const { computePosition, offset, flip, shift } = FloatingUIDOM;
@@ -154,28 +146,49 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderAnnotations(annotations) {
         const langStrings = translations[settings.language] || translations.en;
         const annotationsContainer = annotationsList;
+        const hadAnnotations = annotationsContainer.querySelectorAll('.annotation-card').length > 0;
+        const hasAnnotations = annotations && annotations.length > 0;
 
-        if (!annotations || annotations.length === 0) {
-            if (!annotationsContainer.classList.contains('empty-state')) {
-                annotationsContainer.innerHTML = ''; // Clear only if not already empty
-                annotationsContainer.classList.add('empty-state');
-                const emptyView = document.createElement('div');
-                emptyView.className = 'empty-state-content';
-                emptyView.innerHTML = `
-                <div class="empty-state-icon">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5 7C5 6.44772 5.44772 6 6 6H18C18.5523 6 19 6.44772 19 7C19 7.55228 18.5523 8 18 8H6C5.44772 8 5 7.55228 5 7ZM5 12C5 11.4477 5.44772 11 6 11H18C18.5523 11 19 11.4477 19 12C19 12.5523 18.5523 13 18 13H6C5.44772 13 5 12.5523 5 12ZM5 17C5 16.4477 5.44772 16 6 16H11C11.5523 16 12 16.4477 12 17C12 17.5523 11.5523 18 11 18H6C5.44772 18 5 17.5523 5 17Z" fill="currentColor"/>
-                    </svg>
-                </div>
-                <h3 class="empty-state-title">${langStrings.noAnnotationsTitle || 'No Annotations Yet'}</h3>
-                <p class="empty-state-text">${langStrings.noAnnotations || 'Highlight text on the page to get started!'}</p>
-            `;
-                annotationsContainer.appendChild(emptyView);
+        // Handle transition from annotations to empty state
+        if (hadAnnotations && !hasAnnotations) {
+            const emptyView = createEmptyStateView(langStrings);
+            emptyView.style.opacity = '0'; // Start transparent
+            annotationsContainer.appendChild(emptyView);
+            annotationsContainer.classList.add('empty-state');
+            requestAnimationFrame(() => {
+                emptyView.style.transition = 'opacity 0.5s ease-out';
+                emptyView.style.opacity = '1';
+            });
+        }
+        // Handle transition from empty state to annotations
+        else if (!hadAnnotations && hasAnnotations) {
+            const emptyView = annotationsContainer.querySelector('.empty-state-content');
+            if (emptyView) {
+                emptyView.classList.add('hiding');
+                emptyView.addEventListener('animationend', () => {
+                    annotationsContainer.classList.remove('empty-state');
+                    emptyView.remove();
+                }, { once: true });
             }
+        }
+        // Handle initial empty state
+        else if (!hasAnnotations && !annotationsContainer.querySelector('.empty-state-content')) {
+            annotationsContainer.innerHTML = ''; // Clear previous content
+            const emptyView = createEmptyStateView(langStrings);
+            annotationsContainer.appendChild(emptyView);
+            annotationsContainer.classList.add('empty-state');
+        }
+
+        if (!hasAnnotations) {
+            // Clear out any remaining card elements if we are in the empty state
+            annotationsContainer.querySelectorAll('.annotation-card').forEach(card => card.remove());
             return;
         }
 
-        annotationsContainer.classList.remove('empty-state');
+        // If we have annotations, ensure the empty-state class is removed
+        if (hasAnnotations) {
+            annotationsContainer.classList.remove('empty-state');
+        }
 
         const existingIds = new Set(Array.from(annotationsContainer.querySelectorAll('.annotation-card')).map(el => el.dataset.annotationId));
         const receivedAnnotationsMap = new Map(annotations);
@@ -187,18 +200,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (cardToRemove && !cardToRemove.classList.contains('deleting')) {
                     cardToRemove.classList.add('deleting');
                     cardToRemove.addEventListener('animationend', () => {
-                        if (editorInstances[id]) {
-                            editorInstances[id].destroy();
-                            delete editorInstances[id];
-                        }
-                        cardToRemove.remove()
+                        cardToRemove.remove();
                     }, { once: true });
                 }
             }
         }
 
         // 2. Update existing and add new annotations
-        let lastElement = null; // Keep track of the last processed element for insertion order
+        let lastElement = null;
         annotations.forEach(([id, annotation]) => {
             let card = annotationsContainer.querySelector(`[data-annotation-id="${id}"]`);
 
@@ -208,36 +217,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 const commentEl = card.querySelector('.comment');
                 const colorBar = card.querySelector('.annotation-color-bar');
 
-                // Only update if content has actually changed
-                if (textEl.innerHTML !== annotation.text) {
-                    textEl.innerHTML = annotation.text;
-                }
+                if (textEl.innerHTML !== annotation.text) textEl.innerHTML = annotation.text;
                 const newCommentHtml = annotation.comment || `<span class="no-comment-placeholder">${langStrings.noComment}</span>`;
-                if (commentEl.innerHTML !== newCommentHtml) {
-                    commentEl.innerHTML = newCommentHtml;
-                }
-                if (colorBar.style.backgroundColor !== annotation.color) {
-                    colorBar.style.backgroundColor = annotation.color;
-                }
-                // Update the data attribute to ensure the editor gets the latest content
+                if (commentEl.innerHTML !== newCommentHtml) commentEl.innerHTML = newCommentHtml;
+                if (colorBar.style.backgroundColor !== annotation.color) colorBar.style.backgroundColor = annotation.color;
                 card.dataset.comment = annotation.comment || '';
             } else {
                 // Element is new, create and insert it
                 card = createAnnotationCard(id, annotation);
                 card.classList.add('newly-added');
 
-                // Insert in the correct order
                 if (lastElement) {
                     lastElement.after(card);
                 } else {
                     annotationsContainer.prepend(card);
                 }
-
                 card.addEventListener('animationend', () => card.classList.remove('newly-added'), { once: true });
             }
-            lastElement = card; // Update the last element reference
+            lastElement = card;
         });
     }
+
+    function createEmptyStateView(langStrings) {
+        const emptyView = document.createElement('div');
+        emptyView.className = 'empty-state-content';
+        emptyView.innerHTML = `
+            <div class="empty-state-icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M5 7C5 6.44772 5.44772 6 6 6H18C18.5523 6 19 6.44772 19 7C19 7.55228 18.5523 8 18 8H6C5.44772 8 5 7.55228 5 7ZM5 12C5 11.4477 5.44772 11 6 11H18C18.5523 11 19 11.4477 19 12C19 12.5523 18.5523 13 18 13H6C5.44772 13 5 12.5523 5 12ZM5 17C5 16.4477 5.44772 16 6 16H11C11.5523 16 12 16.4477 12 17C12 17.5523 11.5523 18 11 18H6C5.44772 18 5 17.5523 5 17Z" fill="currentColor"/>
+                </svg>
+            </div>
+            <h3 class="empty-state-title">${langStrings.noAnnotationsTitle || 'No Annotations Yet'}</h3>
+            <p class="empty-state-text">${langStrings.noAnnotations || 'Highlight text on the page to get started!'}</p>
+        `;
+        return emptyView;
+    }
+
 
     function createAnnotationCard(id, annotation) {
         const langStrings = translations[settings.language] || translations.en;
@@ -265,21 +280,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             commentDisplay.innerHTML = `<span class="no-comment-placeholder">${langStrings.noComment}</span>`;
         }
-
-        const commentEditorContainer = document.createElement('div');
-        commentEditorContainer.className = 'comment-editor-container';
-        commentEditorContainer.innerHTML = `
-            <div class="tiptap-toolbar"></div>
-            <div class="tiptap-editor"></div>
-            <div class="comment-editor-actions">
-                <button class="comment-cancel-btn">${langStrings.cancel || 'Cancel'}</button>
-                <button class="comment-save-btn">${langStrings.save || 'Save'}</button>
-            </div>
-        `;
         
         mainContent.appendChild(text);
         mainContent.appendChild(commentDisplay);
-        mainContent.appendChild(commentEditorContainer);
 
         const actionsContainer = document.createElement('div');
         actionsContainer.className = 'actions-container';
@@ -295,9 +298,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const divider = document.createElement('div');
         divider.className = 'divider';
-        actionsContainer.appendChild(divider);
         
-        actionsContainer.appendChild(commentBtn);
+        // actionsContainer.appendChild(commentBtn);
+        actionsContainer.appendChild(divider);
         
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-btn';
@@ -312,60 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
         card.appendChild(mainContent);
         card.appendChild(actionsContainer);
 
-        const editorElement = commentEditorContainer.querySelector('.tiptap-editor');
-        const toolbarElement = commentEditorContainer.querySelector('.tiptap-toolbar');
-        const saveBtn = commentEditorContainer.querySelector('.comment-save-btn');
-        const cancelBtn = commentEditorContainer.querySelector('.comment-cancel-btn');
-
-        commentBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const card = e.target.closest('.annotation-card');
-            if (!card) return;
-
-            const isEditing = card.classList.toggle('editing');
-
-            if (isEditing) {
-                if (!editorInstances[id]) {
-                    const editor = setupEditor(editorElement, toolbarElement, card.dataset.comment);
-                    editorInstances[id] = editor;
-                }
-                editorInstances[id].commands.focus();
-            }
-        });
-
-        cancelBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const card = e.target.closest('.annotation-card');
-            if (card) card.classList.remove('editing');
-        });
-
-        saveBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const card = e.target.closest('.annotation-card');
-            if (!card || !editorInstances[id]) return;
-
-            const editor = editorInstances[id];
-            const newComment = editor.getHTML();
-            
-            card.dataset.comment = newComment;
-            commentDisplay.innerHTML = newComment || `<span class="no-comment-placeholder">${langStrings.noComment}</span>`;
-            card.classList.remove('editing');
-
-            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                if (tabs.length > 0 && tabs[0].id) {
-                    chrome.tabs.sendMessage(tabs[0].id, { 
-                        action: 'updateAnnotation', 
-                        annotationId: id,
-                        updates: { comment: newComment }
-                    });
-                }
-            });
-        });
-
         mainContent.addEventListener('click', () => {
-            const card = mainContent.closest('.annotation-card');
-            if (card.classList.contains('editing')) return; // Don't scroll if editing
-
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                 if (tabs.length > 0 && tabs[0].id) {
                     chrome.tabs.sendMessage(tabs[0].id, { action: 'scrollToAnnotation', annotationId: id });
@@ -383,135 +333,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         return card;
-    }
-
-    function setupEditor(element, toolbarContainer, content) {
-        const editor = new Editor({
-            element: element,
-            extensions: [
-                StarterKit,
-                Underline,
-                Link.configure({
-                    openOnClick: false,
-                    autolink: true,
-                }),
-            ],
-            content: content,
-            autofocus: 'end',
-            editable: true,
-            onUpdate: ({ editor }) => {
-                updateToolbar(editor, toolbarContainer);
-            },
-            onSelectionUpdate: ({ editor }) => {
-                updateToolbar(editor, toolbarContainer);
-            }
-        });
-
-        buildToolbar(toolbarContainer, editor);
-        updateToolbar(editor, toolbarContainer);
-
-        return editor;
-    }
-
-    function buildToolbar(toolbarContainer, editor) {
-        toolbarContainer.innerHTML = `
-            <button data-action="bold" title="Negrita">B</button>
-            <button data-action="italic" title="Cursiva">I</button>
-            <button data-action="underline" title="Subrayado">U</button>
-            <button data-action="strike" title="Tachado">S</button>
-            <button data-action="link" title="Enlace">🔗</button>
-            <button data-action="h1" title="Título 1">H1</button>
-            <button data-action="h2" title="Título 2">H2</button>
-            <button data-action="h3" title="Título 3">H3</button>
-        `;
-
-        toolbarContainer.querySelectorAll('button').forEach(button => {
-            button.addEventListener('click', (e) => {
-                e.preventDefault();
-                const action = e.currentTarget.dataset.action;
-                handleToolbarClick(action, editor);
-            });
-        });
-    }
-
-    function updateToolbar(editor, toolbarContainer) {
-        if (!toolbarContainer) return;
-        const buttons = toolbarContainer.querySelectorAll('button');
-        buttons.forEach(button => {
-            const action = button.dataset.action;
-            let isActive = false;
-            switch (action) {
-                case 'bold':
-                case 'italic':
-                case 'strike':
-                case 'underline':
-                case 'link':
-                    isActive = editor.isActive(action);
-                    break;
-                case 'h1':
-                    isActive = editor.isActive('heading', { level: 1 });
-                    break;
-                case 'h2':
-                    isActive = editor.isActive('heading', { level: 2 });
-                    break;
-                case 'h3':
-                    isActive = editor.isActive('heading', { level: 3 });
-                    break;
-            }
-            button.classList.toggle('is-active', isActive);
-        });
-    }
-
-    const applyMarkWithTrim = (editor, markName) => {
-        const { state } = editor;
-        const { from, to, empty } = state.selection;
-        const commandName = `toggle${markName.charAt(0).toUpperCase() + markName.slice(1)}`;
-
-        if (empty) {
-            editor.chain().focus()[commandName]().run();
-            return;
-        }
-        const selectedText = state.doc.textBetween(from, to);
-        const leadingSpaces = selectedText.match(/^\s*/)[0].length;
-        const trailingSpaces = selectedText.match(/\s*$/)[0].length;
-        const newFrom = from + leadingSpaces;
-        const newTo = to - trailingSpaces;
-        if (newFrom >= newTo) return;
-        editor.chain().focus().setTextSelection({ from: newFrom, to: newTo })[commandName]().setTextSelection({ from: from, to: to }).run();
-    };
-
-    function handleToolbarClick(action, editor) {
-        switch (action) {
-            case 'bold':
-            case 'italic':
-            case 'underline':
-            case 'strike':
-                applyMarkWithTrim(editor, action);
-                break;
-            case 'h1':
-                editor.chain().focus().toggleHeading({ level: 1 }).run();
-                break;
-            case 'h2':
-                editor.chain().focus().toggleHeading({ level: 2 }).run();
-                break;
-            case 'h3':
-                editor.chain().focus().toggleHeading({ level: 3 }).run();
-                break;
-            case 'link':
-                if (editor.isActive('link')) {
-                    editor.chain().focus().unsetLink().run();
-                    return;
-                }
-                const previousUrl = editor.getAttributes('link').href || '';
-                const url = window.prompt('URL', previousUrl);
-                if (url === null) return;
-                if (url === '') {
-                    editor.chain().focus().extendMarkRange('link').unsetLink().run();
-                    return;
-                }
-                editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
-                break;
-        }
     }
 
     function loadAnnotations() {
@@ -579,16 +400,6 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (request.action === 'annotationsUpdated') {
             renderAnnotations(request.data);
-        } else if (request.action === 'openCommentEditor') {
-            const card = annotationsList.querySelector(`[data-annotation-id="${request.annotationId}"]`);
-            if (card) {
-                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                const commentBtn = card.querySelector('.comment-btn');
-                // Open editor if it's not already open
-                if (commentBtn && !card.classList.contains('editing')) {
-                    commentBtn.click();
-                }
-            }
         }
     });
 

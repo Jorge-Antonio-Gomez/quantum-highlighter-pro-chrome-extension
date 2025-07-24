@@ -128,7 +128,7 @@ body:not(.locked) #resize-handle {
     border-bottom: 1px solid var(--highlighter-border-color);
     padding-bottom: 12px;
     margin-bottom: 12px;
-    gap: 12px; /* Add gap between top row and card */
+    gap: 36px; /* Add gap between top row and card */
 }
 
 .header-top-row {
@@ -176,6 +176,8 @@ body:not(.locked) #resize-handle {
     padding: 16px;
     gap: 16px;
     background-color: #f0f2f5; /* Soft fallback background */
+
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* Style when there's an image */
@@ -312,6 +314,8 @@ body:not(.locked) #resize-handle {
     grid-template-columns: 1fr auto; /* Content | Actions */
     align-items: center; /* Vertically center all items */
     column-gap: 12px; /* Space between items */
+
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .annotation-color-bar {
@@ -385,13 +389,120 @@ body:not(.locked) #resize-handle {
 
 .annotation-card .text {
     font-size: 14px;
-    margin-bottom: 8px;
+    line-height: 1.5;
+    color: var(--highlighter-text-color);
+    word-wrap: break-word;
 }
 
+/* --- Inspired Comment Section Styles --- */
+
+/* The container for the rich-text comment */
 .annotation-card .comment {
-    font-size: 12px;
-    color: var(--highlighter-text-color-secondary);
-    font-style: italic;
+    font-size: 13px;
+    line-height: 1.45;
+    color: #555; /* Inspired by --highlighter-text-primary */
+    word-wrap: break-word;
+}
+
+/* Hide the placeholder text visually */
+.annotation-card .comment .no-comment-placeholder {
+   /* font-size: 0; */
+   color: #a3a3a3;
+   font-style: italic;
+}
+
+/* The divider: a subtle line that appears only when there's a real comment. */
+.annotation-card .comment:not(:has(.no-comment-placeholder)):not(:empty)::before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 1px;
+    background-color: var(--highlighter-border-color);
+    margin: 8px 0; /* Minimal vertical space */
+}
+
+/* Remove extra space at the start and end of the comment block */
+.annotation-card .comment > *:first-child { margin-top: 0 !important; }
+.annotation-card .comment > *:last-child { margin-bottom: 0 !important; }
+
+/* General styling for block elements for a compact look */
+.annotation-card .comment p,
+.annotation-card .comment ul,
+.annotation-card .comment ol,
+.annotation-card .comment blockquote,
+.annotation-card .comment pre {
+    margin: 0.4em 0;
+    padding: 0;
+}
+
+/* Headings H1-H6 with inspired colors and compact sizing */
+.annotation-card .comment h1,
+.annotation-card .comment h2,
+.annotation-card .comment h3,
+.annotation-card .comment h4,
+.annotation-card .comment h5,
+.annotation-card .comment h6 {
+    margin: 0.5em 0 0.4em 0;
+    padding: 0;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #3b4452; /* A darker shade of the primary text color */
+}
+
+.annotation-card .comment h1 { font-size: 1.1em; }
+.annotation-card .comment h2 { font-size: 1.05em; }
+.annotation-card .comment h3 { font-size: 1.02em; }
+.annotation-card .comment h4 { font-size: 1em; font-weight: 600; }
+.annotation-card .comment h5 { font-size: 0.95em; font-weight: 600; }
+.annotation-card .comment h6 { font-size: 0.9em; font-weight: 600; text-transform: uppercase; color: #64748b; } /* Inspired by --highlighter-text-secondary */
+
+/* Links */
+.annotation-card .comment a {
+    color: var(--highlighter-primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+.annotation-card .comment a:hover { text-decoration: underline; }
+
+/* Lists */
+.annotation-card .comment ul,
+.annotation-card .comment ol {
+    padding-left: 20px;
+}
+.annotation-card .comment li {
+    margin-bottom: 0.2em;
+}
+.annotation-card .comment li::marker {
+    color: #a7a8aa; /* Lighter gray for markers */
+}
+
+/* Blockquotes */
+.annotation-card .comment blockquote {
+    border-left: 3px solid #d2d7dd; /* Inspired by --highlighter-border */
+    background-color: #f0f0f0;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    padding: 0.6em 0 0.6em 1em;
+    margin: 0.6em 0 0.6em 0;
+    color: #64748b; /* Inspired by --highlighter-text-secondary */
+}
+.annotation-card .comment blockquote p {
+    margin: 0; /* No extra margin for paragraphs inside a quote */
+}
+
+/* Code Blocks */
+.annotation-card .comment pre {
+    background-color: #e7e7e7; /* Inspired by --highlighter-toolbar-bg */
+    /* border: 1px solid #d6d6d6; Inspired by --highlighter-border */
+    padding: 0.5em 0.7em;
+    border-radius: 5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.875em;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+.annotation-card .comment code {
+    font-family: 'JetBrains Mono', monospace;
 }
 
 .actions-container {
@@ -405,8 +516,19 @@ body:not(.locked) #resize-handle {
 .divider {
     width: 1px;
     /* height: 28px; */
-    height: calc(100% - 12px);
+    height: calc(100% - 6px);
+    /* height: 100%; */
     background-color: var(--highlighter-border-color);
+    /* background-color: var(--highlighter-primary-color); */
+    /* color: var(--highlighter-primary-color); */
+}
+
+.comment hr {
+    border: none;
+    /* border-top: 1px solid var(--highlighter-primary-color); */
+    /* Mezcla entre el anterior y transparente en 50% */
+    /* border-top: 1px solid color-mix(in srgb, var(--highlighter-primary-color), transparent 70%); */
+    border-top: 1px solid var(--highlighter-border-color);
 }
 
 .comment-btn,
@@ -727,6 +849,21 @@ input:checked + .slider:before {
     animation: fadeIn 0.5s ease-out;
 }
 
+.empty-state-content.hiding {
+    animation: fadeOut 0.3s ease-out forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
 .empty-state-icon {
     width: 64px;
     height: 64px;
@@ -758,4 +895,8 @@ input:checked + .slider:before {
     line-height: 1.5;
     max-width: 280px;
     margin: 0;
+}
+
+.no-comment-placeholder {
+    color: #9b9b9b;
 }

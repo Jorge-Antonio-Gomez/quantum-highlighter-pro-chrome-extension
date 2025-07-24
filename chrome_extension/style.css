@@ -151,6 +151,15 @@ body.highlighter-sidebar-open {
     box-shadow: 0 0 0 3px color-mix(in srgb, black 15%, transparent);
 }
 
+.highlighter-menu .menu-row.colors {
+    width: 100%;
+}
+
+.highlighter-menu .menu-row.colors button {
+    width: 22px;
+    height: 22px;
+}
+
 .highlighter-menu .menu-row.actions {
     padding: 3px;
     background-color: #f0f0f0;
@@ -267,7 +276,7 @@ body.highlighter-sidebar-open {
 .highlighter-comment-box-wrapper {
     background-color: #f0f0f0;
     border-radius: 6px;
-    padding: 3px;
+    padding: 3px 3px 0 3px;
     display: flex;
     flex-direction: column;
 }
@@ -284,13 +293,14 @@ body.highlighter-sidebar-open {
   position: relative;
 }
 
-.ProseMirror {
+.tiptap.ProseMirror {
   word-wrap: break-word;
   white-space: pre-wrap;
   white-space: break-spaces;
   -webkit-font-variant-ligatures: none;
   font-variant-ligatures: none;
   font-feature-settings: "liga" 0; /* the above doesn't seem to work in Edge */
+  margin-bottom: 3px;
 }
 
 .ProseMirror [contenteditable="false"] {
@@ -402,15 +412,17 @@ img.ProseMirror-separator {
 .tiptap-toolbar {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 4px;
+    gap: 3px;
     border-radius: 0.5rem;
     flex-shrink: 0;
 
     /* --- Animation & Visibility (Corrected) --- */
-    overflow: hidden;
+    /* overflow: hidden; */
     max-height: 0;
     opacity: 0;
     padding: 0;
+    /* padding-left: 4px;
+    padding-right: 4px; */
     margin: 0;
     transition: max-height 150ms ease-in-out, opacity 150ms ease-in-out, padding 150ms ease-in-out, margin-top 150ms ease-in-out;
 }
@@ -418,8 +430,9 @@ img.ProseMirror-separator {
 .tiptap-toolbar.is-visible {
     max-height: 100px;
     opacity: 1;
-    padding-top: 4px;
+    padding-top: 0;
     margin: 0;
+    margin-bottom: 3px;
 }
 
 .toolbar-on-top .tiptap-toolbar.is-visible {
@@ -430,7 +443,7 @@ img.ProseMirror-separator {
 .tiptap-toolbar button {
     width: 35px;
     height: 25px;
-    border-radius: 0.375rem;
+    border-radius: 5px;
     border: none;
     background-color: transparent;
     color: #64748b;
@@ -452,7 +465,7 @@ img.ProseMirror-separator {
     background-color: #ffffff;
     color: #334155;
     font-weight: 700;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .tiptap-toolbar button[data-action="underline"] u {

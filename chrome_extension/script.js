@@ -84,16 +84,16 @@
 
     function buildToolbar(toolbarContainer, editor, lang) {
         toolbarContainer.innerHTML = `
-                    <button data-action="bold" title="${lang.toolbarBold}"><img src="${chrome.runtime.getURL('images/toolbar-icons/bold.svg')}" style="max-height: 14px; max-width: 14px; height: 14px; width: 14px;"></button>
-                    <button data-action="italic" title="${lang.toolbarItalic}"><img src="${chrome.runtime.getURL('images/toolbar-icons/italic.svg')}" style="max-height: 14px; max-width: 14px; height: 14px; width: 14px;"></button>
-                    <button data-action="underline" title="${lang.toolbarUnderline}"><img src="${chrome.runtime.getURL('images/toolbar-icons/underline.svg')}" style="max-height: 14px; max-width: 14px; height: 14px; width: 14px;"></button>
-                    <button data-action="strike" title="${lang.toolbarStrike}"><img src="${chrome.runtime.getURL('images/toolbar-icons/strikethrough.svg')}" style="max-height: 14px; max-width: 14px; height: 14px; width: 14px;"></button>
-                    <button data-action="blockquote" title="${lang.toolbarBlockquote}"><img src="${chrome.runtime.getURL('images/toolbar-icons/chat-left.svg')}" style="max-height: 14px; max-width: 14px; height: 14px; width: 14px;"></button>
-                    <button data-action="codeBlock" title="${lang.toolbarCodeBlock}"><img src="${chrome.runtime.getURL('images/toolbar-icons/bracket.svg')}" style="max-height: 14px; max-width: 14px; height: 14px; width: 14px;"></button>
-                    <button data-action="link" title="${lang.toolbarLink}"><img src="${chrome.runtime.getURL('images/toolbar-icons/link-alt.svg')}" style="max-height: 14px; max-width: 14px; height: 14px; width: 14px;"></button>
-                    <button data-action="h1" title="${lang.heading} 1"><img src="${chrome.runtime.getURL('images/toolbar-icons/heading-1.svg')}" style="max-height: 14px; max-width: 14px; height: 14px; width: 14px;"></button>
-                    <button data-action="h2" title="${lang.heading} 2"><img src="${chrome.runtime.getURL('images/toolbar-icons/heading-2.svg')}" style="max-height: 14px; max-width: 14px; height: 14px; width: 14px;"></button>
-                    <button data-action="h3" title="${lang.heading} 3"><img src="${chrome.runtime.getURL('images/toolbar-icons/heading-3.svg')}" style="max-height: 14px; max-width: 14px; height: 14px; width: 14px;"></button>
+                    <button data-action="bold" title="${lang.toolbarBold}"><img src="${chrome.runtime.getURL('images/toolbar-icons/bold.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
+                    <button data-action="italic" title="${lang.toolbarItalic}"><img src="${chrome.runtime.getURL('images/toolbar-icons/italic.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
+                    <button data-action="underline" title="${lang.toolbarUnderline}"><img src="${chrome.runtime.getURL('images/toolbar-icons/underline.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
+                    <button data-action="strike" title="${lang.toolbarStrike}"><img src="${chrome.runtime.getURL('images/toolbar-icons/strikethrough.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
+                    <button data-action="blockquote" title="${lang.toolbarBlockquote}"><img src="${chrome.runtime.getURL('images/toolbar-icons/chat-left.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
+                    <button data-action="codeBlock" title="${lang.toolbarCodeBlock}"><img src="${chrome.runtime.getURL('images/toolbar-icons/bracket.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
+                    <button data-action="link" title="${lang.toolbarLink}"><img src="${chrome.runtime.getURL('images/toolbar-icons/link-alt.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
+                    <button data-action="h1" title="${lang.heading} 1"><img src="${chrome.runtime.getURL('images/toolbar-icons/heading-1.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
+                    <button data-action="h2" title="${lang.heading} 2"><img src="${chrome.runtime.getURL('images/toolbar-icons/heading-2.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
+                    <button data-action="h3" title="${lang.heading} 3"><img src="${chrome.runtime.getURL('images/toolbar-icons/heading-3.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
                 `;
 
         toolbarContainer.querySelectorAll('button').forEach(button => {
