@@ -108,7 +108,19 @@
     }
 
     function setupTiptapEditor(element, toolbarContainer, content, onUpdate, lang) {
-        const { Editor, Extension, InputRule, Plugin, PluginKey } = Tiptap;
+        const { Editor, Extension, InputRule, wrappingInputRule, Plugin, PluginKey } = Tiptap;
+
+        const CustomInputRules = Extension.create({
+            name: 'customInputRules',
+            addInputRules() {
+                return [
+                    wrappingInputRule({
+                        find: /^\s*\|\s$/,
+                        type: this.editor.schema.nodes.blockquote,
+                    }),
+                ];
+            },
+        });
 
         
 
@@ -387,6 +399,7 @@
                         return null;
                     },
                 }),
+                CustomInputRules,
                 ExitLinkOnTwoSpaces,
                 RemoveEmptyLink,
                 LinkTooltip,
