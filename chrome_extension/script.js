@@ -987,6 +987,16 @@
             });
         }
 
+        remove(callback) {
+            const key = this.getKey();
+            chrome.storage.local.remove(key, () => {
+                if (chrome.runtime.lastError) {
+                    console.error("Error removing annotations key:", chrome.runtime.lastError);
+                }
+                if (callback) callback();
+            });
+        }
+
         load(callback) {
             const newKey = this.getKey();
             const oldKey = `highlighter-annotations-${window.location.hostname}${window.location.pathname}`;
@@ -1815,9 +1825,15 @@
             const deleted = this.annotations.delete(id);
 
             if (deleted) {
-                this.storage.save(this.annotations, () => {
-                    this._notifySidebarOfUpdate();
-                });
+                if (this.annotations.size === 0) {
+                    this.storage.remove(() => {
+                        this._notifySidebarOfUpdate();
+                    });
+                } else {
+                    this.storage.save(this.annotations, () => {
+                        this._notifySidebarOfUpdate();
+                    });
+                }
             }
 
             if (id === this.activeAnnotationId) {
