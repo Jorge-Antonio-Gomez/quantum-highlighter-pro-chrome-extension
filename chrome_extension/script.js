@@ -418,7 +418,11 @@
                 toolbarContainer.classList.add('is-visible');
             },
             onBlur: ({ event }) => {
-                if (event.relatedTarget && toolbarContainer.contains(event.relatedTarget)) {
+                // Don't hide the toolbar if focus is moving to another part of the toolbar
+                // or to the link editing modal, which is a legitimate next step in the editing flow.
+                if (event.relatedTarget && 
+                    (toolbarContainer.contains(event.relatedTarget) || 
+                     event.relatedTarget.closest('.highlighter-link-modal'))) {
                     return;
                 }
                 toolbarContainer.classList.remove('is-visible');
@@ -1392,7 +1396,8 @@
             }
 
             const target = event.composedPath()[0] || event.target;
-            if (this.isGloballyDisabled || this.isTemporarilyHidden || target === this.menu.host || this.menu.host.contains(target) || target.closest('.highlighter-mark')) {
+            // Use composedPath to correctly detect clicks inside the Shadow DOM
+            if (this.isGloballyDisabled || this.isTemporarilyHidden || event.composedPath().includes(this.menu.host) || target.closest('.highlighter-mark')) {
                 return;
             }
             
