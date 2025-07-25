@@ -277,7 +277,7 @@ body:not(.locked) #resize-handle {
     background: none;
     border: none;
     color: var(--highlighter-text-color-secondary);
-    font-size: 30px;
+    font-size: 24px;
     cursor: pointer;
     transition: color 0.2s;
     padding: 0; /* Remove default padding */
@@ -890,7 +890,7 @@ input:checked + .slider:before {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 6px;
     text-align: center;
     position: absolute;
     top: 0;
@@ -918,6 +918,7 @@ input:checked + .slider:before {
     justify-content: center;
     color: var(--highlighter-primary-color);
     opacity: 0.8;
+    margin-bottom: 15px;
 }
 
 .empty-state-icon svg,
@@ -965,11 +966,12 @@ input:checked + .slider:before {
     display: flex;
     align-items: center;
     gap: 8px;
-    border-radius: 6px;
+    border-radius: 5px;
     font-weight: 500;
     transition: background-color 0.2s, color 0.2s, border-color 0.2s;
     border: 1px solid transparent;
 }
+
 
 /* Style for the button in the footer */
 #refresh-container .refresh-button {
@@ -986,10 +988,10 @@ input:checked + .slider:before {
 
 /* Styles for the button in the empty state */
 .empty-state-content .refresh-button {
-    margin-top: 16px;
-    padding: 10px 20px;
-    font-size: 15px;
-    background-color: #f0f2f5;
+    margin-top: 12px;
+    padding: 10px 24px;
+    font-size: 14px;
+    background-color: #f3f4f7;
     border: 1px solid var(--highlighter-border-color);
 }
 
