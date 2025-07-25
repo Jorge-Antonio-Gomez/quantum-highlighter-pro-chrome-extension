@@ -1,6 +1,7 @@
 {
-  "version": 1,
+  "version": "25_07_25_B",
   "sites": [
-    "www.notion.so"
+    "www.notion.so",
+    "www.google.com"
   ]
 }

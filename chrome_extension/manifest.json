@@ -47,7 +47,8 @@
                 "libs/fonts.css",
                 "libs/fonts/*",
                 "images/*",
-                "images/toolbar-icons/*"
+                "images/toolbar-icons/*",
+                "excluded-websites.json"
             ],
             "matches": [
                 "<all_urls>"
