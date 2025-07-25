@@ -1,3 +1,7 @@
+:root, :host {
+    --sidebar-highlighter-primary-color: #f18822; /* Azul */
+}
+
 /* General Body Styles */
 body {
     font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -17,6 +21,10 @@ body {
     border-radius: 12px;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
     padding: 20px 40px 40px 40px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-color, #3b241e);
 }
 
 /* Hero Section */
@@ -86,7 +94,7 @@ h2 {
     align-items: center;
     justify-content: center;
     margin-bottom: 20px;
-    color: #3b82f6;
+    color: var(--sidebar-highlighter-primary-color);
 }
 
 .step-icon {
@@ -191,7 +199,7 @@ h2 {
 }
 
 .tip strong {
-    color: #3b82f6;
+    color: var(--sidebar-highlighter-primary-color);
 }
 
 /* Responsive */

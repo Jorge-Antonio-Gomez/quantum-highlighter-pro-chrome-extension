@@ -673,10 +673,17 @@
         let sidebar = document.getElementById(SIDEBAR_ID);
 
         if (sidebar) {
+            // Trigger the animations for both the sidebar and the body margin.
+            // The .highlighter-sidebar-open class is still on the body, so the margin transition will apply.
             sidebar.style.transform = 'translateX(100%)';
             document.body.style.marginRight = '0';
-            document.body.classList.remove('highlighter-sidebar-open');
-            sidebar.addEventListener('transitionend', () => sidebar.remove(), { once: true });
+
+            // Listen for the transition to end on the sidebar.
+            sidebar.addEventListener('transitionend', () => {
+                // Clean up everything *after* the animation is complete.
+                sidebar.remove();
+                document.body.classList.remove('highlighter-sidebar-open');
+            }, { once: true });
         } else {
             chrome.storage.sync.get({ sidebarWidth: 420 }, (data) => {
                 const initialWidth = Math.max(data.sidebarWidth, MIN_WIDTH);
@@ -685,10 +692,15 @@
                 sidebar.src = chrome.runtime.getURL('sidebar.html');
                 sidebar.style.width = `${initialWidth}px`;
                 document.body.appendChild(sidebar);
+                
+                // Add the class *before* triggering the animation.
+                document.body.classList.add('highlighter-sidebar-open');
+                
+                // Force a reflow to ensure the initial state is rendered before the transition starts.
                 void sidebar.offsetWidth; 
+
                 sidebar.style.transform = 'translateX(0)';
                 document.body.style.marginRight = `${initialWidth}px`;
-                document.body.classList.add('highlighter-sidebar-open');
             });
         }
     }
