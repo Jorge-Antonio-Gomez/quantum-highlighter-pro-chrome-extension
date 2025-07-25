@@ -13,3 +13,4 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         chrome.tabs.create({ url: request.url, active: true });
     }
 });
+

@@ -1334,6 +1334,23 @@
             document.addEventListener('mousedown', this._onMouseDown.bind(this), true);
             document.addEventListener('keydown', this._onKeyDown.bind(this));
 
+            // Listen for the global shortcut from the manifest.
+            document.addEventListener('keydown', (event) => {
+                // Check for Ctrl+Shift+H (or Cmd+Shift+H on Mac)
+                if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'h') {
+                    // We use a timeout to check the event status *after* the host page has had a chance to process it.
+                    setTimeout(() => {
+                        // If the page prevented the default action, it means it "claimed" the shortcut.
+                        // In that case, our extension should do nothing.
+                        if (event.defaultPrevented) {
+                            return;
+                        }
+                        // If the shortcut was not claimed, the extension is free to use it.
+                        toggleSidebar();
+                    }, 0);
+                }
+            });
+
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Control') {
                     document.body.classList.add('ctrl-is-pressed');

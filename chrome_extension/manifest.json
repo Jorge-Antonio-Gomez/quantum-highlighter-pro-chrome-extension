@@ -56,5 +56,14 @@
     ],
     "action": {
         "default_title": "Show Highlighter Pcanel"
+    },
+    "commands": {
+      "toggle-sidebar": {
+        "suggested_key": {
+          "default": "Ctrl+Shift+H",
+          "mac": "Command+Shift+H"
+        },
+        "description": "Abrir/Cerrar la barra lateral de Highlighter"
+      }
     }
 }
