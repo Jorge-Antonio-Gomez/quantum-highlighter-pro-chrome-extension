@@ -1371,6 +1371,26 @@
             if (event.key === 'Delete' && this.activeAnnotationId && !isEditable) {
                 await this.deleteAnnotation();
             }
+
+            // If the user copies or cuts text from the main page, close the menu.
+            if (event.ctrlKey && (event.key.toLowerCase() === 'c' || event.key.toLowerCase() === 'x')) {
+                if (!this.menu.isVisible()) return;
+
+                // If the action is inside the comment editor, do nothing.
+                if (event.composedPath().includes(this.menu.host)) {
+                    return;
+                }
+
+                // Use a timeout to allow the default copy/cut action to complete
+                // before we remove the selection and hide the menu.
+                setTimeout(() => {
+                    if (window.getSelection().toString()) {
+                        window.getSelection()?.removeAllRanges();
+                    }
+                    this.menu.hide();
+                    this.activeRange = null;
+                }, 10);
+            }
         }
 
         async _onMouseDown(event) {
