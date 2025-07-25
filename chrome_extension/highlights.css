@@ -1,0 +1,69 @@
+:root {
+    /* Estas variables DEBEN ser globales para que los estilos en línea de los resaltados funcionen. */
+    --highlighter-color-yellow: #ffeb68ce;
+    --highlighter-color-red: #ff9a9aa8;
+    --highlighter-color-green: #a8e6a8ad;
+    --highlighter-color-blue: #a8d1e6cb;
+    --highlighter-color-purple: #d1a8e69c;
+    --highlighter-color-pink: #e6a8d19c;
+    --highlighter-color-orange: #F9C9A1e5;
+    --highlighter-color-grey: #D8D8D8e5;
+
+    --highlighter-color-yellow-solid: #ffd400;
+    --highlighter-color-red-solid: #ff6666;
+    --highlighter-color-green-solid: #5fb236;
+    --highlighter-color-blue-solid: #2ea8e5;
+    --highlighter-color-purple-solid: #a28ae5;
+    --highlighter-color-pink-solid: #e56eee;
+    --highlighter-color-orange-solid: #f19837;
+    --highlighter-color-grey-solid: #aaaaaa;
+}
+
+.highlighter-mark {
+    /* By not resetting all properties, we ensure that the original page's typography and layout are preserved. */
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+    background-color: transparent; /* The actual color is applied inline via JS */
+}
+
+.highlighter-mark:hover {
+    opacity: 1;
+}
+
+/* --- Global styles for sidebar container and page body --- */
+body.highlighter-sidebar-open {
+    transition: margin-right 0.3s ease-in-out;
+}
+
+#highlighter-sidebar-instance {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    border: none;
+    z-index: 9999999;
+    transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
+    transform: translateX(100%);
+}
+
+#highlighter-resize-cover {
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100vw; 
+    height: 100vh;
+    background: transparent; 
+    cursor: col-resize; 
+    z-index: 10000000;
+}
+
+#highlighter-resize-guide {
+    position: fixed; 
+    top: 0; 
+    height: 100vh; 
+    width: 2px;
+    background-image: linear-gradient(to bottom, #444 4px, transparent 4px);
+    background-size: 100% 8px;
+    z-index: 10000001;
+    pointer-events: none;
+}

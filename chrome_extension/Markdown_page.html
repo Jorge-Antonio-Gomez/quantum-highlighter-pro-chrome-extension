@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor Tiptap Compacto</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carga de la fuente Rubik desde Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Paleta de colores suaves */
+        :root {
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --primary: #3b82f6;
+            --primary-light: #eff6ff;
+            --text-primary: #334155;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --toolbar-bg: #f1f5f9;
+        }
+
+        body {
+            font-family: 'Rubik', sans-serif;
+            background-color: var(--background);
+        }
+        
+        #component-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px; /* Espacio entre el editor y la barra */
+        }
+
+        /* Contenedor padre: Define el tamaño, fondo, padding y sombra */
+        .tiptap-container {
+            width: 224px;
+            min-height: 224px;
+            padding: 6px;
+            box-sizing: border-box;
+            background-color: var(--surface);
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            display: flex; /* Para que el hijo ocupe todo el espacio */
+        }
+
+        
+        /* Editor de texto hijo: Ocupa el 100% y tiene el borde */
+        .tiptap {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 0.375rem; /* Borde interior un poco menos redondeado */
+            box-sizing: border-box;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        .tiptap:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .tiptap.ProseMirror {
+            background-color: #f0f0f0;
+            padding: 6px;
+            border: 0;
+        }
+        .tiptap > * + * {
+            margin-top: 0.75em;
+        }
+        .tiptap p {
+            margin: 0;
+            line-height: 1.6;
+        }
+        /* Estilos para la barra de herramientas lateral */
+        .tiptap-toolbar {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 4px; /* Espacio entre botones */
+            padding: 3px;
+            border-radius: 0.5rem;
+            background-color: var(--toolbar-bg);
+            /* box-shadow: 0 2px 5px rgba(0,0,0,0.1); */
+        }
+        .tiptap-toolbar button {
+            width: 30px;
+            height: 30px;
+            border-radius: 0.375rem;
+            border: none;
+            background-color: transparent;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 12px;
+            transition: all 0.2s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .tiptap-toolbar button:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+        .tiptap-toolbar button.is-active {
+            background-color: var(--surface);
+            color: var(--text-primary);
+            font-weight: 700;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        /* Estilos para elementos específicos del contenido */
+        .tiptap h1, .tiptap h2, .tiptap h3, .tiptap h4, .tiptap h5, .tiptap h6 {
+            font-weight: 700;
+            line-height: 1.3;
+            color: var(--text-primary);
+        }
+        .tiptap h1 { font-size: 1.45em; }
+        .tiptap h2 { font-size: 1.25em; }
+        .tiptap h3 { font-size: 1.15em; }
+        .tiptap h4 { font-size: 1.05em; }
+        .tiptap h5 { font-size: 1em; }
+        .tiptap h6 { font-size: 0.9em; font-weight: 500;}
+
+        .tiptap ul, .tiptap ol {
+            padding-left: 1.4rem;
+        }
+        .tiptap ul { list-style-type: disc; }
+        .tiptap ol { list-style-type: decimal; }
+
+        .tiptap a {
+            color: var(--primary);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        
+        .tiptap blockquote {
+            border-left: 3px solid #d1d5db;
+            margin-top: 0.4rem;
+            margin-bottom: 0.4rem;
+            padding-left: 0.5rem;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            font-style: italic;
+            color: var(--text-secondary);
+            background-color: #00000010;
+            border-top-right-radius: 6px;
+            border-bottom-right-radius: 6px;
+        }
+        .tiptap pre {
+            background: #1e293bc7;
+            color: #e2e8f0;
+            font-family: 'JetBrains Mono', 'Courier New', Courier, monospace;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+        }
+        .tiptap pre code {
+            color: inherit;
+            padding: 0;
+            background: none;
+            font-size: 0.8rem;
+            line-height: 1;
+        }
+        .tiptap code:not(pre code) {
+            background-color: #dde0e4;
+            color: #475569;
+            padding: 0.125rem 0.275rem;
+            border-radius: 0.375rem;
+            font-size: 0.875em;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Consolas', monospace;
+            border: 1px solid #e2e8f0;
+            font-weight: 500;
+        }
+
+        .tiptap hr {
+            border: none;
+            border-top: 1px solid #d4d4d4;
+            margin: 0.75em 0;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        const { Editor, StarterKit, Underline, Link } = Tiptap;
+        import { Editor } from 'https://esm.sh/@tiptap/core';
+        import StarterKit from 'https://esm.sh/@tiptap/starter-kit';
+        import { Underline } from 'https://esm.sh/@tiptap/extension-underline';
+        import Link from 'https://esm.sh/@tiptap/extension-link';
+    </script>    
+    <script type="module">
+        // Función para inicializar el editor
+        function setupEditor(element) {
+            const editor = new Editor({
+                element: element,
+                extensions: [
+                    // Se habilita el StarterKit completo para restaurar todas las funcionalidades
+                    StarterKit, 
+                    Underline,
+                    Link.configure({
+                        openOnClick: false,
+                        autolink: true,
+                    }),
+                ],
+                content: `
+                    <h1>¡Funcionalidad Completa!</h1>
+                    <p>Todos los estilos están activos, aunque no tengan un botón.</p>
+                    <blockquote>Esto es una cita en bloque.</blockquote>
+                    <pre><code>console.log('Esto es un bloque de código');</code></pre>
+                    <h4>Esto es un H4</h4>
+                    <p>Y también puedes usar <code>código en línea</code>.</p>
+                `,
+                autofocus: 'end',
+                editable: true,
+                onUpdate: ({ editor }) => {
+                    updateToolbar(editor);
+                },
+                onSelectionUpdate: ({ editor }) => {
+                    updateToolbar(editor);
+                }
+            });
+
+            return editor;
+        }
+
+        // Función para actualizar el estado de los botones de la barra de herramientas
+        function updateToolbar(editor) {
+            document.querySelector('#btn-bold').classList.toggle('is-active', editor.isActive('bold'));
+            document.querySelector('#btn-italic').classList.toggle('is-active', editor.isActive('italic'));
+            document.querySelector('#btn-strike').classList.toggle('is-active', editor.isActive('strike'));
+            document.querySelector('#btn-underline').classList.toggle('is-active', editor.isActive('underline'));
+            document.querySelector('#btn-link').classList.toggle('is-active', editor.isActive('link'));
+            document.querySelector('#btn-h1').classList.toggle('is-active', editor.isActive('heading', { level: 1 }));
+            document.querySelector('#btn-h2').classList.toggle('is-active', editor.isActive('heading', { level: 2 }));
+            document.querySelector('#btn-h3').classList.toggle('is-active', editor.isActive('heading', { level: 3 }));
+        }
+
+        const applyMarkWithTrim = (editor, markName) => {
+            const { state } = editor;
+            const { from, to, empty } = state.selection;
+            const commandName = `toggle${markName.charAt(0).toUpperCase() + markName.slice(1)}`;
+
+            if (empty) {
+                editor.chain().focus()[commandName]().run();
+                return;
+            }
+            const selectedText = state.doc.textBetween(from, to);
+            const leadingSpaces = selectedText.match(/^\s*/)[0].length;
+            const trailingSpaces = selectedText.match(/\s*$/)[0].length;
+            const newFrom = from + leadingSpaces;
+            const newTo = to - trailingSpaces;
+            if (newFrom >= newTo) return;
+            editor.chain().focus().setTextSelection({ from: newFrom, to: newTo })[commandName]().setTextSelection({ from: from, to: to }).run();
+        };
+
+        // --- Lógica de construcción del DOM ---
+        const wrapper = document.getElementById('component-wrapper');
+        
+        // 1. Crear la caja contenedora del editor (se añade primero para estar a la izquierda)
+        const editorContainer = document.createElement('div');
+        editorContainer.className = 'tiptap-container';
+        wrapper.appendChild(editorContainer);
+
+        // 2. Crear el elemento Tiptap dentro de la caja
+        const editorElement = document.createElement('div');
+        editorElement.className = 'tiptap';
+        editorContainer.appendChild(editorElement);
+
+        // 3. Crear la barra de herramientas (se añade después para estar a la derecha)
+        const toolbar = document.createElement('div');
+        toolbar.className = 'tiptap-toolbar';
+        toolbar.innerHTML = `
+            <button id="btn-bold" title="Negrita">B</button>
+            <button id="btn-italic" title="Cursiva">I</button>
+            <button id="btn-underline" title="Subrayado">U</button>
+            <button id="btn-strike" title="Tachado">S</button>
+            <button id="btn-link" title="Enlace">🔗</button>
+            <button id="btn-h1" title="Título 1">H1</button>
+            <button id="btn-h2" title="Título 2">H2</button>
+            <button id="btn-h3" title="Título 3">H3</button>
+        `;
+        wrapper.appendChild(toolbar);
+
+        // 4. Inicializar el editor
+        const editorInstance = setupEditor(editorElement);
+
+        // 5. Asignar eventos a los botones
+        document.querySelector('#btn-bold').addEventListener('click', () => applyMarkWithTrim(editorInstance, 'bold'));
+        document.querySelector('#btn-italic').addEventListener('click', () => applyMarkWithTrim(editorInstance, 'italic'));
+        document.querySelector('#btn-underline').addEventListener('click', () => applyMarkWithTrim(editorInstance, 'underline'));
+        document.querySelector('#btn-strike').addEventListener('click', () => applyMarkWithTrim(editorInstance, 'strike'));
+        
+        document.querySelector('#btn-h1').addEventListener('click', () => editorInstance.chain().focus().toggleHeading({ level: 1 }).run());
+        document.querySelector('#btn-h2').addEventListener('click', () => editorInstance.chain().focus().toggleHeading({ level: 2 }).run());
+        document.querySelector('#btn-h3').addEventListener('click', () => editorInstance.chain().focus().toggleHeading({ level: 3 }).run());
+
+        document.querySelector('#btn-link').addEventListener('click', () => {
+            if (editorInstance.isActive('link')) {
+                editorInstance.chain().focus().unsetLink().run();
+                return;
+            }
+            const previousUrl = editorInstance.getAttributes('link').href || '';
+            const url = window.prompt('URL', previousUrl);
+            if (url === null) return;
+            if (url === '') {
+                editorInstance.chain().focus().extendMarkRange('link').unsetLink().run();
+                return;
+            }
+            editorInstance.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+        });
+
+        updateToolbar(editorInstance);
+    </script>
+</body>
+</html>
