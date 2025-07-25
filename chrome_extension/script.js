@@ -849,7 +849,10 @@
                 nodeRange.selectNodeContents(node);
                 if (node === range.startContainer) nodeRange.setStart(node, range.startOffset);
                 if (node === range.endContainer) nodeRange.setEnd(node, range.endOffset);
-                if (!nodeRange.collapsed) {
+                
+                // FIX: Only wrap the node if the resulting range is not collapsed AND its content is not just whitespace.
+                // This prevents creating empty <mark> tags or marks around newlines between block elements.
+                if (!nodeRange.collapsed && nodeRange.toString().trim() !== '') {
                     const mark = document.createElement('mark');
                     mark.className = 'highlighter-mark';
                     mark.dataset.annotationId = annotation.id;
@@ -928,18 +931,20 @@
             while (startContainer.nodeType === Node.TEXT_NODE && startOffset < startContainer.length && /\s/.test(startContainer.data[startOffset])) {
                 startOffset++;
             }
-            if (startContainer.nodeType === Node.TEXT_NODE && startOffset === startContainer.length) {
-            }
 
             while (endContainer.nodeType === Node.TEXT_NODE && endOffset > 0 && /\s/.test(endContainer.data[endOffset - 1])) {
                 endOffset--;
-            }
-            if (endContainer.nodeType === Node.TEXT_NODE && endOffset === 0) {
             }
 
             const newRange = document.createRange();
             newRange.setStart(startContainer, startOffset);
             newRange.setEnd(endContainer, endOffset);
+            
+            // After trimming the boundaries, if the range content is empty, collapse it.
+            // This prevents creating highlights on selections that only contain whitespace.
+            if (!newRange.collapsed && newRange.toString().trim() === '') {
+                newRange.collapse(true); // Collapse to the start of the range
+            }
             
             return newRange;
         }
