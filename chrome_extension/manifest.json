@@ -30,7 +30,7 @@
             ],
             "css": [
                 "libs/fonts.css",
-                "style.css"
+                "highlights.css"
             ],
             "run_at": "document_idle"
         }
@@ -41,6 +41,8 @@
                 "sidebar.html",
                 "sidebar.css",
                 "sidebar.js",
+                "style.css",
+                "highlights.css",
                 "libs/tiptap.js",
                 "libs/fonts.css",
                 "libs/fonts/*",

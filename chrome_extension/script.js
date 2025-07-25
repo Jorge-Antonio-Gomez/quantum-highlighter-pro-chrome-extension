@@ -1,4 +1,3 @@
-
 (function () {
     'use strict';
 
@@ -107,7 +106,7 @@
         });
     }
 
-    function setupTiptapEditor(element, toolbarContainer, content, onUpdate, lang) {
+    function setupTiptapEditor(element, toolbarContainer, content, onUpdate, lang, rootNode) {
         const { Editor, Extension, InputRule, wrappingInputRule, Plugin, PluginKey } = Tiptap;
 
         const CustomInputRules = Extension.create({
@@ -121,8 +120,6 @@
                 ];
             },
         });
-
-        
 
         const ExitLinkOnTwoSpaces = Extension.create({
             name: 'exitLinkOnTwoSpaces',
@@ -239,7 +236,7 @@
                                     if (!this.editor.options.linkTooltipElement) {
                                         this.editor.options.linkTooltipElement = document.createElement('div');
                                         this.editor.options.linkTooltipElement.className = 'tiptap-link-tooltip';
-                                        document.body.appendChild(this.editor.options.linkTooltipElement);
+                                        (this.editor.rootNode || document.body).appendChild(this.editor.options.linkTooltipElement);
                                         this.editor.options.linkTooltipElement.addEventListener('animationend', (e) => {
                                             if (tooltip && tooltip.classList.contains('popup-bounce-out')) {
                                             e.target.classList.remove('popup-bounce-in', 'popup-bounce-out');
@@ -504,6 +501,7 @@
             }
         });
 
+        editor.rootNode = rootNode;
         buildToolbar(toolbarContainer, editor, lang);
         updateToolbar(editor, toolbarContainer);
 
@@ -511,7 +509,7 @@
     }
 
 
-    function showLinkEditor(previousUrl = '', previousText = '', lang) {
+    function showLinkEditor(previousUrl = '', previousText = '', lang, rootNode) {
         return new Promise((resolve) => {
             const overlay = document.createElement('div');
             overlay.className = 'highlighter-modal-overlay';
@@ -540,7 +538,7 @@
             `;
 
             overlay.appendChild(modal);
-            document.body.appendChild(overlay);
+            (rootNode || document.body).appendChild(overlay);
 
             const urlInput = modal.querySelector('#link-url');
             const textInput = modal.querySelector('#link-text');
@@ -613,7 +611,7 @@
         const selectedText = state.doc.textBetween(from, to, ' ');
         const previousUrl = editor.getAttributes('link').href || '';
         
-        const result = await showLinkEditor(previousUrl, selectedText, lang);
+        const result = await showLinkEditor(previousUrl, selectedText, lang, editor.rootNode);
 
         if (result === null) {
             editor.chain().focus().setTextSelection({ from: to, to: to }).run();
@@ -1009,9 +1007,24 @@
     class HighlightMenu {
         constructor(initialLang) {
             this.lang = initialLang;
+            this.host = document.createElement('div');
+            this.host.id = 'highlighter-host';
+            document.body.appendChild(this.host);
+
+            this.shadowRoot = this.host.attachShadow({ mode: 'open' });
+
+            fetch(chrome.runtime.getURL('style.css'))
+                .then(response => response.text())
+                .then(css => {
+                    const style = document.createElement('style');
+                    style.textContent = css;
+                    this.shadowRoot.appendChild(style);
+                }).catch(err => console.error("Highlighter: Failed to load styles.", err));
+
             this.element = document.createElement('div');
             this.element.className = 'highlighter-menu';
-            document.body.appendChild(this.element);
+            this.shadowRoot.appendChild(this.element);
+
             this.arrowElement = null;
             this.referenceEl = null;
             this.currentPlacement = null;
@@ -1020,12 +1033,12 @@
             this.closeButton = document.createElement('button');
             this.closeButton.className = 'highlighter-close-btn';
             this.closeButton.innerHTML = '&#x2715;';
-            document.body.appendChild(this.closeButton);
+            this.shadowRoot.appendChild(this.closeButton);
 
             this.contextMenu = document.createElement('div');
             this.contextMenu.className = 'highlighter-context-menu';
             this.contextMenu.style.display = 'none';
-            document.body.appendChild(this.contextMenu);
+            this.shadowRoot.appendChild(this.contextMenu);
 
             this.resizeObserver = new ResizeObserver((entries) => {
                 if (!this.isVisible() || !entries.length) return;
@@ -1176,11 +1189,14 @@
 
                 this.element.style.animation = 'popup-bounce-out 150ms ease-in forwards';
                 this.element.classList.add('closing');
+                this.closeButton.classList.remove('show');
+                this.closeButton.classList.add('closing');
                 
                 this.element.addEventListener('animationend', (e) => {
                     if (e.animationName === 'popup-bounce-out') {
                         this.element.classList.remove('show');
-                        this.closeButton.classList.remove('show');
+                        this.element.classList.remove('closing');
+                        this.closeButton.classList.remove('closing');
                         this.hideContextMenu();
                         resolve();
                     }
@@ -1323,7 +1339,7 @@
         async _onKeyDown(event) {
             if (this.isGloballyDisabled || this.isTemporarilyHidden) return;
             
-            const activeEl = document.activeElement;
+            const activeEl = this.menu.shadowRoot.activeElement || document.activeElement;
             const isEditable = activeEl.isContentEditable || activeEl.matches('input, textarea, select');
 
             if (event.key === 'Escape') {
@@ -1346,8 +1362,12 @@
 
         async _onMouseDown(event) {
             if (this.isGloballyDisabled || this.isTemporarilyHidden) return;
-            const target = event.target;
-            if (target.closest('.highlighter-menu, .highlighter-close-btn, .highlighter-context-menu, .tiptap-toolbar-popup')) return;
+            
+            const target = event.composedPath()[0] || event.target;
+            if (target === this.menu.host || this.menu.host.contains(target)) {
+                return;
+            }
+
             const annotationEl = target.closest('.highlighter-mark');
             if (annotationEl) {
                 event.preventDefault();
@@ -1364,7 +1384,11 @@
                 this.isDraggingInCommentBox = false;
                 return;
             }
-            if (this.isGloballyDisabled || this.isTemporarilyHidden || event.target.closest('.highlighter-menu, .highlighter-mark, .highlighter-close-btn, .highlighter-context-menu, .highlighter-modal-overlay')) return;
+
+            const target = event.composedPath()[0] || event.target;
+            if (this.isGloballyDisabled || this.isTemporarilyHidden || target === this.menu.host || this.menu.host.contains(target) || target.closest('.highlighter-mark')) {
+                return;
+            }
             
             setTimeout(async () => {
                 if (this.activeAnnotationId) {
@@ -1467,8 +1491,8 @@
                         this.isDraggingInCommentBox = true;
                     },
                     onCommentBoxReady: () => {
-                        const editorElement = document.getElementById(editorElementId);
-                        const toolbarElement = document.getElementById(toolbarElementId);
+                        const editorElement = this.menu.shadowRoot.getElementById(editorElementId);
+                        const toolbarElement = this.menu.shadowRoot.getElementById(toolbarElementId);
                         if (editorElement && toolbarElement && !this.tiptapEditor) {
                             this.tiptapEditor = setupTiptapEditor(
                                 editorElement,
@@ -1479,7 +1503,8 @@
                                         this.activeDebouncedUpdate(html);
                                     }
                                 },
-                                this.lang
+                                this.lang,
+                                this.menu.shadowRoot
                             );
                             this.menu.updatePosition(element);
                         }
