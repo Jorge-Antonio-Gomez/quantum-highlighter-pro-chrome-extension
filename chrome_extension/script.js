@@ -1278,12 +1278,15 @@
             this.activeDebouncedUpdate = null;
             this.tiptapEditor = null;
             this.tiptapToolbarPopup = null;
+            this.observer = null;
+            this.debouncedReapply = null;
 
             this.storage.load((loadedAnnotations) => {
                 this.annotations = loadedAnnotations;
                 this._loadAnnotations();
             });
             this._setupEventListeners();
+            this._setupMutationObserver();
         }
 
         disableGlobally() {
@@ -1603,6 +1606,62 @@
                     toggleSidebar();
                 },
             };
+        }
+
+        _reapplyAnnotations() {
+            // Disconnect the observer temporarily to avoid infinite loops while we're modifying the DOM.
+            if (this.observer) this.observer.disconnect();
+        
+            this.annotations.forEach(annotation => {
+                // Check if the highlight is already on the page. If so, do nothing.
+                if (document.querySelector(`[data-annotation-id="${annotation.id}"]`)) {
+                    return;
+                }
+        
+                // If not, try to find its position and re-wrap it.
+                const range = DOMManager.getRangeFromPointers(annotation.pointers);
+                if (range) {
+                    DOMManager.wrapRange(range, annotation);
+                }
+            });
+        
+            // Reconnect the observer to continue watching for changes.
+            if (this.observer) {
+                this.observer.observe(document.body, {
+                    childList: true,
+                    subtree: true
+                });
+            }
+        }
+
+        _setupMutationObserver() {
+            // Use the existing debounce function.
+            this.debouncedReapply = debounce(() => this._reapplyAnnotations(), 500);
+        
+            this.observer = new MutationObserver((mutations) => {
+                let shouldReapply = false;
+                for (const mutation of mutations) {
+                    // A quick check to avoid re-applying when our own UI is added/removed.
+                    const targetId = mutation.target.id;
+                    if (targetId === 'highlighter-host' || targetId === 'highlighter-sidebar-instance' || targetId === RESIZE_COVER_ID || targetId === RESIZE_GUIDE_ID) {
+                        continue;
+                    }
+
+                    if (mutation.type === 'childList' && (mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0)) {
+                        shouldReapply = true;
+                        break;
+                    }
+                }
+        
+                if (shouldReapply) {
+                    this.debouncedReapply();
+                }
+            });
+        
+            this.observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
         }
 
         hideTemporarily() {
