@@ -3,20 +3,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const resizeHandle = document.getElementById('resize-handle');
     const lockButton = document.getElementById('lock-button');
     const configButton = document.getElementById('config-button');
-    const configPopup = document.getElementById('config-popup');
     const closeButton = document.getElementById('close-button');
     const annotationsList = document.getElementById('annotations-list');
-    const languageSelectWrapper = document.getElementById('language-select-wrapper');
-    const languageSelectTrigger = document.getElementById('language-select-trigger');
-    const languageOptions = document.getElementById('language-options');
     const forceBlackSwitch = document.getElementById('force-black-switch');
     const disablePageSwitch = document.getElementById('disable-page-switch');
     const disableDomainSwitch = document.getElementById('disable-domain-switch');
+    const configPopup = document.getElementById('config-popup');
+    const languageSelectWrapper = document.getElementById('language-select-wrapper');
+    const languageSelectTrigger = document.getElementById('language-select-trigger');
+    const languageOptions = document.getElementById('language-options');
     const websiteInfoCard = document.getElementById('website-info-card');
     const websiteFavicon = document.getElementById('website-favicon');
     const websiteTitle = document.getElementById('website-title');
     const websiteDescription = document.getElementById('website-description');
     const websiteDomain = document.getElementById('website-domain');
+    const refreshButtons = document.querySelectorAll('.refresh-button');
+    const refreshContainer = document.getElementById('refresh-container');
+    const refreshToast = document.getElementById('refresh-toast');
+    const refreshToastText = document.getElementById('refresh-toast-text');
 
     // --- STATE ---
     let isLocked = false;
@@ -50,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const key = el.dataset.i18nKey;
             if (translations[lang] && translations[lang][key]) {
                 const value = translations[lang][key];
-                if (el.tagName === 'H2' || el.tagName === 'LABEL' || el.tagName === 'SPAN' || el.tagName === 'P') {
+                if (el.tagName === 'H2' || el.tagName === 'H3' || el.tagName === 'LABEL' || el.tagName === 'SPAN' || el.tagName === 'P') {
                     el.textContent = value;
                 } else {
                     el.setAttribute('aria-label', value);
@@ -145,51 +149,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderAnnotations(annotations) {
         const langStrings = translations[settings.language] || translations.en;
-        const annotationsContainer = annotationsList;
-        const hadAnnotations = annotationsContainer.querySelectorAll('.annotation-card').length > 0;
+        const emptyStateContent = document.getElementById('empty-state-content');
         const hasAnnotations = annotations && annotations.length > 0;
 
-        // Handle transition from annotations to empty state
-        if (hadAnnotations && !hasAnnotations) {
-            const emptyView = createEmptyStateView(langStrings);
-            emptyView.style.opacity = '0'; // Start transparent
-            annotationsContainer.appendChild(emptyView);
-            annotationsContainer.classList.add('empty-state');
-            requestAnimationFrame(() => {
-                emptyView.style.transition = 'opacity 0.5s ease-out';
-                emptyView.style.opacity = '1';
-            });
-        }
-        // Handle transition from empty state to annotations
-        else if (!hadAnnotations && hasAnnotations) {
-            const emptyView = annotationsContainer.querySelector('.empty-state-content');
-            if (emptyView) {
-                emptyView.classList.add('hiding');
-                emptyView.addEventListener('animationend', () => {
-                    annotationsContainer.classList.remove('empty-state');
-                    emptyView.remove();
-                }, { once: true });
-            }
-        }
-        // Handle initial empty state
-        else if (!hasAnnotations && !annotationsContainer.querySelector('.empty-state-content')) {
-            annotationsContainer.innerHTML = ''; // Clear previous content
-            const emptyView = createEmptyStateView(langStrings);
-            annotationsContainer.appendChild(emptyView);
-            annotationsContainer.classList.add('empty-state');
-        }
+        // Toggle visibility of annotations list and empty state
+        annotationsList.classList.toggle('is-hidden', !hasAnnotations);
+        emptyStateContent.classList.toggle('is-hidden', hasAnnotations);
 
+        // Manage the refresh button's position and visibility
+        refreshContainer.classList.toggle('visible', hasAnnotations);
+
+        // If there are no annotations, we are done.
         if (!hasAnnotations) {
-            // Clear out any remaining card elements if we are in the empty state
-            annotationsContainer.querySelectorAll('.annotation-card').forEach(card => card.remove());
+            annotationsList.innerHTML = ''; // Clear any leftover cards
             return;
         }
 
-        // If we have annotations, ensure the empty-state class is removed
-        if (hasAnnotations) {
-            annotationsContainer.classList.remove('empty-state');
-        }
-
+        // --- Annotation Card Rendering Logic (largely the same) ---
+        const annotationsContainer = annotationsList;
         const existingIds = new Set(Array.from(annotationsContainer.querySelectorAll('.annotation-card')).map(el => el.dataset.annotationId));
         const receivedAnnotationsMap = new Map(annotations);
 
@@ -199,9 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cardToRemove = annotationsContainer.querySelector(`[data-annotation-id="${id}"]`);
                 if (cardToRemove && !cardToRemove.classList.contains('deleting')) {
                     cardToRemove.classList.add('deleting');
-                    cardToRemove.addEventListener('animationend', () => {
-                        cardToRemove.remove();
-                    }, { once: true });
+                    cardToRemove.addEventListener('animationend', () => cardToRemove.remove(), { once: true });
                 }
             }
         }
@@ -335,7 +310,30 @@ document.addEventListener('DOMContentLoaded', () => {
         return card;
     }
 
-    function loadAnnotations() {
+    function showToast(messageKey) {
+        const langStrings = translations[settings.language] || translations.en;
+        const message = langStrings[messageKey] || 'Done!';
+        
+        refreshToastText.textContent = message;
+
+        // Dynamically adjust toast position
+        if (refreshContainer.style.display === 'flex') {
+            // Position toast above the refresh container when it's visible
+            const containerHeight = refreshContainer.offsetHeight;
+            refreshToast.style.bottom = `${containerHeight + 10}px`; // 10px margin
+        } else {
+            // Default position for empty state
+            refreshToast.style.bottom = '20px';
+        }
+        
+        refreshToast.classList.add('show');
+        
+        setTimeout(() => {
+            refreshToast.classList.remove('show');
+        }, 2200);
+    }
+
+    function loadAnnotations(showToastOnComplete = false) {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             if (!tabs || tabs.length === 0 || !tabs[0].id) {
                 renderAnnotations([]);
@@ -347,13 +345,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 annotationsList.innerHTML = `<p data-i18n-key="noAnnotations">${langStrings.noAnnotations}</p>`;
                 return;
             }
+
+            // Start animation
+            refreshButtons.forEach(button => {
+                button.classList.add('refreshing');
+                button.disabled = true;
+            });
+
             chrome.tabs.sendMessage(currentTab.id, { action: 'getAnnotations' }, (response) => {
+                // Stop animation regardless of outcome
+                setTimeout(() => {
+                    refreshButtons.forEach(button => {
+                        button.classList.remove('refreshing');
+                        button.disabled = false;
+                    });
+                }, 600); // Delay to allow animation to be seen
+
                 if (chrome.runtime.lastError) {
                     console.warn(`Highlighter: Could not connect. ${chrome.runtime.lastError.message}`);
                     annotationsList.innerHTML = `<p data-i18n-key="errorLoading">${langStrings.errorLoading}</p>`;
                     return;
                 }
+                
                 renderAnnotations(response?.data || []);
+                if (showToastOnComplete) {
+                    showToast('annotationsRefreshed');
+                }
             });
         });
     }
@@ -396,6 +413,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- EVENT LISTENERS ---
+    refreshButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            loadAnnotations(true);
+        });
+    });
 
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (request.action === 'annotationsUpdated') {
@@ -510,7 +532,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- INITIALIZATION ---
     const initialize = () => {
         loadPageInfo(); // Load page info on startup
-        chrome.storage.sync.get(['sidebarLocked', 'sidebarWidth', 'highlighter-settings', 'disabledSites', 'disabledPages'], (data) => {
+        chrome.storage.sync.get(['sidebarLocked', 'sidebarWidth', 'highlighter-settings', 'disabledPages', 'disabledSites'], (data) => {
             // Set up sidebar lock and width
             const isLocked = data.sidebarLocked === undefined ? true : data.sidebarLocked;
             setLockedState(isLocked);
@@ -542,30 +564,122 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
-
-        // Tooltip logic
-        const tooltip = document.getElementById('tooltip');
-        document.querySelectorAll('[data-tooltip-key]').forEach(el => {
-            el.addEventListener('mouseenter', (e) => {
-                const tooltipKey = e.target.dataset.tooltipKey;
-                const langStrings = translations[settings.language] || translations.en;
-                if (langStrings[tooltipKey]) {
-                    tooltip.textContent = langStrings[tooltipKey];
-                    tooltip.style.display = 'block';
-                    computePosition(e.target, tooltip, {
-                        placement: 'top',
-                        middleware: [offset(8), flip(), shift({padding: 5})],
-                    }).then(({x, y}) => {
-                        tooltip.style.left = `${x}px`;
-                        tooltip.style.top = `${y}px`;
-                    });
-                }
-            });
-            el.addEventListener('mouseleave', () => {
-                tooltip.style.display = 'none';
-            });
-        });
     };
 
     initialize();
+});
+
+// --- COMMENT EDITOR LOGIC ---
+
+document.addEventListener('DOMContentLoaded', () => {
+    const annotationsList = document.getElementById('annotations-list');
+
+    // Use event delegation to handle clicks on comment buttons
+    annotationsList.addEventListener('click', (e) => {
+        const commentBtn = e.target.closest('.comment-btn');
+        if (commentBtn) {
+            const card = commentBtn.closest('.annotation-card');
+            if (card) {
+                toggleCommentEditor(card);
+            }
+        }
+    });
+
+    function toggleCommentEditor(card) {
+        const isEditing = card.classList.contains('editing');
+        
+        // Close any other open editors
+        document.querySelectorAll('.annotation-card.editing').forEach(openCard => {
+            if (openCard !== card) {
+                closeEditor(openCard);
+            }
+        });
+
+        if (isEditing) {
+            closeEditor(card);
+        } else {
+            openEditor(card);
+        }
+    }
+
+    function openEditor(card) {
+        card.classList.add('editing');
+        
+        const existingEditor = card.querySelector('.comment-editor');
+        if (existingEditor) {
+            existingEditor.style.display = 'block';
+            return; // Editor already exists
+        }
+
+        const langStrings = translations[settings.language] || translations.en;
+        const initialContent = card.dataset.comment || '';
+
+        const editorContainer = document.createElement('div');
+        editorContainer.className = 'comment-editor';
+
+        const editorDiv = document.createElement('div');
+        editorDiv.className = 'wysiwyg-editor';
+        editorDiv.setAttribute('contenteditable', 'true');
+        editorDiv.innerHTML = initialContent;
+
+        const actions = document.createElement('div');
+        actions.className = 'comment-editor-actions';
+
+        const saveBtn = document.createElement('button');
+        saveBtn.className = 'comment-save-btn';
+        saveBtn.textContent = langStrings.saveButton || 'Save';
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'comment-cancel-btn';
+        cancelBtn.textContent = langStrings.cancelButton || 'Cancel';
+
+        actions.appendChild(cancelBtn);
+        actions.appendChild(saveBtn);
+        editorContainer.appendChild(editorDiv);
+        editorContainer.appendChild(actions);
+        card.appendChild(editorContainer);
+
+        editorDiv.focus();
+
+        // --- Event Listeners for the new editor ---
+        saveBtn.addEventListener('click', () => {
+            const newContent = editorDiv.innerHTML;
+            const annotationId = card.dataset.annotationId;
+            
+            // Update UI immediately
+            const commentDisplay = card.querySelector('.comment');
+            if (newContent.trim()) {
+                commentDisplay.innerHTML = newContent;
+            } else {
+                commentDisplay.innerHTML = `<span class="no-comment-placeholder">${langStrings.noComment}</span>`;
+            }
+            card.dataset.comment = newContent;
+
+            // Send to content script to save
+            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                if (tabs.length > 0 && tabs[0].id) {
+                    chrome.tabs.sendMessage(tabs[0].id, {
+                        action: 'updateAnnotationComment',
+                        annotationId: annotationId,
+                        comment: newContent
+                    });
+                }
+            });
+
+            closeEditor(card);
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            closeEditor(card);
+        });
+    }
+
+    function closeEditor(card) {
+        card.classList.remove('editing');
+        const editor = card.querySelector('.comment-editor');
+        if (editor) {
+            // Instead of removing, just hide it to preserve state if reopened
+            editor.style.display = 'none';
+        }
+    }
 });

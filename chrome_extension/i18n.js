@@ -47,7 +47,9 @@ const translations = {
         disableOnThisPage: "Disable on This Page",
         disableOnThisWebsite: "Disable on This Entire Website",
         openSidebar: "Open Sidebar",
-        closeSidebar: "Close Sidebar"
+        closeSidebar: "Close Sidebar",
+        refreshAnnotations: "Refresh Annotations",
+        annotationsRefreshed: "Annotations Refreshed!"
     },
     es: {
         sidebarTitle: "Anotaciones",
@@ -97,7 +99,9 @@ const translations = {
         disableOnThisPage: "Desactivar en esta página",
         disableOnThisWebsite: "Desactivar en todo este sitio web",
         openSidebar: "Abrir barra lateral",
-        closeSidebar: "Cerrar barra lateral"
+        closeSidebar: "Cerrar barra lateral",
+        refreshAnnotations: "Actualizar Anotaciones",
+        annotationsRefreshed: "¡Anotaciones actualizadas!"
     },
     fr: {
         sidebarTitle: "Annotations",
@@ -147,7 +151,9 @@ const translations = {
         disableOnThisPage: "Désactiver sur cette page",
         disableOnThisWebsite: "Désactiver sur tout ce site web",
         openSidebar: "Ouvrir le panneau latéral",
-        closeSidebar: "Fermer le panneau latéral"
+        closeSidebar: "Fermer le panneau latéral",
+        refreshAnnotations: "Actualiser les Annotations",
+        annotationsRefreshed: "Annotations actualisées !"
     },
     pt: {
         sidebarTitle: "Anotações",
@@ -197,7 +203,9 @@ const translations = {
         disableOnThisPage: "Desativar nesta página",
         disableOnThisWebsite: "Desativar em todo este site",
         openSidebar: "Abrir barra lateral",
-        closeSidebar: "Fechar barra lateral"
+        closeSidebar: "Fechar barra lateral",
+        refreshAnnotations: "Atualizar Anotações",
+        annotationsRefreshed: "Anotações atualizadas!"
     },
     ru: {
         sidebarTitle: "Аннотации",
@@ -247,7 +255,9 @@ const translations = {
         disableOnThisPage: "Отключить на этой странице",
         disableOnThisWebsite: "Отключить на всём сайте",
         openSidebar: "Открыть боковую панель",
-        closeSidebar: "Закрыть боковую панель"
+        closeSidebar: "Закрыть боковую панель",
+        refreshAnnotations: "Обновить аннотации",
+        annotationsRefreshed: "Аннотации обновлены!"
     },
     zh: {
         sidebarTitle: "标注",
@@ -297,6 +307,8 @@ const translations = {
         disableOnThisPage: "在此页面禁用",
         disableOnThisWebsite: "在整个网站禁用",
         openSidebar: "打开侧边栏",
-        closeSidebar: "关闭侧边栏"
+        closeSidebar: "关闭侧边栏",
+        refreshAnnotations: "刷新标注",
+        annotationsRefreshed: "标注已刷新！"
     }
 };

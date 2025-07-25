@@ -4,9 +4,9 @@
     --highlighter-radius: 8px;
     --highlighter-transition: all 0.15s ease-in-out;
     --highlighter-primary: #ec8521;
-    --highlighter-color-yellow: #fded87d0;
+    --highlighter-color-yellow: #ffeb68ce;
     --highlighter-color-red: #ff9a9aa8;
-    --highlighter-color-green: #a8e6a896;
+    --highlighter-color-green: #a8e6a8ad;
     --highlighter-color-blue: #a8d1e6cb;
     --highlighter-color-purple: #d1a8e69c;
     --highlighter-color-pink: #e6a8d19c;
@@ -226,6 +226,7 @@ body.highlighter-sidebar-open {
     background-color: #FFE0E0;
     color: #D8000C; /* This will now apply to the SVG via currentColor */
 }
+
 .highlighter-menu .highlighter-shortcut-warning { font-size: 11px; color: #888; text-align: center; padding: 4px 0 0 0; border-top: 1px solid #f0f0f0; margin-top: 4px; }
 
 #highlighter-sidebar-instance {
