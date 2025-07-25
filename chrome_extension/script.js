@@ -801,15 +801,16 @@
             }
         }
         static applyAnnotationStyle(element, annotation, nodeContext) {
-            const colorWithOpacity = annotation.color.startsWith('#') ? `${annotation.color}80` : annotation.color;
             const settings = window.highlighterInstance ? window.highlighterInstance.settings : { useDarkText: false };
 
             if (annotation.type === 'highlight') {
+                const colorWithOpacity = annotation.color.startsWith('#') ? `${annotation.color}80` : annotation.color;
                 element.style.backgroundColor = colorWithOpacity;
                 element.style.borderBottom = 'none';
             } else { // underline
+                const solidColor = annotation.color.replace(')', '-solid)');
                 element.style.backgroundColor = 'transparent';
-                element.style.borderBottom = `2px solid ${colorWithOpacity}`;
+                element.style.borderBottom = `2px solid ${solidColor}`;
             }
 
             element.style.textShadow = 'none';
