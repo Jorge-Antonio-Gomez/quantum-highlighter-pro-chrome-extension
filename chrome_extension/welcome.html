@@ -1,118 +1,393 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienvenido a Quantum Highlighter</title>
+    <title data-i18n="pageTitle">Welcome to Quantum Highlighter</title>
     <link rel="stylesheet" href="welcome.css">
     <link rel="stylesheet" href="libs/fonts.css">
 </head>
 <body>
     <div class="container">
+        <div class="language-selector-container">
+            <div class="custom-select-wrapper" id="language-select-wrapper">
+                <div class="custom-select-trigger" id="language-select-trigger">
+                    <span>English</span>
+                    <svg class="arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+                <ul class="custom-select-options" id="language-options">
+                    <li class="custom-select-option" data-lang="en">English</li>
+                    <li class="custom-select-option" data-lang="es">Español</li>
+                    <li class="custom-select-option" data-lang="fr">Français</li>
+                    <li class="custom-select-option" data-lang="pt">Português</li>
+                    <li class="custom-select-option" data-lang="ru">Русский</li>
+                    <li class="custom-select-option" data-lang="zh">中文</li>
+                </ul>
+            </div>
+        </div>
+
         <header class="hero">
             <img src="images/icon128.png" alt="Quantum Highlighter Logo" class="logo">
-            <h1>¡Bienvenido a Quantum Highlighter PRO!</h1>
-            <p class="subtitle">La forma más inteligente de resaltar, subrayar y tomar notas en cualquier sitio web.</p>
+            <h1 data-i18n="heroTitle">Welcome to Quantum Highlighter PRO!</h1>
+            <p class="subtitle" data-i18n="heroSubtitle">The smartest way to highlight, underline, and take notes on any website.</p>
         </header>
 
         <section class="how-it-works">
-            <h2>¿Cómo Funciona?</h2>
+            <h2 data-i18n="howItWorksTitle">How It Works?</h2>
             <div class="steps">
                 <div class="step">
                     <div class="step-icon-wrapper">
-                        <img src="images/text.svg" alt="Seleccionar texto" class="step-icon">
+                        <img src="images/text.svg" alt="Select text" class="step-icon">
                     </div>
-                    <h3>1. Selecciona</h3>
-                    <p>Simplemente selecciona cualquier texto en una página web.</p>
+                    <h3 data-i18n="step1Title">1. Select</h3>
+                    <p data-i18n="step1Text">Just select any text on a webpage.</p>
                 </div>
                 <div class="step">
                     <div class="step-icon-wrapper">
-                        <img src="images/selection-pencil.svg" alt="Resaltar selección" class="step-icon">
+                        <img src="images/selection-pencil.svg" alt="Highlight selection" class="step-icon">
                     </div>
-                    <h3>2. Resalta</h3>
-                    <p>Elige un color y tipo de resaltado en el menú que aparece.</p>
+                    <h3 data-i18n="step2Title">2. Highlight</h3>
+                    <p data-i18n="step2Text">Choose a color and highlight type from the menu that appears.</p>
                 </div>
                 <div class="step">
                     <div class="step-icon-wrapper">
-                        <img src="images/circle-plus.svg" alt="Añadir comentario" class="step-icon">
+                        <img src="images/circle-plus.svg" alt="Add comment" class="step-icon">
                     </div>
-                    <h3>3. Comenta</h3>
-                    <p>Añade notas con formato enriquecido a tus resaltados.</p>
+                    <h3 data-i18n="step3Title">3. Comment</h3>
+                    <p data-i18n="step3Text">Add rich-formatted notes to your highlights.</p>
                 </div>
             </div>
         </section>
 
         <section class="demo">
-            <h2>Míralo en Acción</h2>
-            <img src="images/video_demo.gif" alt="Demostración de Quantum Highlighter" class="demo-gif">
+            <h2 data-i18n="demoTitle">See it in Action</h2>
+            <div class="demo-gif-wrapper">
+                <img src="images/video_demo.gif" alt="Quantum Highlighter Demonstration" class="demo-gif">
+            </div>
         </section>
 
         <section class="features">
-            <h2>Características Principales</h2>
+            <h2 data-i18n="featuresTitle">Main Features</h2>
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon" id="color-cycle-icon"></div>
-                    <h4>Múltiples Colores</h4>
-                    <p>Organiza tus ideas con una paleta de colores vibrantes.</p>
+                    <h4 data-i18n="feature1Title">Multiple Colors</h4>
+                    <p data-i18n="feature1Text">Organize your ideas with a vibrant color palette.</p>
                 </div>
                 <div class="feature-card">
-                     <img src="images/toolbar-icons/underline.svg" alt="Icono de subrayado" class="feature-icon-svg">
-                    <h4>Resaltado y Subrayado</h4>
-                    <p>Elige entre resaltar el fondo o un elegante subrayado.</p>
+                     <img src="images/toolbar-icons/underline.svg" alt="Underline Icon" class="feature-icon-svg">
+                    <h4 data-i18n="feature2Title">Highlight and Underline</h4>
+                    <p data-i18n="feature2Text">Choose between a background highlight or an elegant underline.</p>
                 </div>
                 <div class="feature-card">
-                    <img src="images/toolbar-icons/italic.svg" alt="Icono de texto enriquecido" class="feature-icon-svg">
-                    <h4>Comentarios Ricos</h4>
-                    <p>Usa negritas, listas, enlaces y más en tus notas.</p>
+                    <img src="images/toolbar-icons/italic.svg" alt="Rich Text Icon" class="feature-icon-svg">
+                    <h4 data-i18n="feature3Title">Rich Comments</h4>
+                    <p data-i18n="feature3Text">Use bold, lists, links, and more in your notes.</p>
                 </div>
                 <div class="feature-card">
-                    <img src="images/align-left-svgrepo-com.svg" alt="Icono de barra lateral" class="feature-icon-svg">
-                    <h4>Barra Lateral Inteligente</h4>
-                    <p>Gestiona y navega por todas tus notas en un solo lugar.</p>
+                    <img src="images/align-left-svgrepo-com.svg" alt="Sidebar Icon" class="feature-icon-svg">
+                    <h4 data-i18n="feature4Title">Smart Sidebar</h4>
+                    <p data-i18n="feature4Text">Manage and navigate all your notes in one place.</p>
                 </div>
                  <div class="feature-card">
-                    <img src="images/refresh-round.svg" alt="Icono de sincronización" class="feature-icon-svg">
-                    <h4>Robusto y Dinámico</h4>
-                    <p>Funciona a la perfección en sitios dinámicos como ChatGPT.</p>
+                    <img src="images/refresh-round.svg" alt="Sync Icon" class="feature-icon-svg">
+                    <h4 data-i18n="feature5Title">Robust and Dynamic</h4>
+                    <p data-i18n="feature5Text">Works perfectly on dynamic sites like ChatGPT.</p>
                 </div>
                  <div class="feature-card">
-                    <img src="images/settings.svg" alt="Icono de personalización" class="feature-icon-svg">
-                    <h4>Altamente Personalizable</h4>
-                    <p>Ajusta la extensión a tu gusto desde el menú de configuración.</p>
+                    <img src="images/settings.svg" alt="Customization Icon" class="feature-icon-svg">
+                    <h4 data-i18n="feature6Title">Highly Customizable</h4>
+                    <p data-i18n="feature6Text">Adjust the extension to your liking from the settings menu.</p>
                 </div>
             </div>
         </section>
 
         <footer class="cta">
-            <h2>¡Listo para Empezar!</h2>
-            <p>Ve a cualquier página web, selecciona un texto y comienza a organizar tu conocimiento.</p>
-            <p class="tip"><strong>Consejo:</strong> Puedes abrir la barra lateral en cualquier momento usando el atajo de teclado (Ctrl+Shift+H por defecto) o desde el icono de la extensión.</p>
+            <h2 data-i18n="ctaTitle">Ready to Get Started!</h2>
+            <p data-i18n="ctaText">Go to any webpage, select some text, and start organizing your knowledge.</p>
+            <p class="tip" data-i18n="ctaTip"><strong>Tip:</strong> You can open the sidebar at any time using the keyboard shortcut (<strong>Ctrl + Shift + H</strong> by default) or from the extension icon.</p>
         </footer>
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // --- ELEMENTS ---
             const colorIcon = document.getElementById('color-cycle-icon');
-            if (colorIcon) {
-                const colors = [
-                    '#ffd400', // yellow
-                    '#ff6666', // red
-                    '#5fb236', // green
-                    '#2ea8e5', // blue
-                    '#a28ae5', // purple
-                    '#e56eee', // pink
-                    '#f19837', // orange
-                    '#aaaaaa'  // grey
-                ];
-                let currentIndex = 0;
-                
-                // Set initial color
-                colorIcon.style.backgroundColor = colors[currentIndex];
+            const languageSelectWrapper = document.getElementById('language-select-wrapper');
+            const languageSelectTrigger = document.getElementById('language-select-trigger');
+            const languageOptions = document.getElementById('language-options');
 
-                setInterval(() => {
-                    currentIndex = (currentIndex + 1) % colors.length;
-                    colorIcon.style.backgroundColor = colors[currentIndex];
-                }, 9000 / colors.length);
+            // --- TRANSLATIONS ---
+            const translations = {
+                en: {
+                    pageTitle: "Welcome to Quantum Highlighter",
+                    heroTitle: "Welcome to Quantum Highlighter PRO!",
+                    heroSubtitle: "The smartest way to highlight, underline, and take notes on any website.",
+                    howItWorksTitle: "How It Works?",
+                    step1Title: "1. Select",
+                    step1Text: "Just select any text on a webpage.",
+                    step2Title: "2. Highlight",
+                    step2Text: "Choose a color and highlight type from the menu that appears.",
+                    step3Title: "3. Comment",
+                    step3Text: "Add rich-formatted notes to your highlights.",
+                    demoTitle: "See it in Action",
+                    featuresTitle: "Main Features",
+                    feature1Title: "Multiple Colors",
+                    feature1Text: "Organize your ideas with a vibrant color palette.",
+                    feature2Title: "Highlight and Underline",
+                    feature2Text: "Choose between a background highlight or an elegant underline.",
+                    feature3Title: "Rich Comments",
+                    feature3Text: "Use bold, lists, links, and more in your notes.",
+                    feature4Title: "Smart Sidebar",
+                    feature4Text: "Manage and navigate all your notes in one place.",
+                    feature5Title: "Robust and Dynamic",
+                    feature5Text: "Works perfectly on dynamic sites like ChatGPT.",
+                    feature6Title: "Highly Customizable",
+                    feature6Text: "Adjust the extension to your liking from the settings menu.",
+                    ctaTitle: "Ready to Get Started!",
+                    ctaText: "Go to any webpage, select some text, and start organizing your knowledge.",
+                    ctaTip: "<strong>Tip:</strong> You can open the sidebar at any time using the keyboard shortcut (<strong>Ctrl + Shift + H</strong> by default) or from the extension icon."
+                },
+                es: {
+                    pageTitle: "Bienvenido a Quantum Highlighter",
+                    heroTitle: "¡Bienvenido a Quantum Highlighter PRO!",
+                    heroSubtitle: "La forma más inteligente de resaltar, subrayar y tomar notas en cualquier sitio web.",
+                    howItWorksTitle: "¿Cómo Funciona?",
+                    step1Title: "1. Selecciona",
+                    step1Text: "Simplemente selecciona cualquier texto en una página web.",
+                    step2Title: "2. Resalta",
+                    step2Text: "Elige un color y tipo de resaltado en el menú que aparece.",
+                    step3Title: "3. Comenta",
+                    step3Text: "Añade notas con formato enriquecido a tus resaltados.",
+                    demoTitle: "Míralo en Acción",
+                    featuresTitle: "Características Principales",
+                    feature1Title: "Múltiples Colores",
+                    feature1Text: "Organiza tus ideas con una paleta de colores vibrantes.",
+                    feature2Title: "Resaltado y Subrayado",
+                    feature2Text: "Elige entre resaltar el fondo o un elegante subrayado.",
+                    feature3Title: "Comentarios Ricos",
+                    feature3Text: "Usa negritas, listas, enlaces y más en tus notas.",
+                    feature4Title: "Barra Lateral Inteligente",
+                    feature4Text: "Gestiona y navega por todas tus notas en un solo lugar.",
+                    feature5Title: "Robusto y Dinámico",
+                    feature5Text: "Funciona a la perfección en sitios dinámicos como ChatGPT.",
+                    feature6Title: "Altamente Personalizable",
+                    feature6Text: "Ajusta la extensión a tu gusto desde el menú de configuración.",
+                    ctaTitle: "¡Listo para Empezar!",
+                    ctaText: "Ve a cualquier página web, selecciona un texto y comienza a organizar tu conocimiento.",
+                    ctaTip: "<strong>Consejo:</strong> Puedes abrir la barra lateral en cualquier momento usando el atajo de teclado (<strong>Ctrl + Shift + H</strong> por defecto) o desde el icono de la extensión."
+                },
+                fr: {
+                    pageTitle: "Bienvenue chez Quantum Highlighter",
+                    heroTitle: "Bienvenue chez Quantum Highlighter PRO !",
+                    heroSubtitle: "La manière la plus intelligente de surligner, souligner et prendre des notes sur n'importe quel site web.",
+                    howItWorksTitle: "Comment ça marche ?",
+                    step1Title: "1. Sélectionnez",
+                    step1Text: "Sélectionnez simplement n'importe quel texte sur une page web.",
+                    step2Title: "2. Surlignez",
+                    step2Text: "Choisissez une couleur et un type de surlignage dans le menu qui apparaît.",
+                    step3Title: "3. Commentez",
+                    step3Text: "Ajoutez des notes avec mise en forme enrichie à vos surlignages.",
+                    demoTitle: "Voyez-le en action",
+                    featuresTitle: "Caractéristiques Principales",
+                    feature1Title: "Plusieurs Couleurs",
+                    feature1Text: "Organisez vos idées avec une palette de couleurs vives.",
+                    feature2Title: "Surlignage et Soulignement",
+                    feature2Text: "Choisissez entre un surlignage de fond ou un soulignement élégant.",
+                    feature3Title: "Commentaires Riches",
+                    feature3Text: "Utilisez le gras, les listes, les liens et plus encore dans vos notes.",
+                    feature4Title: "Barre Latérale Intelligente",
+                    feature4Text: "Gérez et naviguez dans toutes vos notes en un seul endroit.",
+                    feature5Title: "Robuste et Dynamique",
+                    feature5Text: "Fonctionne parfaitement sur des sites dynamiques comme ChatGPT.",
+                    feature6Title: "Hautement Personnalisable",
+                    feature6Text: "Ajustez l'extension à votre goût depuis le menu des paramètres.",
+                    ctaTitle: "Prêt à commencer !",
+                    ctaText: "Allez sur n'importe quelle page web, sélectionnez du texte et commencez à organiser vos connaissances.",
+                    ctaTip: "<strong>Astuce :</strong> Vous pouvez ouvrir la barre latérale à tout moment avec le raccourci clavier (<strong>Ctrl + Shift + H</strong> par défaut) ou depuis l'icône de l'extension."
+                },
+                pt: {
+                    pageTitle: "Bem-vindo ao Quantum Highlighter",
+                    heroTitle: "Bem-vindo ao Quantum Highlighter PRO!",
+                    heroSubtitle: "A maneira mais inteligente de destacar, sublinhar e fazer anotações em qualquer site.",
+                    howItWorksTitle: "Como Funciona?",
+                    step1Title: "1. Selecione",
+                    step1Text: "Basta selecionar qualquer texto em uma página da web.",
+                    step2Title: "2. Destaque",
+                    step2Text: "Escolha uma cor e tipo de destaque no menu que aparece.",
+                    step3Title: "3. Comente",
+                    step3Text: "Adicione notas com formatação rica aos seus destaques.",
+                    demoTitle: "Veja em Ação",
+                    featuresTitle: "Principais Características",
+                    feature1Title: "Múltiplas Cores",
+                    feature1Text: "Organize suas ideias com uma paleta de colores vibrantes.",
+                    feature2Title: "Destaque e Sublinhado",
+                    feature2Text: "Escolha entre destacar o fundo ou um elegante sublinhado.",
+                    feature3Title: "Comentários Ricos",
+                    feature3Text: "Use negrito, listas, links e muito mais em suas notas.",
+                    feature4Title: "Barra Lateral Inteligente",
+                    feature4Text: "Gerencie e navegue por todas as suas notas em um só lugar.",
+                    feature5Title: "Robusto e Dinâmico",
+                    feature5Text: "Funciona perfeitamente em sites dinâmicos como o ChatGPT.",
+                    feature6Title: "Altamente Personalizável",
+                    feature6Text: "Ajuste a extensão ao seu gosto no menu de configurações.",
+                    ctaTitle: "Pronto para Começar!",
+                    ctaText: "Vá para qualquer página da web, selecione um texto e comece a organizar seu conhecimento.",
+                    ctaTip: "<strong>Dica:</strong> Você pode abrir la barra lateral a qualquer momento usando o atalho de teclado (<strong>Ctrl + Shift + H</strong> por padrão) ou pelo ícone da extensão."
+                },
+                ru: {
+                    pageTitle: "Добро пожаловать в Quantum Highlighter",
+                    heroTitle: "Добро пожаловать в Quantum Highlighter PRO!",
+                    heroSubtitle: "Самый умный способ выделять, подчеркивать и делать заметки на любом веб-сайте.",
+                    howItWorksTitle: "Как это работает?",
+                    step1Title: "1. Выделите",
+                    step1Text: "Просто выделите любой текст на веб-странице.",
+                    step2Title: "2. Выделите цветом",
+                    step2Text: "Выберите цвет и тип выделения в появившемся меню.",
+                    step3Title: "3. Комментируйте",
+                    step3Text: "Добавляйте к выделениям заметки с расширенным форматированием.",
+                    demoTitle: "Посмотрите в действии",
+                    featuresTitle: "Основные возможности",
+                    feature1Title: "Несколько цветов",
+                    feature1Text: "Организуйте свои идеи с помощью яркой цветовой палитры.",
+                    feature2Title: "Выделение и подчеркивание",
+                    feature2Text: "Выбирайте между выделением фона или элегантным подчеркиванием.",
+                    feature3Title: "Расширенные комментарии",
+                    feature3Text: "Используйте жирный шрифт, списки, ссылки и многое другое в своих заметках.",
+                    feature4Title: "Умная боковая панель",
+                    feature4Text: "Управляйте и просматривайте все свои заметки в одном месте.",
+                    feature5Title: "Надежный и динамичный",
+                    feature5Text: "Отлично работает на динамических сайтах, таких как ChatGPT.",
+                    feature6Title: "Гибкая настройка",
+                    feature6Text: "Настройте расширение по своему вкусу в меню настроек.",
+                    ctaTitle: "Готовы начать!",
+                    ctaText: "Перейдите на любую веб-страницу, выделите текст и начните организовывать свои знания.",
+                    ctaTip: "<strong>Совет:</strong> Вы можете открыть боковую панель в любое время с помощью сочетания клавиш (по умолчанию <strong>Ctrl + Shift + H</strong>) или через значок расширения."
+                },
+                zh: {
+                    pageTitle: "欢迎使用 Quantum Highlighter",
+                    heroTitle: "欢迎使用 Quantum Highlighter PRO！",
+                    heroSubtitle: "在任何网站上进行高亮、下划线和做笔记的最智能方式。",
+                    howItWorksTitle: "它是如何工作的？",
+                    step1Title: "1. 选择",
+                    step1Text: "只需在网页上选择任何文本。",
+                    step2Title: "2. 高亮",
+                    step2Text: "从出现的菜单中选择颜色和高亮类型。",
+                    step3Title: "3. 评论",
+                    step3Text: "为您的高亮添加格式丰富的笔记。",
+                    demoTitle: "观看实际操作",
+                    featuresTitle: "主要特点",
+                    feature1Title: "多种颜色",
+                    feature1Text: "使用充满活力的调色板来组织您的想法。",
+                    feature2Title: "高亮和下划线",
+                    feature2Text: "在背景高亮或优雅的下划线之间进行选择。",
+                    feature3Title: "丰富评论",
+                    feature3Text: "在您的笔记中使用粗体、列表、链接等。",
+                    feature4Title: "智能侧边栏",
+                    feature4Text: "在一个地方管理和浏览您的所有笔记。",
+                    feature5Title: "稳健且动态",
+                    feature5Text: "在像ChatGPT这样的动态网站上完美工作。",
+                    feature6Title: "高度可定制",
+                    feature6Text: "从设置菜单中根据您的喜好调整扩展。",
+                    ctaTitle: "准备开始！",
+                    ctaText: "转到任何网页，选择一些文本，然后开始组织您的知识。",
+                    ctaTip: "<strong>提示：</strong>您可以随时使用键盘快捷键（默认为<strong>Ctrl + Shift + H</strong>）或从扩展图标打开侧边栏。"
+                }
+            };
+
+            // --- FUNCTIONS ---
+
+            function applyTranslations(lang) {
+                if (translations[lang]) {
+                    document.documentElement.lang = lang;
+                    document.querySelectorAll('[data-i18n]').forEach(el => {
+                        const key = el.getAttribute('data-i18n');
+                        if (translations[lang][key]) {
+                            el.innerHTML = translations[lang][key];
+                        }
+                    });
+                }
             }
+
+            function updateLanguageSelectorUI(lang) {
+                const triggerSpan = languageSelectTrigger.querySelector('span');
+                const selectedOption = document.querySelector(`.custom-select-option[data-lang="${lang}"]`);
+                if (triggerSpan && selectedOption) {
+                    triggerSpan.textContent = selectedOption.textContent;
+                }
+                document.querySelectorAll('.custom-select-option').forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.lang === lang);
+                });
+            }
+
+            function setLanguage(lang, save = false) {
+                if (!translations[lang]) lang = 'en'; // Fallback
+                
+                applyTranslations(lang);
+                updateLanguageSelectorUI(lang);
+
+                if (save && chrome && chrome.storage && chrome.storage.sync) {
+                    chrome.storage.sync.get(['highlighter-settings'], (result) => {
+                        const newSettings = { ...result['highlighter-settings'], language: lang };
+                        chrome.storage.sync.set({ 'highlighter-settings': newSettings });
+                    });
+                }
+            }
+
+            function initialize() {
+                // Color cycle animation
+                if (colorIcon) {
+                    const colors = ['#ffd400', '#ff6666', '#5fb236', '#2ea8e5', '#a28ae5', '#e56eee', '#f19837', '#aaaaaa'];
+                    let currentIndex = 0;
+                    colorIcon.style.backgroundColor = colors[currentIndex];
+                    setInterval(() => {
+                        currentIndex = (currentIndex + 1) % colors.length;
+                        colorIcon.style.backgroundColor = colors[currentIndex];
+                    }, 9000 / colors.length);
+                }
+
+                // Language selector logic
+                languageSelectTrigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    languageOptions.classList.toggle('show');
+                });
+
+                document.querySelectorAll('.custom-select-option').forEach(option => {
+                    option.addEventListener('click', (e) => {
+                        setLanguage(e.currentTarget.dataset.lang, true);
+                        languageOptions.classList.remove('show');
+                    });
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (languageOptions.classList.contains('show') && !languageSelectWrapper.contains(e.target)) {
+                        languageOptions.classList.remove('show');
+                    }
+                });
+
+                // Load initial language
+                if (chrome && chrome.storage && chrome.storage.sync) {
+                    chrome.storage.sync.get(['highlighter-settings'], (result) => {
+                        const savedLang = result['highlighter-settings']?.language;
+                        if (savedLang && translations[savedLang]) {
+                            // A valid language is already in storage. Just load it.
+                            setLanguage(savedLang, false);
+                        } else {
+                            // This is the first time, or the stored language is invalid.
+                            // Determine the best language and save it.
+                            const browserLang = navigator.language.split('-')[0];
+                            const defaultLang = translations[browserLang] ? browserLang : 'en';
+                            setLanguage(defaultLang, true); // Apply and SAVE the new default.
+                        }
+                    });
+                } else {
+                    // Fallback for local testing (no storage access)
+                    const browserLang = navigator.language.split('-')[0];
+                    const defaultLang = translations[browserLang] ? browserLang : 'en';
+                    setLanguage(defaultLang, false); // Cannot save here
+                }
+            }
+
+            initialize();
         });
     </script>
 </body>
