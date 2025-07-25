@@ -539,6 +539,7 @@ body:not(.locked) #resize-handle {
     padding: 0.6em 0 0.6em 1em;
     margin: 0.6em 0 0.6em 0;
     color: #64748b; /* Inspired by --highlighter-text-secondary */
+    min-height: calc(1em);
 }
 .annotation-card .comment blockquote p {
     margin: 0; /* No extra margin for paragraphs inside a quote */
