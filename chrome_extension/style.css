@@ -139,11 +139,6 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.3);
 }
 
-body.highlighter-sidebar-open {
-    transition: margin-right 0.3s ease-in-out;
-    margin-right: 480px;
-}
-
 .highlighter-menu { position: absolute; display: none; flex-direction: column; gap: 6px; background: white; border-radius: var(--highlighter-radius); box-shadow: var(--highlighter-shadow); z-index: var(--highlighter-z-index); font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 6px; transition: opacity 0.1s ease-in-out; width: auto; transform-origin: top center; }
 .highlighter-menu, .highlighter-menu * { box-sizing: border-box; }
 .highlighter-menu.show { display: flex; }
