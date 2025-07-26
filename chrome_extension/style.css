@@ -185,7 +185,7 @@
 
 .highlighter-type-selector .underline {
     text-decoration: underline;
-    text-decoration-thickness: 2px;
+    text-decoration-thickness: 1.5px;
 }
 
 .highlighter-menu .menu-row.actions button.highlighter-delete-btn {
