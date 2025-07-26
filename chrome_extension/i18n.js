@@ -49,7 +49,18 @@ const translations = {
         openSidebar: "Open Sidebar",
         closeSidebar: "Close Sidebar",
         refreshAnnotations: "Refresh Annotations",
-        annotationsRefreshed: "Annotations Refreshed!"
+        annotationsRefreshed: "Annotations Refreshed!",
+        donationsTitle: "You keep Quantum Highlighter PRO free and alive",
+        donationsText: "Hi! I'm George, the creator and sole developer behind Quantum Highlighter. My promise is and always will be that this tool is free and of the highest quality. There's no big company behind it, just countless hours of work and the dream of creating something truly useful for you. To keep innovating, I need your help.",
+        oneTimeDonationTitle: "Make a One-Time Contribution",
+        oneTimeDonationDescription: "Support the development of Quantum Highlighter PRO with a single gesture. Every contribution brings us closer to our next major update.",
+        oneTimeDonationButton: "Of course, I'll buy you a coffee!",
+        monthlySubscriptionTitle: "Become a Monthly Sponsor",
+        monthlySubscriptionDescription: "Ensure the future of the project with recurring support. Our sponsors are the foundation of sustainable growth.",
+        subscribeButton: "Join as a sponsor",
+        remindMeLater: "Maybe later, thanks!",
+        dontRemindAgain: "Ok, I promise I won't forget (but don't notify me again)",
+        remindMeLaterTooltip: "You will be reminded again after 80 more highlights."
     },
     es: {
         sidebarTitle: "Anotaciones",
@@ -101,7 +112,18 @@ const translations = {
         openSidebar: "Abrir barra lateral",
         closeSidebar: "Cerrar barra lateral",
         refreshAnnotations: "Actualizar Anotaciones",
-        annotationsRefreshed: "¡Anotaciones actualizadas!"
+        annotationsRefreshed: "¡Anotaciones actualizadas!",
+        donationsTitle: "Tú mantienes Quantum Highlighter PRO gratis y vivo",
+        donationsText: "¡Hola! Soy George, el creador y único desarrollador detrás de Quantum Highlighter. Mi promesa es y siempre será que esta herramienta sea gratuita y de la más alta calidad. No hay una gran empresa detrás, solo muchísimas horas de trabajo y la ilusión de crear algo verdaderamente útil para ti. Para seguir innovando, necesito tu ayuda.",
+        oneTimeDonationTitle: "Realiza una Aportación Única",
+        oneTimeDonationDescription: "Apoya el desarrollo de Quantum Highlighter PRO con un único gesto. Cada contribución nos acerca a nuestra próxima gran actualización.",
+        oneTimeDonationButton: "¡Claro, te invito un café!",
+        monthlySubscriptionTitle: "Conviértete en Patrocinador Mensual",
+        monthlySubscriptionDescription: "Asegura el futuro del proyecto con un apoyo recurrente. Nuestros patrocinadores son la base de un crecimiento sostenible.",
+        subscribeButton: "Unirme como patrocinador",
+        remindMeLater: "En otro ratito, ¡gracias!",
+        dontRemindAgain: "Ok, prometo no olvidarlo (pero no avises más)",
+        remindMeLaterTooltip: "Se te notificará de nuevo tras 80 resaltados más."
     },
     fr: {
         sidebarTitle: "Annotations",
@@ -153,7 +175,18 @@ const translations = {
         openSidebar: "Ouvrir le panneau latéral",
         closeSidebar: "Fermer le panneau latéral",
         refreshAnnotations: "Actualiser les Annotations",
-        annotationsRefreshed: "Annotations actualisées !"
+        annotationsRefreshed: "Annotations actualisées !",
+        donationsTitle: "Vous maintenez Quantum Highlighter PRO gratuit et vivant",
+        donationsText: "Bonjour ! Je suis George, le créateur et unique développeur de Quantum Highlighter. Ma promesse est et sera toujours que cet outil soit gratuit et de la plus haute qualité. Il n'y a pas de grande entreprise derrière, seulement d'innombrables heures de travail et le rêve de créer quelque chose de vraiment utile pour vous. Pour continuer à innover, j'ai besoin de votre aide.",
+        oneTimeDonationTitle: "Faire une contribution unique",
+        oneTimeDonationDescription: "Soutenez le développement de Quantum Highlighter PRO d'un simple geste. Chaque contribution nous rapproche de notre prochaine grande mise à jour.",
+        oneTimeDonationButton: "Bien sûr, je vous offre un café !",
+        monthlySubscriptionTitle: "Devenez un sponsor mensuel",
+        monthlySubscriptionDescription: "Assurez l'avenir du projet avec un soutien récurrent. Nos sponsors sont la base d'une croissance durable.",
+        subscribeButton: "Rejoindre comme sponsor",
+        remindMeLater: "Peut-être plus tard, merci !",
+        dontRemindAgain: "OK, promis, je n'oublierai pas (mais ne m'avise plus).",
+        remindMeLaterTooltip: "Un rappel vous sera envoyé après 80 autres surlignages."
     },
     pt: {
         sidebarTitle: "Anotações",
@@ -205,7 +238,18 @@ const translations = {
         openSidebar: "Abrir barra lateral",
         closeSidebar: "Fechar barra lateral",
         refreshAnnotations: "Atualizar Anotações",
-        annotationsRefreshed: "Anotações atualizadas!"
+        annotationsRefreshed: "Anotações atualizadas!",
+        donationsTitle: "Você mantém o Quantum Highlighter PRO gratuito e vivo",
+        donationsText: "Olá! Eu sou o George, o criador e único desenvolvedor por trás do Quantum Highlighter. Minha promessa é e sempre será que esta ferramenta seja gratuita e da mais alta qualidade. Não há uma grande empresa por trás, apenas inúmeras horas de trabalho e o sonho de criar algo verdadeiramente útil para você. Para continuar a inovar, preciso da sua ajuda.",
+        oneTimeDonationTitle: "Faça uma Contribuição Única",
+        oneTimeDonationDescription: "Apoie o desenvolvimento do Quantum Highlighter PRO com um único gesto. Cada contribuição nos aproxima da nossa próxima grande atualização.",
+        oneTimeDonationButton: "Claro, eu te pago um café!",
+        monthlySubscriptionTitle: "Torne-se um Patrocinador Mensal",
+        monthlySubscriptionDescription: "Garanta o futuro do projeto com apoio recorrente. Nossos patrocinadores são a base para um crescimento sustentável.",
+        subscribeButton: "Juntar-me como patrocinador",
+        remindMeLater: "Talvez mais tarde, obrigado!",
+        dontRemindAgain: "Ok, prometo não esquecer (mas não me avise mais)",
+        remindMeLaterTooltip: "Você será lembrado novamente após mais 80 destaques."
     },
     ru: {
         sidebarTitle: "Аннотации",
@@ -257,7 +301,18 @@ const translations = {
         openSidebar: "Открыть боковую панель",
         closeSidebar: "Закрыть боковую панель",
         refreshAnnotations: "Обновить аннотации",
-        annotationsRefreshed: "Аннотации обновлены!"
+        annotationsRefreshed: "Аннотации обновлены!",
+        donationsTitle: "Вы поддерживаете Quantum Highlighter PRO бесплатным и живым",
+        donationsText: "Привет! Я Джордж, создатель и единственный разработчик Quantum Highlighter. Мое обещание есть и всегда будет в том, что этот инструмент будет бесплатным и высочайшего качества. За ним не стоит большая компания, только бесчисленные часы работы и мечта создать что-то действительно полезное для вас. Чтобы продолжать инновации, мне нужна ваша помощь.",
+        oneTimeDonationTitle: "Сделать разовый взнос",
+        oneTimeDonationDescription: "Поддержите разработку Quantum Highlighter PRO одним жестом. Каждый вклад приближает нас к нашему следующему большому обновлению.",
+        oneTimeDonationButton: "Конечно, я куплю тебе кофе!",
+        monthlySubscriptionTitle: "Стать ежемесячным спонсором",
+        monthlySubscriptionDescription: "Обеспечьте будущее проекта с помощью регулярной поддержки. Наши спонсоры — основа устойчивого роста.",
+        subscribeButton: "Присоединиться как спонсор",
+        remindMeLater: "Может, попозже, спасибо!",
+        dontRemindAgain: "Хорошо, обещаю не забыть (но больше не уведомляй).",
+        remindMeLaterTooltip: "Тебе напомнят снова через 80 выделений."
     },
     zh: {
         sidebarTitle: "标注",
@@ -309,6 +364,17 @@ const translations = {
         openSidebar: "打开侧边栏",
         closeSidebar: "关闭侧边栏",
         refreshAnnotations: "刷新标注",
-        annotationsRefreshed: "标注已刷新！"
+        annotationsRefreshed: "标注已刷新！",
+        donationsTitle: "您让 Quantum Highlighter PRO 保持免费和活力",
+        donationsText: "你好！我是 George，Quantum Highlighter 背后的创造者和唯一开发者。我的承诺是，这个工具将永远是免费和最高质量的。背后没有大公司，只有无数小时的工作和创造一个真正对您有用的东西的梦想。为了继续创新，我需要您的帮助。",
+        oneTimeDonationTitle: "进行一次性捐赠",
+        oneTimeDonationDescription: "只需一个简单的举动，即可支持 Quantum Highlighter PRO 的开发。每一次贡献都让我们离下一次重大更新更近一步。",
+        oneTimeDonationButton: "当然，我请你喝杯咖啡！",
+        monthlySubscriptionTitle: "成为月度赞助商",
+        monthlySubscriptionDescription: "通过定期支持来确保项目的未来。我们的赞助商是可持续增长的基础。",
+        subscribeButton: "作为赞助商加入",
+        remindMeLater: "稍后再说吧，谢谢！",
+        dontRemindAgain: "好的，我保证不会忘记（但不要再通知我了）",
+        remindMeLaterTooltip: "再突出显示80次后，系统会再次提醒您。"
     }
 };

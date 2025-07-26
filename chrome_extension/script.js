@@ -1275,11 +1275,222 @@
         }
     }
 
+    class DonationManager {
+        constructor(lang, shadowRoot) {
+            this.lang = lang;
+            this.shadowRoot = shadowRoot;
+            this.storageKeys = {
+                count: 'highlighter-annotation-count',
+                neverShow: 'highlighter-donation-never-show',
+                remindAt: 'highlighter-donation-remind-at',
+                disabledUntil: 'highlighter-donation-disabled-until'
+            };
+        }
+    
+        updateLanguage(newLang) {
+            this.lang = newLang;
+        }
+
+        processNewAnnotation() {
+            console.log("Highlighter: Processing new annotation for donation count.");
+            const storageKeysToGet = [
+                this.storageKeys.count,
+                this.storageKeys.neverShow,
+                this.storageKeys.remindAt,
+                this.storageKeys.disabledUntil
+            ];
+
+            chrome.storage.local.get(storageKeysToGet, (data) => {
+                if (chrome.runtime.lastError) {
+                    console.error("Highlighter: Error getting data for annotation count.", chrome.runtime.lastError);
+                    return;
+                }
+                console.log("Highlighter: Fetched data from storage:", data);
+
+                const neverShow = data[this.storageKeys.neverShow] || false;
+                if (neverShow) {
+                    console.log("Highlighter: Donation reminders are permanently disabled.");
+                    return;
+                }
+    
+                const disabledUntil = data[this.storageKeys.disabledUntil] || 0;
+                if (Date.now() < disabledUntil) {
+                    console.log("Highlighter: Donation reminders are temporarily disabled.");
+                    return;
+                }
+    
+                const currentCount = data[this.storageKeys.count] || 0;
+                const newCount = currentCount + 1;
+                console.log(`Highlighter: Annotation count updated from ${currentCount} to ${newCount}.`);
+    
+                chrome.storage.local.set({ [this.storageKeys.count]: newCount }, () => {
+                    if (chrome.runtime.lastError) {
+                        console.error("Highlighter: Error saving new annotation count.", chrome.runtime.lastError);
+                        return;
+                    }
+                    console.log("Highlighter: New annotation count saved successfully.");
+                    const remindAt = data[this.storageKeys.remindAt] || 10;
+                    if (newCount >= remindAt) {
+                        this.showModal(newCount);
+                    }
+                });
+            });
+        }
+
+        showModal(currentCount) {
+            const overlay = document.createElement('div');
+            overlay.className = 'highlighter-modal-overlay';
+
+            const modal = document.createElement('div');
+            modal.className = 'highlighter-donation-modal';
+            modal.innerHTML = `
+                <div class="heading-wrapper">
+                    <img src="${chrome.runtime.getURL('images/icon128.png')}" alt="Highlighter Icon">
+                    <h3>${this.lang.donationsTitle}</h3>
+                </div>
+                <p>${this.lang.donationsText}</p>
+                <div class="donations-grid">
+                    <div class="donation-card donation-card-onetime">
+                        <div class="donation-card-content">
+                            <h4>${this.lang.oneTimeDonationTitle}</h4>
+                            <p>${this.lang.oneTimeDonationDescription}</p>
+                        </div>
+                        <a href="https://www.paypal.com/ncp/payment/P8GZGDP6GQBB2" target="_blank" class="donation-button">
+                            <img src="${chrome.runtime.getURL('images/paypal-logo.svg')}" alt="PayPal" class="paypal-logo">
+                            <span>${this.lang.oneTimeDonationButton}</span>
+                        </a>
+                    </div>
+                    <div class="donation-card donation-card-subscription">
+                        <div class="donation-card-content">
+                            <h4>${this.lang.monthlySubscriptionTitle}</h4>
+                            <p>${this.lang.monthlySubscriptionDescription}</p>
+                        </div>
+                        <a href="https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-2CW39197CN079424VNCCCAAQ" target="_blank" class="donation-button">
+                            <img src="${chrome.runtime.getURL('images/paypal-logo.svg')}" alt="PayPal" class="paypal-logo">
+                            <span>${this.lang.subscribeButton}</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <div class="left-actions">
+                         <button class="never-remind-btn">${this.lang.dontRemindAgain}</button>
+                    </div>
+                    <div class="right-actions">
+                        <button class="remind-later-btn">${this.lang.remindMeLater}</button>
+                    </div>
+                </div>
+            `;
+
+            overlay.appendChild(modal);
+            this.shadowRoot.appendChild(overlay);
+
+            let tooltip = null;
+
+            const cleanup = () => {
+                if (tooltip) tooltip.remove();
+                document.removeEventListener('keydown', handleEsc, true);
+                overlay.remove();
+            };
+
+            const handleEsc = (e) => {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    cleanup();
+                }
+            };
+
+            modal.querySelectorAll('.donation-button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const disabledUntil = Date.now() + (180 * 24 * 60 * 60 * 1000);
+                    chrome.storage.local.set({ [this.storageKeys.disabledUntil]: disabledUntil });
+                    // No cleanup here, let the user go to paypal
+                });
+            });
+
+            const remindLaterBtn = modal.querySelector('.remind-later-btn');
+
+            remindLaterBtn.addEventListener('click', () => {
+                const nextReminder = currentCount + 80;
+                chrome.storage.local.set({ [this.storageKeys.remindAt]: nextReminder });
+                cleanup();
+            });
+
+            const setupTooltip = () => {
+                const createTooltip = () => {
+                    if (tooltip) return;
+                    tooltip = document.createElement('div');
+                    tooltip.className = 'highlighter-dynamic-tooltip';
+                    tooltip.textContent = this.lang.remindMeLaterTooltip;
+                    this.shadowRoot.appendChild(tooltip);
+                    tooltip.addEventListener('animationend', (e) => {
+                        if (tooltip && tooltip.classList.contains('popup-bounce-out')) {
+                            e.target.classList.remove('popup-bounce-in', 'popup-bounce-out');
+                            e.target.style.display = 'none';
+                        }
+                    });
+                };
+
+                const updateTooltipPosition = (event) => {
+                    if (!tooltip) return;
+                    const virtualEl = {
+                        getBoundingClientRect: () => ({
+                            width: 0, height: 0,
+                            x: event.clientX, y: event.clientY,
+                            left: event.clientX, right: event.clientX,
+                            top: event.clientY, bottom: event.clientY,
+                        }),
+                    };
+                    computePosition(virtualEl, tooltip, {
+                        placement: 'top',
+                        middleware: [offset(15), flip(), shift({ padding: 5 })],
+                    }).then(({ x, y }) => {
+                        Object.assign(tooltip.style, { left: `${x}px`, top: `${y}px` });
+                    });
+                };
+
+                remindLaterBtn.addEventListener('mouseover', (event) => {
+                    createTooltip();
+                    tooltip.style.display = 'block';
+                    updateTooltipPosition(event);
+                    tooltip.classList.remove('popup-bounce-out');
+                    tooltip.classList.add('popup-bounce-in');
+                });
+
+                remindLaterBtn.addEventListener('mouseout', () => {
+                    if (tooltip) {
+                        tooltip.classList.remove('popup-bounce-in');
+                        tooltip.classList.add('popup-bounce-out');
+                    }
+                });
+
+                remindLaterBtn.addEventListener('mousemove', updateTooltipPosition);
+            };
+
+            setupTooltip();
+
+            modal.querySelector('.never-remind-btn').addEventListener('click', () => {
+                chrome.storage.local.set({ [this.storageKeys.neverShow]: true });
+                cleanup();
+            });
+            
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    cleanup();
+                }
+            });
+
+            document.addEventListener('keydown', handleEsc, true);
+        }
+    }
+
     class Highlighter {
         constructor(initialLang, initialSettings) {
             this.lang = initialLang;
             this.settings = initialSettings || { useDarkText: false };
             this.storage = new HighlightStorage();
+            this.menu = new HighlightMenu(this.lang);
+            this.donationManager = new DonationManager(this.lang, this.menu.shadowRoot);
             this.annotations = new Map();
             this.colors = {
                 yellow: 'var(--highlighter-color-yellow)', red: 'var(--highlighter-color-red)',
@@ -1294,7 +1505,6 @@
                 orange: 'var(--highlighter-color-orange-solid)', grey: 'var(--highlighter-color-grey-solid)',
             };
             this.currentAnnotationType = 'highlight';
-            this.menu = new HighlightMenu(this.lang);
             this.isTemporarilyHidden = false;
             this.isGloballyDisabled = false;
             this.activeDebouncedUpdate = null;
@@ -1339,6 +1549,7 @@
             if (translations[newLangCode]) {
                 this.lang = translations[newLangCode];
                 this.menu.updateLanguage(this.lang);
+                this.donationManager.updateLanguage(this.lang);
                 
                 if (this.menu.isVisible()) {
                     if (this.activeAnnotationId) {
@@ -1790,6 +2001,11 @@
                 this.storage.save(this.annotations, () => {
                     this._notifySidebarOfUpdate();
                 });
+
+                this.donationManager.processNewAnnotation();
+
+                this.menu.hide();
+                this.activeRange = null;
             }
 
             window.getSelection()?.removeAllRanges();

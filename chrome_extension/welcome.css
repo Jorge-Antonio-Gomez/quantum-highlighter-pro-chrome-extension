@@ -1,3 +1,7 @@
+html {
+    scroll-behavior: smooth;
+}
+
 :root, :host {
     --highlighter-primary-color: #f18822;
     --highlighter-surface-color: #ffffff;

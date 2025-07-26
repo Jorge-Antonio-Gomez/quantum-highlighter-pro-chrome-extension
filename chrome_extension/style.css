@@ -834,3 +834,196 @@ body.ctrl-is-pressed .tiptap a {
     background-color: #c86f1c;
 }
 
+/* --- Donation Modal --- */
+.highlighter-donation-modal {
+    background-color: #fdfdfd;
+    padding: 24px 32px;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 600px;
+    font-family: 'Rubik', sans-serif;
+    color: #2c2c2c;
+    animation: slideInUp 0.3s ease-out;
+    border-top: 4px solid var(--highlighter-primary, #eb8521);
+}
+
+.highlighter-donation-modal h3 {
+    margin: 0 0 12px 0;
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--highlighter-primary, #eb8521);
+}
+
+.highlighter-donation-modal > p {
+    text-align: center;
+    margin-bottom: 24px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #555;
+}
+
+.highlighter-donation-modal .donations-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.highlighter-donation-modal .donation-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.highlighter-donation-modal .donation-card:hover {
+    border-color: #ccc;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.highlighter-donation-modal .donation-card h4 {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0 0 8px 0;
+    color: #333;
+}
+
+.highlighter-donation-modal .donation-card p {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.5;
+    margin: 0 0 16px 0;
+    flex-grow: 1;
+}
+
+.highlighter-donation-modal .donation-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.highlighter-donation-modal .donation-card-onetime .donation-button {
+    background-color: var(--highlighter-primary, #eb8521);
+    color: white;
+}
+.highlighter-donation-modal .donation-card-onetime .donation-button:hover {
+    background-color: var(--highlighter-primary-hover, #c86f1c);
+}
+
+.highlighter-donation-modal .donation-card-subscription .donation-button {
+    background-color: #0070ba;
+    color: white;
+}
+.highlighter-donation-modal .donation-card-subscription .donation-button:hover {
+    background-color: #005ea6;
+}
+
+.highlighter-donation-modal .paypal-logo {
+    height: 16px;
+    width: auto;
+}
+
+.highlighter-donation-modal .modal-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 20px;
+    margin-top: 24px;
+}
+
+.highlighter-donation-modal .modal-actions .right-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.highlighter-donation-modal .modal-actions button {
+    padding: 8px 16px;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.highlighter-donation-modal .modal-actions .never-remind-btn {
+    background: none;
+    border: none;
+    color: var(--highlighter-danger-color, #e53935);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+
+.highlighter-donation-modal .modal-actions .never-remind-btn:hover {
+    background-color: rgba(229, 57, 53, 0.1);
+}
+
+.highlighter-donation-modal .modal-actions .remind-later-btn {
+    background-color: var(--highlighter-primary, #eb8521);
+    color: white;
+}
+
+.highlighter-donation-modal .modal-actions .remind-later-btn:hover {
+    background-color: #c86f1c;
+}
+
+.highlighter-donation-modal .heading-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.highlighter-donation-modal .heading-wrapper img {
+    width: 32px;
+    height: 32px;
+}
+
+.highlighter-donation-modal h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--highlighter-primary, #eb8521);
+}
+
+.highlighter-dynamic-tooltip {
+    position: absolute;
+    background-color: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-family: 'Rubik', sans-serif;
+    z-index: 20001; /* Above the modal overlay */
+    pointer-events: none;
+    display: none; /* Initially hidden */
+    white-space: nowrap;
+}
+
+.highlighter-dynamic-tooltip.popup-bounce-in {
+    animation: popup-bounce-in 150ms ease-out forwards;
+    display: block;
+}
+
+.highlighter-dynamic-tooltip.popup-bounce-out {
+    animation: popup-bounce-out 150ms ease-in forwards;
+}
