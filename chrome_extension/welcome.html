@@ -8,106 +8,177 @@
     <link rel="stylesheet" href="libs/fonts.css">
 </head>
 <body>
-    <div class="container">
-        <div class="language-selector-container">
-            <div class="custom-select-wrapper" id="language-select-wrapper">
-                <div class="custom-select-trigger" id="language-select-trigger">
-                    <span>English</span>
-                    <svg class="arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                </div>
-                <ul class="custom-select-options" id="language-options">
-                    <li class="custom-select-option" data-lang="en">English</li>
-                    <li class="custom-select-option" data-lang="es">Español</li>
-                    <li class="custom-select-option" data-lang="fr">Français</li>
-                    <li class="custom-select-option" data-lang="pt">Português</li>
-                    <li class="custom-select-option" data-lang="ru">Русский</li>
-                    <li class="custom-select-option" data-lang="zh">中文</li>
-                </ul>
-            </div>
-        </div>
-
-        <header class="hero">
-            <img src="images/icon128.png" alt="Quantum Highlighter Logo" class="logo">
-            <h1 data-i18n="heroTitle">Welcome to Quantum Highlighter PRO!</h1>
-            <p class="subtitle" data-i18n="heroSubtitle">The smartest way to highlight, underline, and take notes on any website.</p>
+    <div class="page-wrapper">
+        <header class="top-header">
+            <a href="https://github.com/Jorge-Antonio-Gomez/quantum-highlighter-pro-chrome-extension" target="_blank" class="github-link" data-i18n="githubLink">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+                <span></span>
+            </a>
+            <button class="donate-button" id="donate-button" data-i18n="donateButton"></button>
         </header>
-
-        <section class="how-it-works">
-            <h2 data-i18n="howItWorksTitle">How It Works?</h2>
-            <div class="steps">
-                <div class="step">
-                    <div class="step-icon-wrapper">
-                        <img src="images/text.svg" alt="Select text" class="step-icon">
+        <div class="container">
+            <div class="language-selector-container">
+                <div class="custom-select-wrapper" id="language-select-wrapper">
+                    <div class="custom-select-trigger" id="language-select-trigger">
+                        <span>English</span>
+                        <svg class="arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                     </div>
-                    <h3 data-i18n="step1Title">1. Select</h3>
-                    <p data-i18n="step1Text">Just select any text on a webpage.</p>
-                </div>
-                <div class="step">
-                    <div class="step-icon-wrapper">
-                        <img src="images/selection-pencil.svg" alt="Highlight selection" class="step-icon">
-                    </div>
-                    <h3 data-i18n="step2Title">2. Highlight</h3>
-                    <p data-i18n="step2Text">Choose a color and highlight type from the menu that appears.</p>
-                </div>
-                <div class="step">
-                    <div class="step-icon-wrapper">
-                        <img src="images/circle-plus.svg" alt="Add comment" class="step-icon">
-                    </div>
-                    <h3 data-i18n="step3Title">3. Comment</h3>
-                    <p data-i18n="step3Text">Add rich-formatted notes to your highlights.</p>
+                    <ul class="custom-select-options" id="language-options">
+                        <li class="custom-select-option" data-lang="en">English</li>
+                        <li class="custom-select-option" data-lang="es">Español</li>
+                        <li class="custom-select-option" data-lang="fr">Français</li>
+                        <li class="custom-select-option" data-lang="pt">Português</li>
+                        <li class="custom-select-option" data-lang="ru">Русский</li>
+                        <li class="custom-select-option" data-lang="zh">中文</li>
+                    </ul>
                 </div>
             </div>
-        </section>
 
-        <section class="demo">
-            <h2 data-i18n="demoTitle">See it in Action</h2>
-            <div class="demo-gif-wrapper">
-                <img src="images/video_demo.gif" alt="Quantum Highlighter Demonstration" class="demo-gif">
-            </div>
-        </section>
+            <section class="hero">
+                <img src="images/icon128.png" alt="Quantum Highlighter Logo" class="logo">
+                <h1 data-i18n="heroTitle">Welcome to Quantum Highlighter PRO!</h1>
+                <p class="subtitle" data-i18n="heroSubtitle">The smartest way to highlight, underline, and take notes on any website.</p>
+            </section>
 
-        <section class="features">
-            <h2 data-i18n="featuresTitle">Main Features</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon" id="color-cycle-icon"></div>
-                    <h4 data-i18n="feature1Title">Multiple Colors</h4>
-                    <p data-i18n="feature1Text">Organize your ideas with a vibrant color palette.</p>
+            <section class="how-it-works">
+                <h2 data-i18n="howItWorksTitle">How It Works?</h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-icon-wrapper">
+                            <img src="images/text.svg" alt="Select text" class="step-icon">
+                        </div>
+                        <h3 data-i18n="step1Title">1. Select</h3>
+                        <p data-i18n="step1Text">Just select any text on a webpage.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon-wrapper">
+                            <img src="images/selection-pencil.svg" alt="Highlight selection" class="step-icon">
+                        </div>
+                        <h3 data-i18n="step2Title">2. Highlight</h3>
+                        <p data-i18n="step2Text">Choose a color and highlight type from the menu that appears.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-icon-wrapper">
+                            <img src="images/circle-plus.svg" alt="Add comment" class="step-icon">
+                        </div>
+                        <h3 data-i18n="step3Title">3. Comment</h3>
+                        <p data-i18n="step3Text">Add rich-formatted notes to your highlights.</p>
+                    </div>
                 </div>
-                <div class="feature-card">
-                     <img src="images/toolbar-icons/underline.svg" alt="Underline Icon" class="feature-icon-svg">
-                    <h4 data-i18n="feature2Title">Highlight and Underline</h4>
-                    <p data-i18n="feature2Text">Choose between a background highlight or an elegant underline.</p>
-                </div>
-                <div class="feature-card">
-                    <img src="images/toolbar-icons/italic.svg" alt="Rich Text Icon" class="feature-icon-svg">
-                    <h4 data-i18n="feature3Title">Rich Comments</h4>
-                    <p data-i18n="feature3Text">Use bold, lists, links, and more in your notes.</p>
-                </div>
-                <div class="feature-card">
-                    <img src="images/align-left-svgrepo-com.svg" alt="Sidebar Icon" class="feature-icon-svg">
-                    <h4 data-i18n="feature4Title">Smart Sidebar</h4>
-                    <p data-i18n="feature4Text">Manage and navigate all your notes in one place.</p>
-                </div>
-                 <div class="feature-card">
-                    <img src="images/refresh-round.svg" alt="Sync Icon" class="feature-icon-svg">
-                    <h4 data-i18n="feature5Title">Robust and Dynamic</h4>
-                    <p data-i18n="feature5Text">Works perfectly on dynamic sites like ChatGPT.</p>
-                </div>
-                 <div class="feature-card">
-                    <img src="images/settings.svg" alt="Customization Icon" class="feature-icon-svg">
-                    <h4 data-i18n="feature6Title">Highly Customizable</h4>
-                    <p data-i18n="feature6Text">Adjust the extension to your liking from the settings menu.</p>
-                </div>
-            </div>
-        </section>
+            </section>
 
-        <footer class="cta">
-            <h2 data-i18n="ctaTitle">Ready to Get Started!</h2>
-            <p data-i18n="ctaText">Go to any webpage, select some text, and start organizing your knowledge.</p>
-            <p class="tip" data-i18n="ctaTip"><strong>Tip:</strong> You can open the sidebar at any time using the keyboard shortcut (<strong>Ctrl + Shift + H</strong> by default) or from the extension icon.</p>
-        </footer>
+            <section class="demo">
+                <h2 data-i18n="demoTitle">See it in Action</h2>
+                <div class="demo-gif-wrapper">
+                    <img src="images/video_demo.gif" alt="Quantum Highlighter Demonstration" class="demo-gif">
+                </div>
+            </section>
+
+            <section class="features">
+                <h2 data-i18n="featuresTitle">Main Features</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon" id="color-cycle-icon"></div>
+                        <h4 data-i18n="feature1Title">Multiple Colors</h4>
+                        <p data-i18n="feature1Text">Organize your ideas with a vibrant color palette.</p>
+                    </div>
+                    <div class="feature-card">
+                         <img src="images/toolbar-icons/underline.svg" alt="Underline Icon" class="feature-icon-svg">
+                        <h4 data-i18n="feature2Title">Highlight and Underline</h4>
+                        <p data-i18n="feature2Text">Choose between a background highlight or an elegant underline.</p>
+                    </div>
+                    <div class="feature-card">
+                        <img src="images/toolbar-icons/italic.svg" alt="Rich Text Icon" class="feature-icon-svg">
+                        <h4 data-i18n="feature3Title">Rich Comments</h4>
+                        <p data-i18n="feature3Text">Use bold, lists, links, and more in your notes.</p>
+                    </div>
+                    <div class="feature-card">
+                        <img src="images/align-left-svgrepo-com.svg" alt="Sidebar Icon" class="feature-icon-svg">
+                        <h4 data-i18n="feature4Title">Smart Sidebar</h4>
+                        <p data-i18n="feature4Text">Manage and navigate all your notes in one place.</p>
+                    </div>
+                     <div class="feature-card">
+                        <img src="images/refresh-round.svg" alt="Sync Icon" class="feature-icon-svg">
+                        <h4 data-i18n="feature5Title">Robust and Dynamic</h4>
+                        <p data-i18n="feature5Text">Works perfectly on dynamic sites like ChatGPT.</p>
+                    </div>
+                     <div class="feature-card">
+                        <img src="images/settings.svg" alt="Customization Icon" class="feature-icon-svg">
+                        <h4 data-i18n="feature6Title">Highly Customizable</h4>
+                        <p data-i18n="feature6Text">Adjust the extension to your liking from the settings menu.</p>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="cta">
+                <h2 data-i18n="ctaTitle">Ready to Get Started!</h2>
+                <p data-i18n="ctaText">Go to any webpage, select some text, and start organizing your knowledge.</p>
+                <p class="tip" data-i18n="ctaTip"><strong>Tip:</strong> You can open the sidebar at any time using the keyboard shortcut (<strong>Ctrl + Shift + H</strong> by default) or from the extension icon.</p>
+            </footer>
+
+            <section id="donations">
+                <hr>
+                <h2 data-i18n="donationsTitle">Quantum Highlighter PRO will ALWAYS be free</h2>
+                <!-- <p data-i18n="donationsText">Quantum Highlighter is an open-source project built with dedication. Your donation helps keep it alive and allows for the development of new features. Every contribution, no matter the size, makes a huge difference. Thank you so much for your support!</p> -->
+                <p>Quantum Highlighter is an open-source project built with dedication. Your donation helps keep it alive and allows for the development of new features. Every contribution, no matter the size, makes a huge difference. Thank you so much for your support!</p>
+
+                <div class="donations-grid">
+                    <!-- One-Time Donation Card -->
+                    <div class="donation-card">
+                        <div>
+                            <h3>One-Time Donation</h3>
+                        </div>
+                        <div id="paypal-container-P8GZGDP6GQBB2"></div>
+                    </div>
+
+                    <!-- Subscription Donation Card -->
+                    <div class="donation-card">
+                        <div>
+                            <h3>Monthly Subscription</h3>
+                            <div class="donation-amount">
+                                <label for="subscription-amount">USD</label>
+                                <input type="number" id="subscription-amount" value="5" min="1">
+                                <label>/month</label>
+                            </div>
+                        </div>
+                        <div id="paypal-button-container-P-2CW39197CN079424VNCCCAAQ"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
     </div>
+
+    <script 
+      src="https://www.paypal.com/sdk/js?client-id=BAAsx4E4JQKKfHGgCixLi7b0iXMJJMroWwI_7voGwI7JtvvZHAsGBOcF06O3UJrYAO7jvdHHzUpVVo1QSE&components=hosted-buttons&disable-funding=venmo&currency=USD">
+    </script>
+    <script>
+      paypal.HostedButtons({
+        hostedButtonId: "P8GZGDP6GQBB2",
+      }).render("#paypal-container-P8GZGDP6GQBB2")
+    </script>
+
+    <script src="https://www.paypal.com/sdk/js?client-id=AWd0noNfZ5s6waUBOp2roT_UWN6QIwf0VvK2n8d4Ls3Hl6BP85iXA4j0uzSYIhdufI7578u2hmoa1GRe&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
+    <script>
+      paypal.Buttons({
+          style: {
+              shape: 'rect',
+              color: 'silver',
+              layout: 'vertical',
+              label: 'subscribe'
+          },
+          createSubscription: function(data, actions) {
+            return actions.subscription.create({
+              /* Creates the subscription */
+              plan_id: 'P-2CW39197CN079424VNCCCAAQ',
+              quantity: 1 // The quantity of the product for a subscription
+            });
+          },
+          onApprove: function(data, actions) {
+            alert(data.subscriptionID); // You can add optional success message for the subscriber here
+          }
+      }).render('#paypal-button-container-P-2CW39197CN079424VNCCCAAQ'); // Renders the PayPal button
+    </script>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- ELEMENTS ---
@@ -115,11 +186,15 @@
             const languageSelectWrapper = document.getElementById('language-select-wrapper');
             const languageSelectTrigger = document.getElementById('language-select-trigger');
             const languageOptions = document.getElementById('language-options');
+            const donateButton = document.getElementById('donate-button');
+            const donationsSection = document.getElementById('donations');
 
             // --- TRANSLATIONS ---
             const translations = {
                 en: {
                     pageTitle: "Welcome to Quantum Highlighter",
+                    githubLink: "View on GitHub",
+                    donateButton: "Donate",
                     heroTitle: "Welcome to Quantum Highlighter PRO!",
                     heroSubtitle: "The smartest way to highlight, underline, and take notes on any website.",
                     howItWorksTitle: "How It Works?",
@@ -145,10 +220,14 @@
                     feature6Text: "Adjust the extension to your liking from the settings menu.",
                     ctaTitle: "Ready to Get Started!",
                     ctaText: "Go to any webpage, select some text, and start organizing your knowledge.",
-                    ctaTip: "<strong>Tip:</strong> You can open the sidebar at any time using the keyboard shortcut (<strong>Ctrl + Shift + H</strong> by default) or from the extension icon."
+                    ctaTip: "<strong>Tip:</strong> You can open the sidebar at any time using the keyboard shortcut (<strong>Ctrl + Shift + H</strong> by default) or from the extension icon.",
+                    donationsTitle: "Quantum Highlighter PRO will ALWAYS be free",
+                    donationsText: "[content]"
                 },
                 es: {
                     pageTitle: "Bienvenido a Quantum Highlighter",
+                    githubLink: "Ver en GitHub",
+                    donateButton: "Donar",
                     heroTitle: "¡Bienvenido a Quantum Highlighter PRO!",
                     heroSubtitle: "La forma más inteligente de resaltar, subrayar y tomar notas en cualquier sitio web.",
                     howItWorksTitle: "¿Cómo Funciona?",
@@ -174,10 +253,14 @@
                     feature6Text: "Ajusta la extensión a tu gusto desde el menú de configuración.",
                     ctaTitle: "¡Listo para Empezar!",
                     ctaText: "Ve a cualquier página web, selecciona un texto y comienza a organizar tu conocimiento.",
-                    ctaTip: "<strong>Consejo:</strong> Puedes abrir la barra lateral en cualquier momento usando el atajo de teclado (<strong>Ctrl + Shift + H</strong> por defecto) o desde el icono de la extensión."
+                    ctaTip: "<strong>Consejo:</strong> Puedes abrir la barra lateral en cualquier momento usando el atajo de teclado (<strong>Ctrl + Shift + H</strong> por defecto) o desde el icono de la extensión.",
+                    donationsTitle: "Quantum Highlighter PRO SIEMPRE será gratuito",
+                    donationsText: "[contenido]"
                 },
                 fr: {
                     pageTitle: "Bienvenue chez Quantum Highlighter",
+                    githubLink: "Voir sur GitHub",
+                    donateButton: "Faire un don",
                     heroTitle: "Bienvenue chez Quantum Highlighter PRO !",
                     heroSubtitle: "La manière la plus intelligente de surligner, souligner et prendre des notes sur n'importe quel site web.",
                     howItWorksTitle: "Comment ça marche ?",
@@ -203,10 +286,14 @@
                     feature6Text: "Ajustez l'extension à votre goût depuis le menu des paramètres.",
                     ctaTitle: "Prêt à commencer !",
                     ctaText: "Allez sur n'importe quelle page web, sélectionnez du texte et commencez à organiser vos connaissances.",
-                    ctaTip: "<strong>Astuce :</strong> Vous pouvez ouvrir la barre latérale à tout moment avec le raccourci clavier (<strong>Ctrl + Shift + H</strong> par défaut) ou depuis l'icône de l'extension."
+                    ctaTip: "<strong>Astuce :</strong> Vous pouvez ouvrir la barre latérale à tout moment avec le raccourci clavier (<strong>Ctrl + Shift + H</strong> par défaut) ou depuis l'icône de l'extension.",
+                    donationsTitle: "Quantum Highlighter PRO sera TOUJOURS gratuit",
+                    donationsText: "[contenu]"
                 },
                 pt: {
                     pageTitle: "Bem-vindo ao Quantum Highlighter",
+                    githubLink: "Ver no GitHub",
+                    donateButton: "Doar",
                     heroTitle: "Bem-vindo ao Quantum Highlighter PRO!",
                     heroSubtitle: "A maneira mais inteligente de destacar, sublinhar e fazer anotações em qualquer site.",
                     howItWorksTitle: "Como Funciona?",
@@ -219,7 +306,7 @@
                     demoTitle: "Veja em Ação",
                     featuresTitle: "Principais Características",
                     feature1Title: "Múltiplas Cores",
-                    feature1Text: "Organize suas ideias com uma paleta de colores vibrantes.",
+                    feature1Text: "Organize suas ideias com uma paleta de cores vibrantes.",
                     feature2Title: "Destaque e Sublinhado",
                     feature2Text: "Escolha entre destacar o fundo ou um elegante sublinhado.",
                     feature3Title: "Comentários Ricos",
@@ -232,10 +319,14 @@
                     feature6Text: "Ajuste a extensão ao seu gosto no menu de configurações.",
                     ctaTitle: "Pronto para Começar!",
                     ctaText: "Vá para qualquer página da web, selecione um texto e comece a organizar seu conhecimento.",
-                    ctaTip: "<strong>Dica:</strong> Você pode abrir la barra lateral a qualquer momento usando o atalho de teclado (<strong>Ctrl + Shift + H</strong> por padrão) ou pelo ícone da extensão."
+                    ctaTip: "<strong>Dica:</strong> Você pode abrir a barra lateral a qualquer momento usando o atalho de teclado (<strong>Ctrl + Shift + H</strong> por padrão) ou pelo ícone da extensão.",
+                    donationsTitle: "O Quantum Highlighter PRO SEMPRE será gratuito",
+                    donationsText: "[conteúdo]"
                 },
                 ru: {
                     pageTitle: "Добро пожаловать в Quantum Highlighter",
+                    githubLink: "Посмотреть на GitHub",
+                    donateButton: "Пожертвовать",
                     heroTitle: "Добро пожаловать в Quantum Highlighter PRO!",
                     heroSubtitle: "Самый умный способ выделять, подчеркивать и делать заметки на любом веб-сайте.",
                     howItWorksTitle: "Как это работает?",
@@ -261,10 +352,14 @@
                     feature6Text: "Настройте расширение по своему вкусу в меню настроек.",
                     ctaTitle: "Готовы начать!",
                     ctaText: "Перейдите на любую веб-страницу, выделите текст и начните организовывать свои знания.",
-                    ctaTip: "<strong>Совет:</strong> Вы можете открыть боковую панель в любое время с помощью сочетания клавиш (по умолчанию <strong>Ctrl + Shift + H</strong>) или через значок расширения."
+                    ctaTip: "<strong>Совет:</strong> Вы можете открыть боковую панель в любое время с помощью сочетания клавиш (по умолчанию <strong>Ctrl + Shift + H</strong>) или через значок расширения.",
+                    donationsTitle: "Quantum Highlighter PRO ВСЕГДА будет бесплатным",
+                    donationsText: "[содержание]"
                 },
                 zh: {
                     pageTitle: "欢迎使用 Quantum Highlighter",
+                    githubLink: "在 GitHub 上查看",
+                    donateButton: "捐赠",
                     heroTitle: "欢迎使用 Quantum Highlighter PRO！",
                     heroSubtitle: "在任何网站上进行高亮、下划线和做笔记的最智能方式。",
                     howItWorksTitle: "它是如何工作的？",
@@ -290,7 +385,9 @@
                     feature6Text: "从设置菜单中根据您的喜好调整扩展。",
                     ctaTitle: "准备开始！",
                     ctaText: "转到任何网页，选择一些文本，然后开始组织您的知识。",
-                    ctaTip: "<strong>提示：</strong>您可以随时使用键盘快捷键（默认为<strong>Ctrl + Shift + H</strong>）或从扩展图标打开侧边栏。"
+                    ctaTip: "<strong>提示：</strong>您可以随时使用键盘快捷键（默认为<strong>Ctrl + Shift + H</strong>）或从扩展图标打开侧边栏。",
+                    donationsTitle: "Quantum Highlighter PRO 将永远免费",
+                    donationsText: "[内容]"
                 }
             };
 
@@ -302,7 +399,20 @@
                     document.querySelectorAll('[data-i18n]').forEach(el => {
                         const key = el.getAttribute('data-i18n');
                         if (translations[lang][key]) {
-                            el.innerHTML = translations[lang][key];
+                            // For elements that might contain other elements (like the tip),
+                            // we need to be careful not to overwrite them.
+                            // A simple approach is to set innerHTML for leaf nodes,
+                            // but for this specific case, we can check the element's children.
+                            // A more robust solution would be to use a library, but this is fine for now.
+                            if (el.children.length > 0 && key !== 'ctaTip') {
+                                // Example: update only the text content of a button or link
+                                const textNode = Array.from(el.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+                                if(textNode) textNode.textContent = translations[lang][key];
+                                else if (el.querySelector('span')) el.querySelector('span').textContent = translations[lang][key];
+
+                            } else {
+                                el.innerHTML = translations[lang][key];
+                            }
                         }
                     });
                 }
@@ -363,6 +473,12 @@
                         languageOptions.classList.remove('show');
                     }
                 });
+
+                // Donate button scroll
+                donateButton.addEventListener('click', () => {
+                    donationsSection.scrollIntoView({ behavior: 'smooth' });
+                });
+
 
                 // Load initial language
                 if (chrome && chrome.storage && chrome.storage.sync) {
