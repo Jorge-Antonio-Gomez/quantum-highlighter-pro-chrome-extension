@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const refreshToastText = document.getElementById('refresh-toast-text');
 
     // --- STATE ---
+    let myTabId = null; // This sidebar's host tab ID
     let isLocked = false;
     let lastStoredWidth = 420; // Default width
     let settings = {
@@ -37,15 +38,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function saveSettings() {
         chrome.storage.sync.set({ 'highlighter-settings': settings });
-        // Notify content script of the change
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (tabs.length > 0 && tabs[0].id) {
-                chrome.tabs.sendMessage(tabs[0].id, {
-                    action: 'settingChanged',
-                    settings: settings
-                });
-            }
-        });
+        // Notify the specific content script of the change
+        if (myTabId) {
+            chrome.tabs.sendMessage(myTabId, {
+                action: 'settingChanged',
+                settings: settings
+            });
+        }
     }
 
     const applyTranslations = () => {
@@ -79,11 +78,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         applyTranslations();
 
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (tabs.length > 0 && tabs[0].id) {
-                chrome.tabs.sendMessage(tabs[0].id, { action: 'languageChanged', language: lang });
-            }
-        });
+        if (myTabId) {
+            chrome.tabs.sendMessage(myTabId, { action: 'languageChanged', language: lang });
+        }
 
         document.querySelectorAll('.custom-select-option').forEach(opt => {
             opt.classList.toggle('active', opt.dataset.lang === lang);
@@ -104,23 +101,18 @@ document.addEventListener('DOMContentLoaded', () => {
         applyTranslations(); // Re-apply translations to update lock button label
         chrome.storage.sync.set({ sidebarLocked: locked });
 
+        if (!myTabId) return;
+
         if (locked) {
-            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                if (tabs.length > 0 && tabs[0].id) {
-                    chrome.tabs.sendMessage(tabs[0].id, { action: 'getSidebarWidth' }, (response) => {
-                        if (response && response.width) {
-                            lastStoredWidth = response.width;
-                            chrome.storage.sync.set({ sidebarWidth: response.width });
-                        }
-                    });
+            chrome.tabs.sendMessage(myTabId, { action: 'getSidebarWidth' }, (response) => {
+                if (chrome.runtime.lastError) { console.warn(chrome.runtime.lastError.message); return; }
+                if (response && response.width) {
+                    lastStoredWidth = response.width;
+                    chrome.storage.sync.set({ sidebarWidth: response.width });
                 }
             });
         } else {
-            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                if (tabs.length > 0 && tabs[0].id) {
-                    chrome.tabs.sendMessage(tabs[0].id, { action: 'setSidebarWidth', width: lastStoredWidth });
-                }
-            });
+            chrome.tabs.sendMessage(myTabId, { action: 'setSidebarWidth', width: lastStoredWidth });
         }
     };
 
@@ -152,25 +144,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const emptyStateContent = document.getElementById('empty-state-content');
         const hasAnnotations = annotations && annotations.length > 0;
 
-        // Toggle visibility of annotations list and empty state
         annotationsList.classList.toggle('is-hidden', !hasAnnotations);
         emptyStateContent.classList.toggle('is-hidden', hasAnnotations);
-
-        // Manage the refresh button's position and visibility
         refreshContainer.classList.toggle('visible', hasAnnotations);
 
-        // If there are no annotations, we are done.
         if (!hasAnnotations) {
-            annotationsList.innerHTML = ''; // Clear any leftover cards
+            annotationsList.innerHTML = '';
             return;
         }
 
-        // --- Annotation Card Rendering Logic (largely the same) ---
         const annotationsContainer = annotationsList;
         const existingIds = new Set(Array.from(annotationsContainer.querySelectorAll('.annotation-card')).map(el => el.dataset.annotationId));
         const receivedAnnotationsMap = new Map(annotations);
 
-        // 1. Remove annotations that are no longer present
         for (const id of existingIds) {
             if (!receivedAnnotationsMap.has(id)) {
                 const cardToRemove = annotationsContainer.querySelector(`[data-annotation-id="${id}"]`);
@@ -181,13 +167,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // 2. Update existing and add new annotations
         let lastElement = null;
         annotations.forEach(([id, annotation]) => {
             let card = annotationsContainer.querySelector(`[data-annotation-id="${id}"]`);
 
             if (card) {
-                // Element exists, check for updates
                 const textEl = card.querySelector('.text');
                 const commentEl = card.querySelector('.comment');
                 const colorBar = card.querySelector('.annotation-color-bar');
@@ -198,7 +182,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (colorBar.style.backgroundColor !== annotation.color) colorBar.style.backgroundColor = annotation.color;
                 card.dataset.comment = annotation.comment || '';
             } else {
-                // Element is new, create and insert it
                 card = createAnnotationCard(id, annotation);
                 card.classList.add('newly-added');
 
@@ -213,28 +196,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function createEmptyStateView(langStrings) {
-        const emptyView = document.createElement('div');
-        emptyView.className = 'empty-state-content';
-        emptyView.innerHTML = `
-            <div class="empty-state-icon">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M5 7C5 6.44772 5.44772 6 6 6H18C18.5523 6 19 6.44772 19 7C19 7.55228 18.5523 8 18 8H6C5.44772 8 5 7.55228 5 7ZM5 12C5 11.4477 5.44772 11 6 11H18C18.5523 11 19 11.4477 19 12C19 12.5523 18.5523 13 18 13H6C5.44772 13 5 12.5523 5 12ZM5 17C5 16.4477 5.44772 16 6 16H11C11.5523 16 12 16.4477 12 17C12 17.5523 11.5523 18 11 18H6C5.44772 18 5 17.5523 5 17Z" fill="currentColor"/>
-                </svg>
-            </div>
-            <h3 class="empty-state-title">${langStrings.noAnnotationsTitle || 'No Annotations Yet'}</h3>
-            <p class="empty-state-text">${langStrings.noAnnotations || 'Highlight text on the page to get started!'}</p>
-        `;
-        return emptyView;
-    }
-
-
     function createAnnotationCard(id, annotation) {
         const langStrings = translations[settings.language] || translations.en;
         const card = document.createElement('div');
         card.className = 'annotation-card';
         card.dataset.annotationId = id;
-        card.dataset.comment = annotation.comment || ''; // Store initial comment
+        card.dataset.comment = annotation.comment || '';
 
         const colorBar = document.createElement('div');
         colorBar.className = 'annotation-color-bar';
@@ -250,61 +217,34 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const commentDisplay = document.createElement('div');
         commentDisplay.className = 'comment';
-        if (annotation.comment) {
-            commentDisplay.innerHTML = annotation.comment;
-        } else {
-            commentDisplay.innerHTML = `<span class="no-comment-placeholder">${langStrings.noComment}</span>`;
-        }
+        commentDisplay.innerHTML = annotation.comment ? annotation.comment : `<span class="no-comment-placeholder">${langStrings.noComment}</span>`;
         
         mainContent.appendChild(text);
         mainContent.appendChild(commentDisplay);
 
         const actionsContainer = document.createElement('div');
         actionsContainer.className = 'actions-container';
-
-        const commentBtn = document.createElement('button');
-        commentBtn.className = 'comment-btn';
-        commentBtn.setAttribute('aria-label', langStrings.addComment || 'Add comment');
-        commentBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7.5 9.5H16.5M7.5 13.5H12.5M21 12C21 16.9706 16.9706 21 12 21C10.517 21 9.11249 20.6318 7.88573 19.9679L3 21L4.0321 16.1143C3.36821 14.8875 3 13.483 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        `;
-        
-        const divider = document.createElement('div');
-        divider.className = 'divider';
-        
-        // actionsContainer.appendChild(commentBtn);
-        actionsContainer.appendChild(divider);
         
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-btn';
         deleteBtn.setAttribute('aria-label', langStrings.deleteAnnotation || 'Delete annotation');
-        deleteBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V6H17H19C19.5523 6 20 6.44772 20 7C20 7.55228 19.5523 8 19 8H18V18C18 19.6569 16.6569 21 15 21H9C7.34315 21 6 19.6569 6 18V8H5C4.44772 8 4 7.55228 4 7C4 6.44772 4.44772 6 5 6H7H9V5ZM10 8H8V18C8 18.5523 8.44772 19 9 19H15C15.5523 19 16 18.5523 16 18V8H14H10ZM13 6H11V5H13V6ZM10 9C10.5523 9 11 9.44772 11 10V17C11 17.5523 10.5523 18 10 18C9.44772 18 9 17.5523 9 17V10C9 9.44772 9.44772 9 10 9ZM14 9C14.5523 9 15 9.44772 15 10V17C15 17.5523 14.5523 18 14 18C13.4477 18 13 17.5523 13 17V10C13 9.44772 13.4477 9 14 9Z" fill="currentColor"/>
-            </svg>
-        `;
+        deleteBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V6H17H19C19.5523 6 20 6.44772 20 7C20 7.55228 19.5523 8 19 8H18V18C18 19.6569 16.6569 21 15 21H9C7.34315 21 6 19.6569 6 18V8H5C4.44772 8 4 7.55228 4 7C4 6.44772 4.44772 6 5 6H7H9V5ZM10 8H8V18C8 18.5523 8.44772 19 9 19H15C15.5523 19 16 18.5523 16 18V8H14H10ZM13 6H11V5H13V6ZM10 9C10.5523 9 11 9.44772 11 10V17C11 17.5523 10.5523 18 10 18C9.44772 18 9 17.5523 9 17V10C9 9.44772 9.44772 9 10 9ZM14 9C14.5523 9 15 9.44772 15 10V17C15 17.5523 14.5523 18 14 18C13.4477 18 13 17.5523 13 17V10C13 9.44772 13.4477 9 14 9Z" fill="currentColor"/></svg>`;
         actionsContainer.appendChild(deleteBtn);
 
         card.appendChild(mainContent);
         card.appendChild(actionsContainer);
 
         mainContent.addEventListener('click', () => {
-            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                if (tabs.length > 0 && tabs[0].id) {
-                    chrome.tabs.sendMessage(tabs[0].id, { action: 'scrollToAnnotation', annotationId: id });
-                }
-            });
+            if (myTabId) {
+                chrome.tabs.sendMessage(myTabId, { action: 'scrollToAnnotation', annotationId: id });
+            }
         });
 
         deleteBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                if (tabs.length > 0 && tabs[0].id) {
-                    chrome.tabs.sendMessage(tabs[0].id, { action: 'deleteAnnotation', annotationId: id });
-                }
-            });
+            if (myTabId) {
+                chrome.tabs.sendMessage(myTabId, { action: 'deleteAnnotation', annotationId: id });
+            }
         });
 
         return card;
@@ -313,60 +253,51 @@ document.addEventListener('DOMContentLoaded', () => {
     function showToast(messageKey) {
         const langStrings = translations[settings.language] || translations.en;
         const message = langStrings[messageKey] || 'Done!';
-        
         refreshToastText.textContent = message;
-
-        // Dynamically adjust toast position
-        if (refreshContainer.style.display === 'flex') {
-            // Position toast above the refresh container when it's visible
+        if (refreshContainer.classList.contains('visible')) {
             const containerHeight = refreshContainer.offsetHeight;
-            refreshToast.style.bottom = `${containerHeight + 10}px`; // 10px margin
+            refreshToast.style.bottom = `${containerHeight + 10}px`;
         } else {
-            // Default position for empty state
             refreshToast.style.bottom = '20px';
         }
-        
         refreshToast.classList.add('show');
-        
         setTimeout(() => {
             refreshToast.classList.remove('show');
         }, 2200);
     }
 
     function loadAnnotations(showToastOnComplete = false) {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (!tabs || tabs.length === 0 || !tabs[0].id) {
+        if (!myTabId) {
+            renderAnnotations([]);
+            return;
+        }
+        chrome.tabs.get(myTabId, (currentTab) => {
+            if (chrome.runtime.lastError) {
+                console.warn(`Highlighter: Could not get tab info. ${chrome.runtime.lastError.message}`);
                 renderAnnotations([]);
                 return;
             }
-            const currentTab = tabs[0];
             const langStrings = translations[settings.language] || translations.en;
             if (currentTab.url && currentTab.url.startsWith('chrome-extension://')) {
                 annotationsList.innerHTML = `<p data-i18n-key="noAnnotations">${langStrings.noAnnotations}</p>`;
                 return;
             }
-
-            // Start animation
             refreshButtons.forEach(button => {
                 button.classList.add('refreshing');
                 button.disabled = true;
             });
-
-            chrome.tabs.sendMessage(currentTab.id, { action: 'getAnnotations' }, (response) => {
-                // Stop animation regardless of outcome
+            chrome.tabs.sendMessage(myTabId, { action: 'getAnnotations' }, (response) => {
                 setTimeout(() => {
                     refreshButtons.forEach(button => {
                         button.classList.remove('refreshing');
                         button.disabled = false;
                     });
-                }, 600); // Delay to allow animation to be seen
-
+                }, 600);
                 if (chrome.runtime.lastError) {
                     console.warn(`Highlighter: Could not connect. ${chrome.runtime.lastError.message}`);
                     annotationsList.innerHTML = `<p data-i18n-key="errorLoading">${langStrings.errorLoading}</p>`;
                     return;
                 }
-                
                 renderAnnotations(response?.data || []);
                 if (showToastOnComplete) {
                     showToast('annotationsRefreshed');
@@ -376,68 +307,57 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadPageInfo() {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (!tabs || tabs.length === 0 || !tabs[0].id) return;
-            const tabId = tabs[0].id;
-            chrome.tabs.sendMessage(tabId, { action: 'getPageInfo' }, (response) => {
-                if (chrome.runtime.lastError) {
-                    console.warn(`Highlighter: Could not get page info. ${chrome.runtime.lastError.message}`);
-                    websiteInfoCard.style.display = 'none';
-                    return;
-                }
-                if (response) {
-                    websiteTitle.textContent = response.title || 'No Title';
-                    websiteDescription.textContent = response.description || 'No description available.';
-                    websiteDomain.textContent = response.domain || '';
-                    
-                    if (response.favicon) {
-                        websiteFavicon.src = response.favicon;
-                        websiteFavicon.style.display = 'block';
-                    } else {
-                        websiteFavicon.style.display = 'none';
-                    }
-
-                    if (response.image) {
-                        websiteInfoCard.style.backgroundImage = `url('${response.image}')`;
-                        websiteInfoCard.classList.add('has-image');
-                    } else {
-                        websiteInfoCard.style.backgroundImage = '';
-                        websiteInfoCard.classList.remove('has-image');
-                    }
-                    websiteInfoCard.style.display = 'flex';
+        if (!myTabId) return;
+        chrome.tabs.sendMessage(myTabId, { action: 'getPageInfo' }, (response) => {
+            if (chrome.runtime.lastError) {
+                console.warn(`Highlighter: Could not get page info. ${chrome.runtime.lastError.message}`);
+                websiteInfoCard.style.display = 'none';
+                return;
+            }
+            if (response) {
+                websiteTitle.textContent = response.title || 'No Title';
+                websiteDescription.textContent = response.description || 'No description available.';
+                websiteDomain.textContent = response.domain || '';
+                if (response.favicon) {
+                    websiteFavicon.src = response.favicon;
+                    websiteFavicon.style.display = 'block';
                 } else {
-                    websiteInfoCard.style.display = 'none';
+                    websiteFavicon.style.display = 'none';
                 }
-            });
+                if (response.image) {
+                    websiteInfoCard.style.backgroundImage = `url('${response.image}')`;
+                    websiteInfoCard.classList.add('has-image');
+                } else {
+                    websiteInfoCard.style.backgroundImage = '';
+                    websiteInfoCard.classList.remove('has-image');
+                }
+                websiteInfoCard.style.display = 'flex';
+            } else {
+                websiteInfoCard.style.display = 'none';
+            }
         });
     }
 
     // --- EVENT LISTENERS ---
     refreshButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            loadAnnotations(true);
-        });
+        button.addEventListener('click', () => loadAnnotations(true));
     });
 
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (sender.tab && sender.tab.id !== myTabId) {
+            return; // Ignore messages from other tabs
+        }
         if (request.action === 'annotationsUpdated') {
             renderAnnotations(request.data);
         }
     });
 
-    lockButton.addEventListener('mousedown', (e) => {
-        // Prevent this event from bubbling up to the resize handle
-        e.stopPropagation();
-    });
+    lockButton.addEventListener('mousedown', (e) => e.stopPropagation());
     lockButton.addEventListener('click', () => setLockedState(!isLocked));
     resizeHandle.addEventListener('mousedown', (e) => {
-        if (isLocked) return;
+        if (isLocked || !myTabId) return;
         e.preventDefault();
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (tabs.length > 0 && tabs[0].id) {
-                chrome.tabs.sendMessage(tabs[0].id, { action: 'startSidebarResize' });
-            }
-        });
+        chrome.tabs.sendMessage(myTabId, { action: 'startSidebarResize' });
     });
 
     configButton.addEventListener('click', (e) => {
@@ -447,11 +367,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     closeButton.addEventListener('click', () => {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (tabs.length > 0 && tabs[0].id) {
-                chrome.tabs.sendMessage(tabs[0].id, { action: 'toggleSidebar' });
-            }
-        });
+        if (myTabId) {
+            chrome.tabs.sendMessage(myTabId, { action: 'toggleSidebar' });
+        }
     });
 
     languageSelectTrigger.addEventListener('click', (e) => {
@@ -462,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.custom-select-option').forEach(option => {
         option.addEventListener('click', (e) => {
             setLanguage(e.target.dataset.lang);
-            saveSettings(); // Save after changing the language
+            saveSettings();
             languageOptions.classList.remove('show');
         });
     });
@@ -470,46 +388,46 @@ document.addEventListener('DOMContentLoaded', () => {
     forceBlackSwitch.addEventListener('change', () => {
         settings.useDarkText = forceBlackSwitch.checked;
         updateAnnotationTextStyles();
-        saveSettings(); // Save after changing the switch
+        saveSettings();
     });
 
     disablePageSwitch.addEventListener('change', (e) => {
         const checked = e.target.checked;
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (tabs.length > 0 && tabs[0].url) {
-                const href = tabs[0].url;
-                chrome.storage.sync.get({ disabledPages: [] }, (data) => {
-                    let disabledPages = data.disabledPages;
-                    if (checked) {
-                        if (!disabledPages.includes(href)) disabledPages.push(href);
-                    } else {
-                        disabledPages = disabledPages.filter(page => page !== href);
-                    }
-                    chrome.storage.sync.set({ disabledPages }, () => {
-                        chrome.tabs.sendMessage(tabs[0].id, { action: 'toggleActivation', disabled: checked });
-                    });
+        if (!myTabId) return;
+        chrome.tabs.get(myTabId, (tab) => {
+            if (!tab || !tab.url) return;
+            const href = tab.url;
+            chrome.storage.sync.get({ disabledPages: [] }, (data) => {
+                let disabledPages = data.disabledPages;
+                if (checked) {
+                    if (!disabledPages.includes(href)) disabledPages.push(href);
+                } else {
+                    disabledPages = disabledPages.filter(page => page !== href);
+                }
+                chrome.storage.sync.set({ disabledPages }, () => {
+                    chrome.tabs.sendMessage(myTabId, { action: 'toggleActivation', disabled: checked });
                 });
-            }
+            });
         });
     });
 
     disableDomainSwitch.addEventListener('change', (e) => {
         const checked = e.target.checked;
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (tabs.length > 0 && tabs[0].url) {
-                const hostname = new URL(tabs[0].url).hostname;
-                chrome.storage.sync.get({ disabledSites: [] }, (data) => {
-                    let disabledSites = data.disabledSites;
-                    if (checked) {
-                        if (!disabledSites.includes(hostname)) disabledSites.push(hostname);
-                    } else {
-                        disabledSites = disabledSites.filter(site => site !== hostname);
-                    }
-                    chrome.storage.sync.set({ disabledSites }, () => {
-                        chrome.tabs.sendMessage(tabs[0].id, { action: 'toggleActivation', disabled: checked });
-                    });
+        if (!myTabId) return;
+        chrome.tabs.get(myTabId, (tab) => {
+            if (!tab || !tab.url) return;
+            const hostname = new URL(tab.url).hostname;
+            chrome.storage.sync.get({ disabledSites: [] }, (data) => {
+                let disabledSites = data.disabledSites;
+                if (checked) {
+                    if (!disabledSites.includes(hostname)) disabledSites.push(hostname);
+                } else {
+                    disabledSites = disabledSites.filter(site => site !== hostname);
+                }
+                chrome.storage.sync.set({ disabledSites }, () => {
+                    chrome.tabs.sendMessage(myTabId, { action: 'toggleActivation', disabled: checked });
                 });
-            }
+            });
         });
     });
 
@@ -531,32 +449,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- INITIALIZATION ---
     const initialize = () => {
-        loadPageInfo(); // Load page info on startup
-        chrome.storage.sync.get(['sidebarLocked', 'sidebarWidth', 'highlighter-settings', 'disabledPages', 'disabledSites'], (data) => {
-            // Set up sidebar lock and width
-            const isLocked = data.sidebarLocked === undefined ? true : data.sidebarLocked;
-            setLockedState(isLocked);
-            lastStoredWidth = Math.max(data.sidebarWidth || 420, 380);
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (!tabs || tabs.length === 0) {
+                console.error("Highlighter sidebar: Could not identify the host tab.");
+                return;
+            }
+            const currentTab = tabs[0];
+            myTabId = currentTab.id;
 
-            // Safely load and merge settings
-            const defaultSettings = {
-                language: navigator.language.split('-')[0] || 'en',
-                useDarkText: false
-            };
-            settings = { ...defaultSettings, ...data['highlighter-settings'] };
-            
-            // Apply loaded settings to the UI
-            setLanguage(settings.language);
-            forceBlackSwitch.checked = settings.useDarkText;
-            updateAnnotationTextStyles();
+            loadPageInfo();
+            loadAnnotations();
 
-            // Save the potentially merged/cleaned settings back to storage
-            saveSettings();
+            chrome.storage.sync.get(['sidebarLocked', 'sidebarWidth', 'highlighter-settings', 'disabledPages', 'disabledSites'], (data) => {
+                const isLocked = data.sidebarLocked === undefined ? true : data.sidebarLocked;
+                setLockedState(isLocked);
+                lastStoredWidth = Math.max(data.sidebarWidth || 420, 380);
 
-            // Set initial state for disable switches
-            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                if (tabs.length > 0 && tabs[0].url) {
-                    const url = new URL(tabs[0].url);
+                const defaultSettings = {
+                    language: navigator.language.split('-')[0] || 'en',
+                    useDarkText: false
+                };
+                settings = { ...defaultSettings, ...data['highlighter-settings'] };
+                
+                setLanguage(settings.language);
+                forceBlackSwitch.checked = settings.useDarkText;
+                updateAnnotationTextStyles();
+                saveSettings();
+
+                if (currentTab.url) {
+                    const url = new URL(currentTab.url);
                     const disabledSites = data.disabledSites || [];
                     const disabledPages = data.disabledPages || [];
                     disableDomainSwitch.checked = disabledSites.includes(url.hostname);
@@ -567,119 +488,4 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     initialize();
-});
-
-// --- COMMENT EDITOR LOGIC ---
-
-document.addEventListener('DOMContentLoaded', () => {
-    const annotationsList = document.getElementById('annotations-list');
-
-    // Use event delegation to handle clicks on comment buttons
-    annotationsList.addEventListener('click', (e) => {
-        const commentBtn = e.target.closest('.comment-btn');
-        if (commentBtn) {
-            const card = commentBtn.closest('.annotation-card');
-            if (card) {
-                toggleCommentEditor(card);
-            }
-        }
-    });
-
-    function toggleCommentEditor(card) {
-        const isEditing = card.classList.contains('editing');
-        
-        // Close any other open editors
-        document.querySelectorAll('.annotation-card.editing').forEach(openCard => {
-            if (openCard !== card) {
-                closeEditor(openCard);
-            }
-        });
-
-        if (isEditing) {
-            closeEditor(card);
-        } else {
-            openEditor(card);
-        }
-    }
-
-    function openEditor(card) {
-        card.classList.add('editing');
-        
-        const existingEditor = card.querySelector('.comment-editor');
-        if (existingEditor) {
-            existingEditor.style.display = 'block';
-            return; // Editor already exists
-        }
-
-        const langStrings = translations[settings.language] || translations.en;
-        const initialContent = card.dataset.comment || '';
-
-        const editorContainer = document.createElement('div');
-        editorContainer.className = 'comment-editor';
-
-        const editorDiv = document.createElement('div');
-        editorDiv.className = 'wysiwyg-editor';
-        editorDiv.setAttribute('contenteditable', 'true');
-        editorDiv.innerHTML = initialContent;
-
-        const actions = document.createElement('div');
-        actions.className = 'comment-editor-actions';
-
-        const saveBtn = document.createElement('button');
-        saveBtn.className = 'comment-save-btn';
-        saveBtn.textContent = langStrings.saveButton || 'Save';
-
-        const cancelBtn = document.createElement('button');
-        cancelBtn.className = 'comment-cancel-btn';
-        cancelBtn.textContent = langStrings.cancelButton || 'Cancel';
-
-        actions.appendChild(cancelBtn);
-        actions.appendChild(saveBtn);
-        editorContainer.appendChild(editorDiv);
-        editorContainer.appendChild(actions);
-        card.appendChild(editorContainer);
-
-        editorDiv.focus();
-
-        // --- Event Listeners for the new editor ---
-        saveBtn.addEventListener('click', () => {
-            const newContent = editorDiv.innerHTML;
-            const annotationId = card.dataset.annotationId;
-            
-            // Update UI immediately
-            const commentDisplay = card.querySelector('.comment');
-            if (newContent.trim()) {
-                commentDisplay.innerHTML = newContent;
-            } else {
-                commentDisplay.innerHTML = `<span class="no-comment-placeholder">${langStrings.noComment}</span>`;
-            }
-            card.dataset.comment = newContent;
-
-            // Send to content script to save
-            chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                if (tabs.length > 0 && tabs[0].id) {
-                    chrome.tabs.sendMessage(tabs[0].id, {
-                        action: 'updateAnnotationComment',
-                        annotationId: annotationId,
-                        comment: newContent
-                    });
-                }
-            });
-
-            closeEditor(card);
-        });
-
-        cancelBtn.addEventListener('click', () => {
-            closeEditor(card);
-        });
-    }
-
-    function closeEditor(card) {
-        card.classList.remove('editing');
-        const editor = card.querySelector('.comment-editor');
-        if (editor) {
-            // Instead of removing, just hide it to preserve state if reopened
-            editor.style.display = 'none';
-        }
-    }
 });
