@@ -1,192 +1,143 @@
 # Quantum Highlighter PRO
 
-Una extensión de navegador web completa que permite resaltar, anotar y gestionar comentarios en cualquier página web, inspirada en el sistema de anotaciones de Zotero. Disponible como extensión de Chrome con barra lateral integrada.
+A powerful, open-source web annotation extension for Chrome, inspired by Zotero's annotation system. Highlight, underline, and manage annotations with rich-text comments on any webpage.
 
-## Características principales
+![Demo Light Theme](chrome_extension/images/demo_light_4.png)
 
-### 🎨 Sistema de Anotaciones Avanzado
-*   **Dos tipos de anotación:** Resalta texto con un color de fondo o subráyalo.
-*   **Ocho colores disponibles:** Personaliza tus notas con una paleta de 8 colores (amarillo, rojo, verde, azul, morado, rosa, naranja, gris).
-*   **Editor de texto enriquecido:** Integración completa con Tiptap para comentarios con formato rico (negrita, cursiva, enlaces, listas, código, etc.).
+## Key Features
 
-### 📝 Gestión de Comentarios
-*   **Comentarios enriquecidos:** Agrega comentarios con formato completo usando un editor WYSIWYG.
-*   **Toolbar de formato:** Herramientas completas para formatear texto (negrita, cursiva, tachado, enlaces, bloques de código, citas, etc.).
-*   **Placeholders dinámicos:** Textos de ayuda contextuales según el tipo de contenido que estés escribiendo.
+### 🎨 Advanced Annotation System
+*   **Two Annotation Types:** Choose between highlighting text with a background color or underlining it.
+*   **Eight Colors:** A palette of 8 colors to organize your notes (yellow, red, green, blue, purple, pink, orange, gray).
 
-### 🔧 Barra Lateral Inteligente
-*   **Panel lateral dedicado:** Interfaz completa para gestionar todas tus anotaciones.
-*   **Ancho ajustable:** Redimensiona la barra lateral arrastrando desde el borde y bloquea/desbloquea el ancho.
-*   **Navegación por anotaciones:** Ve todas tus anotaciones organizadas por página.
-*   **Estados vacíos informativos:** Mensajes útiles cuando no hay anotaciones disponibles.
+    ![Demo Light Theme](chrome_extension/images/demo_light_2.png)
+    
+*   **Robust & Dynamic:** Annotations persist reliably, even on dynamic websites like YouTube, thanks to a `MutationObserver`-based re-application system.
 
-### ⚙️ Configuración Avanzada
-*   **Control granular:** Desactiva la extensión por página específica o sitio web completo.
-*   **Forzado de color:** Opción para forzar texto negro en resaltados para mejor legibilidad.
-*   **Gestión de idioma:** Cambia el idioma de la interfaz desde la configuración.
-*   **Persistencia inteligente:** Las configuraciones se mantienen entre sesiones.
+### 📝 Rich-Text Comments
 
-### 🌍 Internacionalización Completa
-*   **Soporte multi-idioma:** Interfaz completamente traducida en 6 idiomas: español, inglés, francés, portugués, ruso y chino.
-*   **Placeholders localizados:** Todos los textos de ayuda están adaptados culturalmente.
-*   **Términos técnicos precisos:** Traducciones profesionales de toda la terminología técnica.
+![Demo Light Theme](chrome_extension/images/demo_light_3.png)
 
-### ⌨️ Experiencia de Usuario Optimizada
-*   **Atajos de teclado inteligentes:**
-    *   `Esc`: Cierra menús o cancela la selección actual.
-    *   `Supr`: Elimina la anotación seleccionada.
-*   **Manejo contextual:** Los atajos se desactivan automáticamente en campos de texto.
-*   **Selección precisa:** Recorta automáticamente espacios en blanco para mantener las notas limpias.
-*   **Menú contextual mejorado:** Posicionamiento inteligente que evita salirse de la pantalla.
+*   **Full-Featured Editor:** Powered by **Tiptap**, the comment editor supports rich formatting.
+*   **Formatting Toolbar:** Includes tools for **bold**, *italic*, <u>underline</u>, ~~strikethrough~~, links, code blocks, quotes, and headings (H1, H2, H3).
+*   **Smart Link Tool:** Create and edit links with a custom modal. Hover over links to see their URL, and `Ctrl+Click` to open them in a new tab.
+*   **Dynamic Placeholders:** Context-aware help text guides you as you write.
 
-## Instalación
+### 🔧 Intelligent Sidebar
+*   **Centralized Management:** A dedicated panel to view and manage all your annotations for the current page.
+*   **Page Metadata:** The sidebar displays the page's title, description, domain, and favicon for context.
+*   **Click-to-Scroll:** Instantly navigate to any annotation on the page by clicking its card in the sidebar.
+*   **Resizable & Lockable:** Drag the edge to resize the sidebar and lock its width to your preference.
 
-### Desde Chrome Web Store (Recomendado)
-*Próximamente disponible en Chrome Web Store*
+### ⚙️ Advanced Configuration
+*   **Granular Control:** Disable the extension on a specific page or an entire website.
+*   **Force Dark Text:** An option to force black text on highlights to ensure readability on any background.
+*   **Smart Persistence:** All your settings and annotations are saved across browser sessions using `chrome.storage`.
 
-### Instalación Manual
-1.  **Descarga la extensión:** Descarga o clona este repositorio.
-2.  **Abre Chrome:** Ve a `chrome://extensions/` en tu navegador.
-3.  **Modo desarrollador:** Activa el "Modo de desarrollador" en la esquina superior derecha.
-4.  **Carga la extensión:** Haz clic en "Cargar extensión sin empaquetar" y selecciona la carpeta `chrome_extension`.
-5.  **¡Listo!** La extensión aparecerá en tu barra de herramientas.
+### 🌍 Full Internationalization (i18n)
+*   **Multi-Language Support:** The entire interface is professionally translated into 6 languages:
+    *   **English** _(en)_
+    *   **Spanish** _(es)_
+    *   **French** _(fr)_
+    *   **Portuguese** _(pt)_
+    *   **Russian** _(ru)_
+    *   **Chinese** _(zh)_
+*   **Localized Placeholders:** All help texts are culturally adapted.
 
-### Para Desarrolladores - UserScript
-Si prefieres usar la versión UserScript original, necesitas una extensión que gestione scripts de usuario:
+### ⌨️ Optimized User Experience
+*   **Smart Context Menus:** Annotation menus are intelligently positioned using **Floating UI** to prevent them from going off-screen.
+*   **Precise Selection:** Automatically trims leading/trailing whitespace from selections to keep your notes clean.
+*   **Intuitive Shortcuts:** A comprehensive set of keyboard shortcuts for a faster workflow.
 
-*   [Tampermonkey](https://www.tampermonkey.net/) (recomendado)
-*   [Greasemonkey](https://www.greasespot.net/)
-*   [Violentmonkey](https://violentmonkey.github.io/)
+## Keyboard Shortcuts
 
-Luego instala el archivo `script_v2.js` desde el repositorio.
+| Shortcut | Action | Context |
+| :--- | :--- | :--- |
+| `Ctrl+Shift+H` | Toggle the sidebar | Global |
+| `Esc` | Close annotation menu or cancel selection | On-Page |
+| `Delete` | Delete the selected annotation | On-Page |
+| `Ctrl+Click` | Open link in a new tab | On a link in a comment |
+| `Ctrl+B` | Toggle **Bold** | Comment Editor |
+| `Ctrl+I` | Toggle *Italic* | Comment Editor |
+| `Ctrl+U` | Toggle <u>Underline</u> | Comment Editor |
+| `Ctrl+Shift+X` | Toggle ~~Strikethrough~~ | Comment Editor |
+| `Ctrl+K` | Add/Edit Link | Comment Editor |
+| `Ctrl+Shift+7` | Toggle Blockquote | Comment Editor |
+| `Ctrl+Shift+8` | Toggle Code Block | Comment Editor |
+| `Ctrl+Alt+1` | Toggle Heading 1 | Comment Editor |
+| `Ctrl+Alt+2` | Toggle Heading 2 | Comment Editor |
+| `Ctrl+Alt+3` | Toggle Heading 3 | Comment Editor |
 
-## Uso
+## Installation
 
-### Creando Anotaciones
-1.  **Selecciona texto:** Arrastra el ratón sobre el texto que quieres anotar en cualquier página web.
-2.  **Elige el tipo:** Aparecerá un menú flotante donde puedes elegir entre resaltado o subrayado.
-3.  **Selecciona color:** Elige uno de los 8 colores disponibles.
-4.  **Agrega comentario:** Opcionalmente, haz clic en "Añadir comentario" para incluir notas detalladas.
+### From the Chrome Web Store (Recommended)
+Install the extension directly from the Chrome Web Store for the most stable version and automatic updates.
 
-### Editando Comentarios
-1.  **Editor enriquecido:** Usa la barra de herramientas para formatear tu texto con:
-    *   **Negrita, cursiva, tachado**
-    *   **Enlaces con texto personalizable**
-    *   **Listas y elementos estructurados**
-    *   **Bloques de código y citas**
-    *   **Encabezados de diferentes niveles**
-2.  **Guarda o cancela:** Usa los botones para confirmar o descartar cambios.
+[**➡️ Install from Chrome Web Store**](https://chrome.google.com/webstore/detail/mock-link-for-quantum-highlighter)
 
-### Gestión desde la Barra Lateral
-1.  **Abre la barra lateral:** Haz clic en el icono de la extensión o usa el menú contextual.
-2.  **Navega tus anotaciones:** Ve todas las anotaciones organizadas por página.
-3.  **Edita o elimina:** Haz clic en cualquier anotación para editarla o eliminarla.
-4.  **Ajusta el ancho:** Arrastra el borde izquierdo para redimensionar y usa el candado para fijar el tamaño.
+### Manual Installation (for Developers)
+If you prefer to install manually or want to test the latest development version:
 
-### Configuración Avanzada
-1.  **Accede a configuración:** Haz clic en el icono de engranaje en la barra lateral.
-2.  **Cambia idioma:** Selecciona tu idioma preferido.
-3.  **Controla visibilidad:** Desactiva la extensión en páginas específicas o sitios completos.
-4.  **Optimiza legibilidad:** Activa el forzado de texto negro en resaltados.
+1.  **Download:** Download or clone this repository.
+2.  **Open Chrome:** Navigate to `chrome://extensions/`.
+3.  **Enable Developer Mode:** Turn on the "Developer mode" toggle in the top-right corner.
+4.  **Load the Extension:** Click "Load unpacked" and select the `chrome_extension` folder from this repository.
+5.  **Done!** The extension icon will appear in your toolbar.
 
-## Configuración
+## Usage
 
-### Cambio de Idioma
-1.  **Desde la barra lateral:** Haz clic en el icono de configuración (⚙️).
-2.  **Selecciona idioma:** Elige entre los idiomas disponibles:
-    *   🇪🇸 **Español** (`es`)
-    *   🇺🇸 **English** (`en`)
-    *   🇫🇷 **Français** (`fr`)
-    *   🇧🇷 **Português** (`pt`)
-    *   🇷🇺 **Русский** (`ru`)
-    *   🇨🇳 **中文** (`zh`)
-3.  **Aplicación automática:** Los cambios se aplican inmediatamente sin necesidad de recargar.
+### Creating Annotations
+1.  **Select Text:** Drag your mouse over any text on a webpage.
+2.  **Choose Type & Color:** A floating menu will appear. First, select the annotation type (highlight or underline), then choose one of the 8 available colors.
+3.  **Annotation is Created:** The annotation is instantly created and saved.
 
-### Opciones de Privacidad
-*   **Desactivar en página:** Desactiva Quantum Highlighter solo en la página actual.
-*   **Desactivar en sitio:** Desactiva la extensión en todo el dominio del sitio web.
-*   **Gestión granular:** Las configuraciones se recuerdan automáticamente.
+### Editing Annotations & Adding Comments
+1.  **Click an Annotation:** Click on any existing highlight or underline on the page.
+2.  **Edit Menu:** The context menu will appear, allowing you to change the color, type, or delete the annotation.
+3.  **Add a Comment:** Use the integrated Tiptap editor to write and format your comments. Changes are saved automatically.
 
-### Optimización Visual
-*   **Forzar texto negro:** Mejora la legibilidad forzando el color negro en texto resaltado.
-*   **Ancho de barra lateral:** Personaliza y fija el ancho según tus preferencias.
-*   **Tema adaptable:** La interfaz se adapta automáticamente al tema del navegador.
+### Managing from the Sidebar
+1.  **Open Sidebar:** Click the extension icon or use the `Ctrl+Shift+H` shortcut.
+2.  **Navigate Annotations:** See all annotations organized in a list.
+3.  **Scroll to, Edit, or Delete:** Click any annotation card to scroll to its position on the page. Use the buttons on the card to edit or delete it.
+4.  **Adjust Width:** Drag the left edge to resize the sidebar and use the lock icon to fix its size.
 
-## Arquitectura y Desarrollo
+## Technology Stack
 
-### Tecnologías Principales
-*   **Extensión Chrome Manifest V3:** Implementación moderna y segura.
-*   **Tiptap Editor:** Editor de texto enriquecido para comentarios avanzados.
-*   **Floating UI:** Posicionamiento inteligente de menús contextuales.
-*   **Sistema i18n personalizado:** Internacionalización completa sin dependencias externas.
+*   **Chrome Extension Manifest V3:** Modern, secure, and performant extension architecture.
+*   **Vanilla JavaScript (ES6+):** No heavy frameworks for the core logic, ensuring a lightweight footprint.
+*   **Tiptap:** A headless, framework-agnostic rich-text editor for advanced comments.
+*   **Floating UI:** A powerful library for intelligently positioning floating elements like context menus.
+*   **Custom i18n System:** A dependency-free internationalization system.
 
-### Estructura del Proyecto
-```
-chrome_extension/
-├── manifest.json          # Configuración de la extensión
-├── script.js              # Lógica principal de anotaciones
-├── sidebar.js/.html/.css  # Interfaz de barra lateral
-├── i18n.js                # Sistema de traducciones
-├── background.js          # Service worker
-├── style.css              # Estilos de anotaciones
-└── libs/                  # Librerías externas
-    ├── tiptap.js         # Editor de texto enriquecido
-    └── floating-ui-*.js  # Posicionamiento de UI
-```
+## Contributing
 
-### Componentes Principales
-*   **`AnnotationManager`**: Gestión central de todas las anotaciones y su persistencia.
-*   **`TiptapIntegration`**: Sistema de edición de texto enriquecido con toolbar completa.
-*   **`SidebarController`**: Lógica de la barra lateral, redimensionamiento y configuración.
-*   **`I18nSystem`**: Sistema de internacionalización con soporte para 6 idiomas.
-*   **`StorageManager`**: Gestión inteligente de datos con Chrome Storage API.
-*   **`ContextMenuManager`**: Menús contextuales con posicionamiento adaptativo.
+Contributions are welcome! Please:
 
-### Características Técnicas
-*   **Persistencia multiplataforma:** Usa Chrome Storage API para sincronización entre dispositivos.
-*   **Rendimiento optimizado:** Lazy loading y gestión eficiente de memoria.
-*   **Accesibilidad:** Soporte completo para lectores de pantalla y navegación por teclado.
-*   **Responsive design:** Interfaz adaptable a diferentes tamaños de pantalla.
-*   **Error handling:** Gestión robusta de errores con fallbacks automáticos.
+1.  **Fork** the repository.
+2.  **Create** a feature branch (`git checkout -b feature/new-feature`).
+3.  **Commit** your changes (`git commit -am 'Add some new feature'`).
+4.  **Push** to the branch (`git push origin feature/new-feature`).
+5.  **Open** a Pull Request.
 
-## Versiones Disponibles
+### Areas for Contribution
+*   🌍 **Translations** into new languages or improving existing ones.
+*   🎨 **UI/UX improvements**.
+*   🐛 **Bug fixes**.
+*   📚 **Documentation**.
+*   ⚡ **Performance optimizations** and code refactoring.
 
-### 🚀 Extensión de Chrome (Recomendada)
-*   **Interfaz completa** con barra lateral integrada
-*   **Editor de texto enriquecido** con Tiptap
-*   **Sincronización** entre dispositivos
-*   **Configuración avanzada** desde la interfaz
-*   **Actualizaciones automáticas**
+### Support the Project
+Quantum Highlighter PRO is a free, open-source project developed with love in my spare time. If you find the extension useful, please consider making a donation to support its continued development and maintenance.
 
-### 📜 UserScript (Clásica)
-*   **Versión ligera** para gestores de scripts
-*   **Compatible** con Tampermonkey, Greasemonkey
-*   **Funcionalidades básicas** de resaltado
-*   **Ideal** para usuarios avanzados
+[**❤️ Donate via PayPal**](https://www.paypal.com/ncp/payment/P8GZGDP6GQBB2)
 
-## Contribución
+## License
 
-¡Las contribuciones son bienvenidas! Por favor:
+This project is licensed under the **Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)**.
 
-1.  **Fork** el repositorio
-2.  **Crea** una rama para tu feature (`git checkout -b feature/nueva-caracteristica`)
-3.  **Commit** tus cambios (`git commit -am 'Agrega nueva característica'`)
-4.  **Push** a la rama (`git push origin feature/nueva-caracteristica`)
-5.  **Abre** un Pull Request
-
-### Áreas de Contribución
-*   🌍 **Traducciones** a nuevos idiomas
-*   🎨 **Mejoras de UI/UX**
-*   🐛 **Corrección de bugs**
-*   📚 **Documentación**
-*   ⚡ **Optimizaciones de rendimiento**
-
-## Licencia
-
-Este proyecto está bajo la Licencia Creative Commons Atribución-CompartirIgual 4.0 Internacional (CC BY-SA 4.0).
-
-Puedes usar, modificar y distribuir libremente este software, siempre que mantengas la atribución original y compartas tus modificaciones bajo la misma licencia.
+You are free to use, modify, and distribute this software, provided you give appropriate credit and share your modifications under the same license.
 
 ---
 
-**Desarrollado con ❤️ por [Jorge Antonio Gómez](https://github.com/Jorge-Antonio-Gomez)**
+**Developed with ❤️ by [Jorge Antonio Gómez](https://github.com/Jorge-Antonio-Gomez)**
