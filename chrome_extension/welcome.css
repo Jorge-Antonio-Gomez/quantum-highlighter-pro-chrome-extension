@@ -33,7 +33,7 @@ body {
     align-items: center;
 }
 
-.top-header a, .top-header .donate-button {
+.top-header a {
     color: white;
     text-decoration: none;
     font-size: 14px;
@@ -41,10 +41,34 @@ body {
     transition: opacity 0.2s;
     display: flex;
     align-items: center;
+    transition: all 0.2s ease, transform 0.2s ease;
 }
 
-.top-header a:hover, .top-header .donate-button:hover {
-    opacity: 0.8;
+.top-header .donate-button {
+    background-color: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 4px 16px;
+    /* padding-left: 1.3rem; */
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.top-header .donate-button:hover {
+    /* opacity: 0.8; */
+    scale: 1.05;
+}
+
+.donate-button svg {
+    width: 16px;
+    height: 16px;
+    /* margin-left: 10px; */
+    margin-right: 10px;
+    fill: white;
+}
+
+.github-link {
+    border: none;
 }
 
 .github-link svg {
@@ -53,15 +77,6 @@ body {
     margin-left: 8px;
     margin-right: 8px;
     fill: white;
-}
-
-.donate-button {
-    background-color: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 6px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-family: inherit;
 }
 
 .container {
@@ -268,6 +283,11 @@ h2 {
 /* Donations Section */
 #donations {
     text-align: center;
+    background-color: #f8fafc; /* Light gray background for the section */
+    padding: 40px 20px;
+    margin: 0 -40px -40px -40px; /* Extend to the container edges */
+    border-radius: 0 0 12px 12px;
+    border-top: 1px solid var(--highlighter-border-color);
 }
 
 #donations h2 {
@@ -287,64 +307,124 @@ h2 {
     gap: 30px;
     margin-top: 30px;
     justify-content: center;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .donation-card {
-    background-color: #f8fafc;
-    padding: 25px;
-    border-radius: 8px;
+    background-color: #ffffff; /* White background for cards */
+    padding: 25px 30px;
+    border-radius: 12px; /* Softer corners */
     border: 1px solid #e2e8f0;
     text-align: center;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    height: auto;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.donation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.donation-card-content {
+    flex-grow: 1; /* Allows this to fill space */
+    /* margin-bottom: 20px; */
 }
 
 .donation-card h3 {
-    font-size: 1.2em;
+    font-size: 1.3em;
     font-weight: 500;
     margin-top: 0;
-    margin-bottom: 15px;
-    color: #647080;
+    margin-bottom: 10px;
+    color: #334155;
 }
 
-.donation-amount {
+.donation-description {
+    font-size: 0.95em;
+    color: #64748b;
+    margin-bottom: 15px;
+    min-height: 55px;
+}
+
+.suggested-amounts {
     display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.amount-chip {
+    background-color: #f1f5f9;
+    border-radius: 16px;
+    padding: 3px 18px;
+    font-size: 0.9em;
+    font-weight: 500;
+    color: #8d939c;
+    cursor: default;
+}
+
+.custom-amount-text {
+    font-size: 0.85em;
+    color: #64748b;
+    margin-top: 10px;
+}
+
+.subscription-price {
+    margin-bottom: 20px;
+}
+
+.subscription-price strong {
+    font-size: 1.8em;
+    font-weight: 700;
+    color: #334155;
+}
+
+.subscription-price span {
+    color: #64748b;
+}
+
+.donation-button {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 20px;
-    gap: 8px;
-}
-
-.donation-amount label {
-    font-size: 14px;
-    font-weight: 500;
-    color: #647080;
-}
-
-.donation-amount input {
-    width: 40px;
-    padding: 8px 0 8px 15px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    font-size: 1.1em;
-    font-weight: 700;
+    width: 100%;
+    padding: 12px 24px;
+    background-color: #ffc439; /* PayPal Gold */
+    color: #111;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
     text-align: center;
-    /* color: var(--highlighter-primary-color); */
-    color: #334155;
-    background-color: #ffffff;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: background-color 0.2s ease;
+    box-sizing: border-box;
+    margin-top: auto; /* Pushes button to the bottom */
 }
 
-.donation-amount input:focus {
-    outline: none;
-    border-color: var(--highlighter-primary-color);
-    box-shadow: 0 0 0 3px rgba(241, 136, 34, 0.2);
+.donation-button .paypal-logo {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
 }
 
-.paypal-button-container {
-    margin-top: auto; /* Pushes the button to the bottom */
-    padding-top: 15px;
+.donation-button:hover {
+    background-color: #f2b930;
+}
+
+.donation-card-subscription .donation-button {
+    background-color: var(--highlighter-primary-color);
+    border: 1px solid var(--highlighter-primary-color);
+    color: white;
+}
+
+.donation-card-subscription .donation-button:hover {
+    background-color: #d97706; /* Darker orange on hover */
+    border-color: #d97706;
 }
 
 
@@ -456,23 +536,8 @@ h2 {
         top: 10px;
         right: 10px;
     }
-}
-
-#donations hr {
-    border: none;
-    border-top: 1px solid var(--highlighter-border-color);
-    margin: 0 0 2em 0;
-}
-
-#form-container-P8GZGDP6GQBB2 h3,
-#form-container-P8GZGDP6GQBB2 .item-description {
-    display: none;
-}
-
-#amount {
-    margin-bottom: 0;
-}
-
-#form-container-P8GZGDP6GQBB2 .vertical.css-134chkc {
-    margin-top: 0;
+    #donations {
+        margin: 0 -20px -20px -20px;
+        padding: 40px 20px;
+    }
 }

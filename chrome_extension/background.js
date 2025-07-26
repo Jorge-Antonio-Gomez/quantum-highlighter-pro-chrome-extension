@@ -1,4 +1,9 @@
 chrome.runtime.onInstalled.addListener(async (details) => {
+  if (details.reason === "install") {
+    chrome.tabs.create({
+      url: "welcome.html"
+    });
+  }
   if (details.reason === "install" || details.reason === "update") {
     const url = chrome.runtime.getURL("excluded-websites.json");
     try {

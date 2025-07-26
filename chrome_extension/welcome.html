@@ -14,7 +14,12 @@
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
                 <span></span>
             </a>
-            <button class="donate-button" id="donate-button" data-i18n="donateButton"></button>
+            <a href="#donations" class="donate-button" data-i18n="donateButton">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/>
+                </svg>
+                <span></span>
+            </a>
         </header>
         <div class="container">
             <div class="language-selector-container">
@@ -117,67 +122,49 @@
             </footer>
 
             <section id="donations">
-                <hr>
                 <h2 data-i18n="donationsTitle">Quantum Highlighter PRO will ALWAYS be free</h2>
-                <!-- <p data-i18n="donationsText">Quantum Highlighter is an open-source project built with dedication. Your donation helps keep it alive and allows for the development of new features. Every contribution, no matter the size, makes a huge difference. Thank you so much for your support!</p> -->
-                <p>Quantum Highlighter is an open-source project built with dedication. Your donation helps keep it alive and allows for the development of new features. Every contribution, no matter the size, makes a huge difference. Thank you so much for your support!</p>
+                <p data-i18n="donationsText">Quantum Highlighter is an open-source project built with dedication. Your donation helps keep it alive and allows for the development of new features. Every contribution, no matter the size, makes a huge difference. Thank you so much for your support!</p>
 
                 <div class="donations-grid">
                     <!-- One-Time Donation Card -->
-                    <div class="donation-card">
-                        <div>
-                            <h3>One-Time Donation</h3>
+                    <div class="donation-card donation-card-onetime">
+                        <div class="donation-card-content">
+                            <h3 data-i18n="oneTimeDonationTitle">One-Time Donation</h3>
+                            <p class="donation-description" data-i18n="oneTimeDonationDescription">Support the project with a single contribution. Every little bit helps!</p>
+                            <div class="suggested-amounts">
+                                <div class="amount-chip">$5</div>
+                                <div class="amount-chip">$10</div>
+                                <div class="amount-chip">$20</div>
+                            </div>
+                            <p class="custom-amount-text" data-i18n="customAmountText">Or choose any other amount. Thank you!</p>
                         </div>
-                        <div id="paypal-container-P8GZGDP6GQBB2"></div>
+                        <a href="https://www.paypal.com/ncp/payment/P8GZGDP6GQBB2" target="_blank" rel="noopener noreferrer" class="donation-button" data-i18n="oneTimeDonationButton">
+                            <img src="images/paypal-logo.svg" alt="PayPal Logo" class="paypal-logo">
+                            <span></span>
+                        </a>
                     </div>
 
                     <!-- Subscription Donation Card -->
-                    <div class="donation-card">
-                        <div>
-                            <h3>Monthly Subscription</h3>
-                            <div class="donation-amount">
-                                <label for="subscription-amount">USD</label>
-                                <input type="number" id="subscription-amount" value="5" min="1">
-                                <label>/month</label>
+                    <div class="donation-card donation-card-subscription">
+                        <div class="donation-card-content">
+                            <h3 data-i18n="monthlySubscriptionTitle">Monthly Subscription</h3>
+                            <p class="donation-description" data-i18n="monthlySubscriptionDescription">Become a regular supporter and help ensure the project's future.</p>
+                            <div class="suggested-amounts">
+                                <div class="amount-chip">$2</div>
+                                <div class="amount-chip">$5</div>
+                                <div class="amount-chip">$10</div>
                             </div>
+                            <p class="custom-amount-text" data-i18n="customAmountTextMonthly">You can choose any amount to donate monthly.</p>
                         </div>
-                        <div id="paypal-button-container-P-2CW39197CN079424VNCCCAAQ"></div>
+                        <a href="https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-2CW39197CN079424VNCCCAAQ" target="_blank" rel="noopener noreferrer" class="donation-button" data-i18n="subscribeButton">
+                            <img src="images/paypal-logo.svg" alt="PayPal Logo" class="paypal-logo">
+                            <span></span>
+                        </a>
                     </div>
                 </div>
             </section>
         </div>
     </div>
-
-    <script 
-      src="https://www.paypal.com/sdk/js?client-id=BAAsx4E4JQKKfHGgCixLi7b0iXMJJMroWwI_7voGwI7JtvvZHAsGBOcF06O3UJrYAO7jvdHHzUpVVo1QSE&components=hosted-buttons&disable-funding=venmo&currency=USD">
-    </script>
-    <script>
-      paypal.HostedButtons({
-        hostedButtonId: "P8GZGDP6GQBB2",
-      }).render("#paypal-container-P8GZGDP6GQBB2")
-    </script>
-
-    <script src="https://www.paypal.com/sdk/js?client-id=AWd0noNfZ5s6waUBOp2roT_UWN6QIwf0VvK2n8d4Ls3Hl6BP85iXA4j0uzSYIhdufI7578u2hmoa1GRe&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
-    <script>
-      paypal.Buttons({
-          style: {
-              shape: 'rect',
-              color: 'silver',
-              layout: 'vertical',
-              label: 'subscribe'
-          },
-          createSubscription: function(data, actions) {
-            return actions.subscription.create({
-              /* Creates the subscription */
-              plan_id: 'P-2CW39197CN079424VNCCCAAQ',
-              quantity: 1 // The quantity of the product for a subscription
-            });
-          },
-          onApprove: function(data, actions) {
-            alert(data.subscriptionID); // You can add optional success message for the subscriber here
-          }
-      }).render('#paypal-button-container-P-2CW39197CN079424VNCCCAAQ'); // Renders the PayPal button
-    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -186,7 +173,6 @@
             const languageSelectWrapper = document.getElementById('language-select-wrapper');
             const languageSelectTrigger = document.getElementById('language-select-trigger');
             const languageOptions = document.getElementById('language-options');
-            const donateButton = document.getElementById('donate-button');
             const donationsSection = document.getElementById('donations');
 
             // --- TRANSLATIONS ---
@@ -222,7 +208,15 @@
                     ctaText: "Go to any webpage, select some text, and start organizing your knowledge.",
                     ctaTip: "<strong>Tip:</strong> You can open the sidebar at any time using the keyboard shortcut (<strong>Ctrl + Shift + H</strong> by default) or from the extension icon.",
                     donationsTitle: "Quantum Highlighter PRO will ALWAYS be free",
-                    donationsText: "[content]"
+                    donationsText: "Quantum Highlighter is an open-source project built with dedication. Your donation helps keep it alive and allows for the development of new features. Every contribution, no matter the size, makes a huge difference. Thank you so much for your support!",
+                    oneTimeDonationTitle: "One-Time Donation",
+                    oneTimeDonationButton: "Donate",
+                    oneTimeDonationDescription: "Support the project with a single contribution. Every little bit helps!",
+                    customAmountText: "Or choose any other amount. Thank you!",
+                    monthlySubscriptionTitle: "Monthly Subscription",
+                    subscribeButton: "Subscribe",
+                    monthlySubscriptionDescription: "Become a regular supporter and help ensure the project's future.",
+                    customAmountTextMonthly: "You can choose any amount to donate monthly."
                 },
                 es: {
                     pageTitle: "Bienvenido a Quantum Highlighter",
@@ -255,7 +249,15 @@
                     ctaText: "Ve a cualquier página web, selecciona un texto y comienza a organizar tu conocimiento.",
                     ctaTip: "<strong>Consejo:</strong> Puedes abrir la barra lateral en cualquier momento usando el atajo de teclado (<strong>Ctrl + Shift + H</strong> por defecto) o desde el icono de la extensión.",
                     donationsTitle: "Quantum Highlighter PRO SIEMPRE será gratuito",
-                    donationsText: "[contenido]"
+                    donationsText: "Quantum Highlighter es un proyecto de código abierto construido con dedicación. Tu donación ayuda a mantenerlo vivo y permite el desarrollo de nuevas características. Cada contribución, sin importar el tamaño, marca una gran diferencia. ¡Muchas gracias por tu apoyo!",
+                    oneTimeDonationTitle: "Donación Única",
+                    oneTimeDonationButton: "Donar",
+                    oneTimeDonationDescription: "Apoya el proyecto con una única contribución. ¡Cada granito de arena cuenta!",
+                    customAmountText: "O elige cualquier otro monto. ¡Gracias!",
+                    monthlySubscriptionTitle: "Suscripción Mensual",
+                    subscribeButton: "Suscribirse",
+                    monthlySubscriptionDescription: "Conviértete en un patrocinador recurrente y ayuda a asegurar el futuro del proyecto.",
+                    customAmountTextMonthly: "Puedes elegir cualquier monto para donar mensualmente."
                 },
                 fr: {
                     pageTitle: "Bienvenue chez Quantum Highlighter",
@@ -288,7 +290,15 @@
                     ctaText: "Allez sur n'importe quelle page web, sélectionnez du texte et commencez à organiser vos connaissances.",
                     ctaTip: "<strong>Astuce :</strong> Vous pouvez ouvrir la barre latérale à tout moment avec le raccourci clavier (<strong>Ctrl + Shift + H</strong> par défaut) ou depuis l'icône de l'extension.",
                     donationsTitle: "Quantum Highlighter PRO sera TOUJOURS gratuit",
-                    donationsText: "[contenu]"
+                    donationsText: "Quantum Highlighter est un projet open-source construit avec dévouement. Votre don aide à le maintenir en vie et permet le développement de nouvelles fonctionnalités. Chaque contribution, quelle que soit sa taille, fait une énorme différence. Merci beaucoup pour votre soutien !",
+                    oneTimeDonationTitle: "Don unique",
+                    oneTimeDonationButton: "Faire un don",
+                    oneTimeDonationDescription: "Soutenez le projet avec une seule contribution. Chaque petit geste compte !",
+                    customAmountText: "Ou choisissez un autre montant. Merci !",
+                    monthlySubscriptionTitle: "Abonnement mensuel",
+                    subscribeButton: "S'abonner",
+                    monthlySubscriptionDescription: "Devenez un supporter régulier et aidez à assurer l'avenir du projet.",
+                    customAmountTextMonthly: "Vous pouvez choisir n'importe quel montant à donner mensuellement."
                 },
                 pt: {
                     pageTitle: "Bem-vindo ao Quantum Highlighter",
@@ -321,7 +331,15 @@
                     ctaText: "Vá para qualquer página da web, selecione um texto e comece a organizar seu conhecimento.",
                     ctaTip: "<strong>Dica:</strong> Você pode abrir a barra lateral a qualquer momento usando o atalho de teclado (<strong>Ctrl + Shift + H</strong> por padrão) ou pelo ícone da extensão.",
                     donationsTitle: "O Quantum Highlighter PRO SEMPRE será gratuito",
-                    donationsText: "[conteúdo]"
+                    donationsText: "O Quantum Highlighter é um projeto de código aberto construído com dedicação. Sua doação ajuda a mantê-lo vivo e permite o desenvolvimento de novas funcionalidades. Cada contribuição, não importa o tamanho, faz uma grande diferença. Muito obrigado pelo seu apoio!",
+                    oneTimeDonationTitle: "Doação única",
+                    oneTimeDonationButton: "Doar",
+                    oneTimeDonationDescription: "Apoie o projeto com uma única contribuição. Toda ajuda é bem-vinda!",
+                    customAmountText: "Ou escolha qualquer outro valor. Obrigado!",
+                    monthlySubscriptionTitle: "Assinatura mensal",
+                    subscribeButton: "Inscrever-se",
+                    monthlySubscriptionDescription: "Torne-se um apoiador regular e ajude a garantir o futuro do projeto.",
+                    customAmountTextMonthly: "Você pode escolher qualquer valor para doar mensalmente."
                 },
                 ru: {
                     pageTitle: "Добро пожаловать в Quantum Highlighter",
@@ -351,10 +369,18 @@
                     feature6Title: "Гибкая настройка",
                     feature6Text: "Настройте расширение по своему вкусу в меню настроек.",
                     ctaTitle: "Готовы начать!",
-                    ctaText: "Перейдите на любую веб-страницу, выделите текст и начните организовывать свои знания.",
+                    ctaText: "Перейдите на любую веб-страничку, выделите текст и начните организовывать свои знания.",
                     ctaTip: "<strong>Совет:</strong> Вы можете открыть боковую панель в любое время с помощью сочетания клавиш (по умолчанию <strong>Ctrl + Shift + H</strong>) или через значок расширения.",
                     donationsTitle: "Quantum Highlighter PRO ВСЕГДА будет бесплатным",
-                    donationsText: "[содержание]"
+                    donationsText: "Quantum Highlighter — это проект с открытым исходным кодом, созданный с большой самоотдачей. Ваши пожертвования помогают поддерживать его и позволяют разрабатывать новые функции. Каждый вклад, независимо от размера, имеет огромное значение. Большое спасибо за вашу поддержку!",
+                    oneTimeDonationTitle: "Единовременное пожертвование",
+                    oneTimeDonationButton: "Пожертвовать",
+                    oneTimeDonationDescription: "Поддержите проект единовременным взносом. Любая помощь важна!",
+                    customAmountText: "Или выберите любую другую сумму. Спасибо!",
+                    monthlySubscriptionTitle: "Ежемесячная подписка",
+                    subscribeButton: "Подписаться",
+                    monthlySubscriptionDescription: "Станьте постоянным спонсором и помогите обеспечить будущее проекта.",
+                    customAmountTextMonthly: "Вы можете выбрать любую сумму для ежемесячного пожертвования."
                 },
                 zh: {
                     pageTitle: "欢迎使用 Quantum Highlighter",
@@ -387,7 +413,15 @@
                     ctaText: "转到任何网页，选择一些文本，然后开始组织您的知识。",
                     ctaTip: "<strong>提示：</strong>您可以随时使用键盘快捷键（默认为<strong>Ctrl + Shift + H</strong>）或从扩展图标打开侧边栏。",
                     donationsTitle: "Quantum Highlighter PRO 将永远免费",
-                    donationsText: "[内容]"
+                    donationsText: "Quantum Highlighter 是一个用心打造的开源项目。您的捐赠有助于维持其活力并支持新功能的开发。每一份贡献，无论大小，都至关重要。非常感谢您的支持！",
+                    oneTimeDonationTitle: "一次性捐赠",
+                    oneTimeDonationButton: "捐赠",
+                    oneTimeDonationDescription: "通过单次捐助来支持该项目。您的每一份支持都至关重要！",
+                    customAmountText: "或选择任何其他金额。谢谢！",
+                    monthlySubscriptionTitle: "按月订阅",
+                    subscribeButton: "订阅",
+                    monthlySubscriptionDescription: "成为我们的长期支持者，帮助确保项目的未来。",
+                    customAmountTextMonthly: "您可以选择任何金额进行按月捐赠。"
                 }
             };
 
@@ -399,18 +433,16 @@
                     document.querySelectorAll('[data-i18n]').forEach(el => {
                         const key = el.getAttribute('data-i18n');
                         if (translations[lang][key]) {
-                            // For elements that might contain other elements (like the tip),
-                            // we need to be careful not to overwrite them.
-                            // A simple approach is to set innerHTML for leaf nodes,
-                            // but for this specific case, we can check the element's children.
-                            // A more robust solution would be to use a library, but this is fine for now.
+                            // If the element has children (like a button with an icon and a span)
+                            // and is not the special-cased 'ctaTip', we target the span directly.
                             if (el.children.length > 0 && key !== 'ctaTip') {
-                                // Example: update only the text content of a button or link
-                                const textNode = Array.from(el.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
-                                if(textNode) textNode.textContent = translations[lang][key];
-                                else if (el.querySelector('span')) el.querySelector('span').textContent = translations[lang][key];
-
+                                const span = el.querySelector('span');
+                                if (span) {
+                                    span.textContent = translations[lang][key];
+                                }
                             } else {
+                                // For simple text elements or the 'ctaTip' (which contains HTML),
+                                // we set the innerHTML.
                                 el.innerHTML = translations[lang][key];
                             }
                         }
@@ -474,10 +506,7 @@
                     }
                 });
 
-                // Donate button scroll
-                donateButton.addEventListener('click', () => {
-                    donationsSection.scrollIntoView({ behavior: 'smooth' });
-                });
+                
 
 
                 // Load initial language
