@@ -1554,7 +1554,13 @@
                 if (this.menu.isVisible()) {
                     if (this.activeAnnotationId) {
                         const element = document.querySelector(`[data-annotation-id="${this.activeAnnotationId}"]`);
-                        if(element) this._showContextMenuFor(element);
+
+                        if (this.tiptapEditor) {
+                            this.tiptapEditor.destroy();
+                            this.tiptapEditor = null;
+                        }
+
+                        if (element) this._showContextMenuFor(element, true);
                     } else if (this.activeRange) {
                         this._showCreationMenu(this.activeRange.getBoundingClientRect());
                     }
@@ -1728,9 +1734,9 @@
             this.menu.show({ getBoundingClientRect: () => rect }, this._getContextMenuCallbacks());
         }
 
-        _showContextMenuFor(element) {
+        _showContextMenuFor(element, forceOpen = false) {
             const annotationId = element.dataset.annotationId;
-            if (this.activeAnnotationId === annotationId) {
+            if (!forceOpen && this.activeAnnotationId === annotationId) {
                 this._closeOrFinalizeContextMenu();
                 return;
             }
