@@ -7,10 +7,12 @@ A powerful, open-source web annotation extension for Chrome, inspired by Zotero'
 ## Key Features
 
 ### 🎨 Advanced Annotation System
+
+![Demo Light Theme](chrome_extension/images/demo_light_2.png)
+
 *   **Two Annotation Types:** Choose between highlighting text with a background color or underlining it.
 *   **Eight Colors:** A palette of 8 colors to organize your notes (yellow, red, green, blue, purple, pink, orange, gray).
 
-    ![Demo Light Theme](chrome_extension/images/demo_light_2.png)
     
 *   **Robust & Dynamic:** Annotations persist reliably, even on dynamic websites like YouTube, thanks to a `MutationObserver`-based re-application system.
 
