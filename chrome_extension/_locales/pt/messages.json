@@ -1,114 +1,418 @@
 {
-  "extensionName": { "message": "Quantum Highlighter PRO", "description": "The name of the extension." },
-  "extensionDescription": { "message": "Sistema de anotações da web inspirado no Zotero. Destaque, sublinhe e gerencie anotações em qualquer página.", "description": "The description of the extension." },
-  "sidebarTitle": { "message": "Anotações", "description": "Title for the sidebar." },
-  "noAnnotationsTitle": { "message": "Ainda não há anotações", "description": "Title when no annotations are present." },
-  "noAnnotations": { "message": "Destaque o texto na página para começar!", "description": "Helper text when no annotations are present." },
-  "noComment": { "message": "Sem comentário", "description": "Placeholder for an empty comment." },
-  "deleteAnnotation": { "message": "Excluir anotação", "description": "Tooltip for the delete annotation button." },
-  "lockSidebarWidth": { "message": "Bloquear a largura da barra lateral", "description": "Tooltip for the lock sidebar button." },
-  "unlockSidebarWidth": { "message": "Desbloquear a largura da barra lateral", "description": "Tooltip for the unlock sidebar button." },
-  "settingsButton": { "message": "Configurações", "description": "Tooltip for the settings button." },
-  "languageLabel": { "message": "Idioma", "description": "Label for the language selector." },
-  "errorLoading": { "message": "Não foi possível carregar as anotações. Por favor, atualize a página.", "description": "Error message when annotations fail to load." },
-  "closeButton": { "message": "Fechar a barra lateral", "description": "Tooltip for the close sidebar button." },
-  "disableOnPageLabel": { "message": "Desativar nesta página", "description": "Label for the disable on page switch." },
-  "disableOnDomainLabel": { "message": "Desativar neste site inteiro", "description": "Label for the disable on domain switch." },
-  "forceBlackColorLabel": { "message": "Forçar texto preto nos destaques", "description": "Label for the force black text switch." },
-  "forceBlackColorTooltip": { "message": "Força todo o texto destacado a ser preto. Isso melhora a legibilidade, mas pode dificultar a identificação de textos coloridos, como links.", "description": "Tooltip for the force black text switch." },
-  "editLinkTitle": { "message": "Editar link", "description": "Title for the link editor modal." },
-  "textLabel": { "message": "Texto", "description": "Label for the link text input." },
-  "linkTextPlaceholder": { "message": "Texto do link", "description": "Placeholder for the link text input." },
-  "urlPlaceholder": { "message": "https://exemplo.com", "description": "Placeholder for the link URL input." },
-  "urlLabel": { "message": "URL", "description": "Label for the link URL input." },
-  "unlinkButton": { "message": "Remover link", "description": "Button to remove a link." },
-  "toolbarBold": { "message": "Negrito", "description": "Toolbar button for bold text." },
-  "toolbarItalic": { "message": "Itálico", "description": "Toolbar button for italic text." },
-  "toolbarStrike": { "message": "Riscado", "description": "Toolbar button for strikethrough text." },
-  "toolbarBlockquote": { "message": "Citação", "description": "Toolbar button for blockquote." },
-  "toolbarCodeBlock": { "message": "Bloco de código", "description": "Toolbar button for code block." },
-  "toolbarLink": { "message": "Link", "description": "Toolbar button for link." },
-  "toolbarUnderline": { "message": "Sublinhado", "description": "Toolbar button for underline." },
-  "highlight": { "message": "Destacar", "description": "Action to highlight text." },
-  "underline": { "message": "Sublinhar", "description": "Action to underline text." },
-  "delete": { "message": "Excluir", "description": "Action to delete." },
-  "comment": { "message": "Comentário", "description": "Noun for comment." },
-  "addComment": { "message": "Adicionar comentário", "description": "Action to add a comment." },
-  "commentPlaceholder": { "message": "Adicionar uma nota...", "description": "Placeholder for the comment input." },
-  "paragraphPlaceholder": { "message": "Digite algo...", "description": "Placeholder for a paragraph." },
-  "listPlaceholder": { "message": "Item da lista", "description": "Placeholder for a list item." },
-  "quotePlaceholder": { "message": "Citação", "description": "Placeholder for a quote." },
-  "codePlaceholder": { "message": "Digite o código...", "description": "Placeholder for a code block." },
-  "heading": { "message": "Título", "description": "Noun for heading." },
-  "save": { "message": "Salvar", "description": "Action to save." },
-  "cancel": { "message": "Cancelar", "description": "Action to cancel." },
-  "close": { "message": "Fechar", "description": "Action to close." },
-  "colors_yellow": { "message": "Amarelo", "description": "The color yellow." },
-  "colors_red": { "message": "Vermelho", "description": "The color red." },
-  "colors_green": { "message": "Verde", "description": "The color green." },
-  "colors_blue": { "message": "Azul", "description": "The color blue." },
-  "colors_purple": { "message": "Roxo", "description": "The color purple." },
-  "colors_pink": { "message": "Rosa", "description": "The color pink." },
-  "colors_orange": { "message": "Laranja", "description": "The color orange." },
-  "colors_grey": { "message": "Cinza", "description": "The color grey." },
-  "shortcutsDisabled": { "message": "Atalhos desativados nos campos de entrada.", "description": "Warning message." },
-  "hideUntilNextVisit": { "message": "Ocultar até a próxima visita", "description": "Action to hide the menu." },
-  "disableOnThisPage": { "message": "Desativar nesta página", "description": "Action to disable on the current page." },
-  "disableOnThisWebsite": { "message": "Desativar neste site inteiro", "description": "Action to disable on the current website." },
-  "openSidebar": { "message": "Abrir a barra lateral", "description": "Action to open the sidebar." },
-  "closeSidebar": { "message": "Fechar a barra lateral", "description": "Action to close the sidebar." },
-  "refreshAnnotations": { "message": "Atualizar anotações", "description": "Action to refresh annotations." },
-  "annotationsRefreshed": { "message": "Anotações atualizadas!", "description": "Toast message after refreshing." },
-  "donationsTitle": { "message": "Você mantém o Quantum Highlighter PRO gratuito e vivo", "description": "Title for the donation modal." },
-  "donationsText": { "message": "Olá! Eu sou o George, o criador e único desenvolvedor por trás do Quantum Highlighter. Minha promessa é e sempre será que esta ferramenta seja gratuita e da mais alta qualidade. Não há uma grande empresa por trás, apenas inúmeras horas de trabalho e o sonho de criar algo verdadeiramente útil para você. Para continuar a inovar, preciso da sua ajuda.", "description": "Text for the donation modal." },
-  "oneTimeDonationTitle": { "message": "Faça uma Doação Única", "description": "Title for one-time donation." },
-  "oneTimeDonationDescription": { "message": "Apoie o desenvolvimento do Quantum Highlighter PRO com um único gesto. Cada doação nos aproxima da nossa próxima grande atualização.", "description": "Description for one-time donation." },
-  "oneTimeDonationButton": { "message": "Claro, eu te pago um café!", "description": "Button for one-time donation." },
-  "monthlySubscriptionTitle": { "message": "Torne-se um Patrocinador Mensal", "description": "Title for monthly subscription." },
-  "monthlySubscriptionDescription": { "message": "Garanta o futuro do projeto com apoio recorrente. Nossos patrocinadores são a base para um crescimento sustentável.", "description": "Description for monthly subscription." },
-  "subscribeButton": { "message": "Tornar-se patrocinador", "description": "Button for monthly subscription." },
-  "remindMeLater": { "message": "Talvez mais tarde, obrigado!", "description": "Button to remind later for donation." },
-  "dontRemindAgain": { "message": "Ok, prometo não esquecer (mas não me avise de novo)", "description": "Button to never remind for donation." },
-  "remindMeLaterTooltip": { "message": "Você será lembrado novamente após mais 80 destaques.", "description": "Tooltip for the remind me later button." },
-  "donationThanksTitle": { "message": "Obrigado pelo seu apoio!", "description": "Title for the donation thank you message." },
-  "donationThanksText": { "message": "Sua contribuição é essencial para continuar melhorando e oferecendo uma ferramenta de qualidade. Vamos continuar trabalhando juntos para criar a ferramenta mais útil e impressionante do mercado.", "description": "Text for the donation thank you message." },
-  "pageTitle": { "message": "Bem-vindo ao Quantum Highlighter", "description": "Title for the welcome page." },
-  "githubLink": { "message": "Ver no GitHub", "description": "Link to the GitHub repository." },
-  "donateButton": { "message": "Doar", "description": "Button to open the donation section." },
-  "heroTitle": { "message": "Bem-vindo ao Quantum Highlighter PRO!", "description": "Main title of the welcome page." },
-  "heroSubtitle": { "message": "A maneira mais inteligente de destacar, sublinhar e fazer anotações em qualquer site.", "description": "Subtitle of the welcome page." },
-  "howItWorksTitle": { "message": "Como Funciona?", "description": "Title for the 'How it works' section." },
-  "step1Title": { "message": "1. Selecione", "description": "Title for the first step." },
-  "step1Text": { "message": "Basta selecionar qualquer texto em uma página da web.", "description": "Text for the first step." },
-  "step2Title": { "message": "2. Destaque", "description": "Title for the second step." },
-  "step2Text": { "message": "Escolha uma cor e tipo de destaque no menu que aparece.", "description": "Text for the second step." },
-  "step3Title": { "message": "3. Comente", "description": "Title for the third step." },
-  "step3Text": { "message": "Adicione notas com formatação rica aos seus destaques.", "description": "Text for the third step." },
-  "demoTitle": { "message": "Veja em Ação", "description": "Title for the demo section." },
-  "featuresTitle": { "message": "Principais Características", "description": "Title for the features section." },
-  "feature1Title": { "message": "Múltiplas Cores", "description": "Title for the first feature." },
-  "feature1Text": { "message": "Organize suas ideias com uma paleta de cores vibrantes.", "description": "Text for the first feature." },
-  "feature2Title": { "message": "Destaque e Sublinhado", "description": "Title for the second feature." },
-  "feature2Text": { "message": "Escolha entre destacar o fundo ou um elegante sublinhado.", "description": "Text for the second feature." },
-  "feature3Title": { "message": "Comentários Ricos", "description": "Title for the third feature." },
-  "feature3Text": { "message": "Use negrito, listas, links e muito mais em suas notas.", "description": "Text for the third feature." },
-  "feature4Title": { "message": "Barra Lateral Inteligente", "description": "Title for the fourth feature." },
-  "feature4Text": { "message": "Gerencie e navegue por todas as suas notas em um só lugar.", "description": "Text for the fourth feature." },
-  "feature5Title": { "message": "Robusto e Dinâmico", "description": "Title for the fifth feature." },
-  "feature5Text": { "message": "Funciona perfeitamente em sites dinâmicos como o ChatGPT.", "description": "Text for the fifth feature." },
-  "feature6Title": { "message": "Altamente Personalizável", "description": "Title for the sixth feature." },
-  "feature6Text": { "message": "Ajuste a extensão ao seu gosto no menu de configurações.", "description": "Text for the sixth feature." },
-  "ctaTitle": { "message": "Pronto para Começar!", "description": "Title for the call to action section." },
-  "ctaText": { "message": "Vá para qualquer página da web, selecione um texto e comece a organizar seu conhecimento.", "description": "Text for the call to action section." },
-  "ctaTip": { "message": "<strong>Dica:</strong> Você pode abrir a barra lateral a qualquer momento usando o atalho de teclado (<strong>Ctrl + Shift + H</strong> por padrão) ou pelo ícone da extensão.", "description": "Tip for the call to action section." },
-  "welcomeDonationsTitle": { "message": "O Quantum Highlighter PRO SEMPRE será gratuito", "description": "Title for the donations section in the welcome page." },
-  "welcomeDonationsText": { "message": "O Quantum Highlighter é um projeto de código aberto construído com dedicação. Sua doação ajuda a mantê-lo vivo e permite o desenvolvimento de novas funcionalidades. Cada contribuição, não importa o tamanho, faz uma grande diferença. Muito obrigado pelo seu apoio!", "description": "Text for the donations section in the welcome page." },
-  "welcomeOneTimeDonationTitle": { "message": "Doação única", "description": "Title for the one-time donation card in the welcome page." },
-  "welcomeOneTimeDonationButton": { "message": "Doar", "description": "Button for the one-time donation in the welcome page." },
-  "welcomeOneTimeDonationDescription": { "message": "Apoie o projeto com uma única contribuição. Toda ajuda é bem-vinda!", "description": "Description for the one-time donation card in the welcome page." },
-  "customAmountText": { "message": "Ou escolha qualquer outro valor. Obrigado!", "description": "Text for the custom amount in the donation card." },
-  "welcomeMonthlySubscriptionTitle": { "message": "Assinatura mensal", "description": "Title for the monthly subscription card in the welcome page." },
-  "welcomeSubscribeButton": { "message": "Inscrever-se", "description": "Button for the monthly subscription in the welcome page." },
-  "welcomeMonthlySubscriptionDescription": { "message": "Torne-se um apoiador regular e ajude a garantir o futuro do projeto.", "description": "Description for the monthly subscription card in the welcome page." },
-  "customAmountTextMonthly": { "message": "Você pode escolher qualquer valor para doar mensalmente.", "description": "Text for the custom amount in the monthly subscription card." }
+  "extensionName": {
+    "message": "Quantum Highlighter PRO",
+    "description": "The name of the extension."
+  },
+  "extensionDescription": {
+    "message": "Sistema de anotações da web inspirado no Zotero. Destaque, sublinhe e gerencie anotações em qualquer página.",
+    "description": "The description of the extension."
+  },
+  "sidebarTitle": {
+    "message": "Anotações",
+    "description": "Title for the sidebar."
+  },
+  "noAnnotationsTitle": {
+    "message": "Ainda não há anotações",
+    "description": "Title when no annotations are present."
+  },
+  "noAnnotations": {
+    "message": "Destaque o texto na página para começar!",
+    "description": "Helper text when no annotations are present."
+  },
+  "noComment": {
+    "message": "Sem comentário",
+    "description": "Placeholder for an empty comment."
+  },
+  "deleteAnnotation": {
+    "message": "Excluir anotação",
+    "description": "Tooltip for the delete annotation button."
+  },
+  "lockSidebarWidth": {
+    "message": "Bloquear a largura da barra lateral",
+    "description": "Tooltip for the lock sidebar button."
+  },
+  "unlockSidebarWidth": {
+    "message": "Desbloquear a largura da barra lateral",
+    "description": "Tooltip for the unlock sidebar button."
+  },
+  "settingsButton": {
+    "message": "Configurações",
+    "description": "Tooltip for the settings button."
+  },
+  "languageLabel": {
+    "message": "Idioma",
+    "description": "Label for the language selector."
+  },
+  "errorLoading": {
+    "message": "Não foi possível carregar as anotações. Por favor, atualize a página.",
+    "description": "Error message when annotations fail to load."
+  },
+  "closeButton": {
+    "message": "Fechar a barra lateral",
+    "description": "Tooltip for the close sidebar button."
+  },
+  "disableOnPageLabel": {
+    "message": "Desativar nesta página",
+    "description": "Label for the disable on page switch."
+  },
+  "disableOnDomainLabel": {
+    "message": "Desativar neste site inteiro",
+    "description": "Label for the disable on domain switch."
+  },
+  "forceBlackColorLabel": {
+    "message": "Forçar texto preto nos destaques",
+    "description": "Label for the force black text switch."
+  },
+  "forceBlackColorTooltip": {
+    "message": "Força todo o texto destacado a ser preto. Isso melhora a legibilidade, mas pode dificultar a identificação de textos coloridos, como links.",
+    "description": "Tooltip for the force black text switch."
+  },
+  "editLinkTitle": {
+    "message": "Editar link",
+    "description": "Title for the link editor modal."
+  },
+  "textLabel": {
+    "message": "Texto",
+    "description": "Label for the link text input."
+  },
+  "linkTextPlaceholder": {
+    "message": "Texto do link",
+    "description": "Placeholder for the link text input."
+  },
+  "urlPlaceholder": {
+    "message": "https://exemplo.com",
+    "description": "Placeholder for the link URL input."
+  },
+  "urlLabel": {
+    "message": "URL",
+    "description": "Label for the link URL input."
+  },
+  "unlinkButton": {
+    "message": "Remover link",
+    "description": "Button to remove a link."
+  },
+  "toolbarBold": {
+    "message": "Negrito",
+    "description": "Toolbar button for bold text."
+  },
+  "toolbarItalic": {
+    "message": "Itálico",
+    "description": "Toolbar button for italic text."
+  },
+  "toolbarStrike": {
+    "message": "Riscado",
+    "description": "Toolbar button for strikethrough text."
+  },
+  "toolbarBlockquote": {
+    "message": "Citação",
+    "description": "Toolbar button for blockquote."
+  },
+  "toolbarCodeBlock": {
+    "message": "Bloco de código",
+    "description": "Toolbar button for code block."
+  },
+  "toolbarLink": {
+    "message": "Link",
+    "description": "Toolbar button for link."
+  },
+  "toolbarUnderline": {
+    "message": "Sublinhado",
+    "description": "Toolbar button for underline."
+  },
+  "highlight": {
+    "message": "Destacar",
+    "description": "Action to highlight text."
+  },
+  "underline": {
+    "message": "Sublinhar",
+    "description": "Action to underline text."
+  },
+  "delete": {
+    "message": "Excluir",
+    "description": "Action to delete."
+  },
+  "comment": {
+    "message": "Comentário",
+    "description": "Noun for comment."
+  },
+  "addComment": {
+    "message": "Adicionar comentário",
+    "description": "Action to add a comment."
+  },
+  "commentPlaceholder": {
+    "message": "Adicionar uma nota...",
+    "description": "Placeholder for the comment input."
+  },
+  "paragraphPlaceholder": {
+    "message": "Digite algo...",
+    "description": "Placeholder for a paragraph."
+  },
+  "listPlaceholder": {
+    "message": "Item da lista",
+    "description": "Placeholder for a list item."
+  },
+  "quotePlaceholder": {
+    "message": "Citação",
+    "description": "Placeholder for a quote."
+  },
+  "codePlaceholder": {
+    "message": "Digite o código...",
+    "description": "Placeholder for a code block."
+  },
+  "heading": {
+    "message": "Título",
+    "description": "Noun for heading."
+  },
+  "save": {
+    "message": "Salvar",
+    "description": "Action to save."
+  },
+  "cancel": {
+    "message": "Cancelar",
+    "description": "Action to cancel."
+  },
+  "close": {
+    "message": "Fechar",
+    "description": "Action to close."
+  },
+  "colors_yellow": {
+    "message": "Amarelo",
+    "description": "The color yellow."
+  },
+  "colors_red": {
+    "message": "Vermelho",
+    "description": "The color red."
+  },
+  "colors_green": {
+    "message": "Verde",
+    "description": "The color green."
+  },
+  "colors_blue": {
+    "message": "Azul",
+    "description": "The color blue."
+  },
+  "colors_purple": {
+    "message": "Roxo",
+    "description": "The color purple."
+  },
+  "colors_pink": {
+    "message": "Rosa",
+    "description": "The color pink."
+  },
+  "colors_orange": {
+    "message": "Laranja",
+    "description": "The color orange."
+  },
+  "colors_grey": {
+    "message": "Cinza",
+    "description": "The color grey."
+  },
+  "shortcutsDisabled": {
+    "message": "Atalhos desativados nos campos de entrada.",
+    "description": "Warning message."
+  },
+  "hideUntilNextVisit": {
+    "message": "Ocultar até a próxima visita",
+    "description": "Action to hide the menu."
+  },
+  "disableOnThisPage": {
+    "message": "Desativar nesta página",
+    "description": "Action to disable on the current page."
+  },
+  "disableOnThisWebsite": {
+    "message": "Desativar neste site inteiro",
+    "description": "Action to disable on the current website."
+  },
+  "openSidebar": {
+    "message": "Abrir a barra lateral",
+    "description": "Action to open the sidebar."
+  },
+  "closeSidebar": {
+    "message": "Fechar a barra lateral",
+    "description": "Action to close the sidebar."
+  },
+  "refreshAnnotations": {
+    "message": "Atualizar anotações",
+    "description": "Action to refresh annotations."
+  },
+  "annotationsRefreshed": {
+    "message": "Anotações atualizadas!",
+    "description": "Toast message after refreshing."
+  },
+  "donationsTitle": {
+    "message": "Você mantém o Quantum Highlighter PRO gratuito e vivo",
+    "description": "Title for the donation modal."
+  },
+  "donationsText": {
+    "message": "Olá! Eu sou o George, o criador e único desenvolvedor por trás do Quantum Highlighter. Minha promessa é e sempre será que esta ferramenta seja gratuita e da mais alta qualidade. Não há uma grande empresa por trás, apenas inúmeras horas de trabalho e o sonho de criar algo verdadeiramente útil para você. Para continuar a inovar, preciso da sua ajuda.",
+    "description": "Text for the donation modal."
+  },
+  "oneTimeDonationTitle": {
+    "message": "Faça uma Doação Única",
+    "description": "Title for one-time donation."
+  },
+  "oneTimeDonationDescription": {
+    "message": "Apoie o desenvolvimento do Quantum Highlighter PRO com um único gesto. Cada doação nos aproxima da nossa próxima grande atualização.",
+    "description": "Description for one-time donation."
+  },
+  "oneTimeDonationButton": {
+    "message": "Claro, eu te pago um café!",
+    "description": "Button for one-time donation."
+  },
+  "monthlySubscriptionTitle": {
+    "message": "Torne-se um Patrocinador Mensal",
+    "description": "Title for monthly subscription."
+  },
+  "monthlySubscriptionDescription": {
+    "message": "Garanta o futuro do projeto com apoio recorrente. Nossos patrocinadores são a base para um crescimento sustentável.",
+    "description": "Description for monthly subscription."
+  },
+  "subscribeButton": {
+    "message": "Tornar-se patrocinador",
+    "description": "Button for monthly subscription."
+  },
+  "remindMeLater": {
+    "message": "Talvez mais tarde, obrigado!",
+    "description": "Button to remind later for donation."
+  },
+  "dontRemindAgain": {
+    "message": "Ok, prometo não esquecer (mas não me avise de novo)",
+    "description": "Button to never remind for donation."
+  },
+  "remindMeLaterTooltip": {
+    "message": "Você será lembrado novamente após mais 80 destaques.",
+    "description": "Tooltip for the remind me later button."
+  },
+  "donationThanksTitle": {
+    "message": "Obrigado pelo seu apoio!",
+    "description": "Title for the donation thank you message."
+  },
+  "donationThanksText": {
+    "message": "Sua contribuição é essencial para continuar melhorando e oferecendo uma ferramenta de qualidade. Vamos continuar trabalhando juntos para criar a ferramenta mais útil e impressionante do mercado.",
+    "description": "Text for the donation thank you message."
+  },
+  "pageTitle": {
+    "message": "Bem-vindo ao Quantum Highlighter",
+    "description": "Title for the welcome page."
+  },
+  "githubLink": {
+    "message": "Ver no GitHub",
+    "description": "Link to the GitHub repository."
+  },
+  "donateButton": {
+    "message": "Doar",
+    "description": "Button to open the donation section."
+  },
+  "heroTitle": {
+    "message": "Bem-vindo ao Quantum Highlighter PRO!",
+    "description": "Main title of the welcome page."
+  },
+  "heroSubtitle": {
+    "message": "A maneira mais inteligente de destacar, sublinhar e fazer anotações em qualquer site.",
+    "description": "Subtitle of the welcome page."
+  },
+  "howItWorksTitle": {
+    "message": "Como Funciona?",
+    "description": "Title for the 'How it works' section."
+  },
+  "step1Title": {
+    "message": "1. Selecione",
+    "description": "Title for the first step."
+  },
+  "step1Text": {
+    "message": "Basta selecionar qualquer texto em uma página da web.",
+    "description": "Text for the first step."
+  },
+  "step2Title": {
+    "message": "2. Destaque",
+    "description": "Title for the second step."
+  },
+  "step2Text": {
+    "message": "Escolha uma cor e tipo de destaque no menu que aparece.",
+    "description": "Text for the second step."
+  },
+  "step3Title": {
+    "message": "3. Comente",
+    "description": "Title for the third step."
+  },
+  "step3Text": {
+    "message": "Adicione notas com formatação rica aos seus destaques.",
+    "description": "Text for the third step."
+  },
+  "demoTitle": {
+    "message": "Veja em Ação",
+    "description": "Title for the demo section."
+  },
+  "featuresTitle": {
+    "message": "Principais Características",
+    "description": "Title for the features section."
+  },
+  "feature1Title": {
+    "message": "Múltiplas Cores",
+    "description": "Title for the first feature."
+  },
+  "feature1Text": {
+    "message": "Organize suas ideias com uma paleta de cores vibrantes.",
+    "description": "Text for the first feature."
+  },
+  "feature2Title": {
+    "message": "Destaque e Sublinhado",
+    "description": "Title for the second feature."
+  },
+  "feature2Text": {
+    "message": "Escolha entre destacar o fundo ou um elegante sublinhado.",
+    "description": "Text for the second feature."
+  },
+  "feature3Title": {
+    "message": "Comentários Ricos",
+    "description": "Title for the third feature."
+  },
+  "feature3Text": {
+    "message": "Use negrito, listas, links e muito mais em suas notas.",
+    "description": "Text for the third feature."
+  },
+  "feature4Title": {
+    "message": "Barra Lateral Inteligente",
+    "description": "Title for the fourth feature."
+  },
+  "feature4Text": {
+    "message": "Gerencie e navegue por todas as suas notas em um só lugar.",
+    "description": "Text for the fourth feature."
+  },
+  "feature5Title": {
+    "message": "Robusto e Dinâmico",
+    "description": "Title for the fifth feature."
+  },
+  "feature5Text": {
+    "message": "Funciona perfeitamente em sites dinâmicos como o ChatGPT.",
+    "description": "Text for the fifth feature."
+  },
+  "feature6Title": {
+    "message": "Altamente Personalizável",
+    "description": "Title for the sixth feature."
+  },
+  "feature6Text": {
+    "message": "Ajuste a extensão ao seu gosto no menu de configurações.",
+    "description": "Text for the sixth feature."
+  },
+  "ctaTitle": {
+    "message": "Pronto para Começar!",
+    "description": "Title for the call to action section."
+  },
+  "ctaText": {
+    "message": "Vá para qualquer página da web, selecione um texto e comece a organizar seu conhecimento.",
+    "description": "Text for the call to action section."
+  },
+  "ctaTip": {
+    "message": "<strong>Dica:</strong> Você pode abrir a barra lateral a qualquer momento usando o atalho de teclado (<strong>Ctrl + Shift + H</strong> por padrão) ou pelo ícone da extensão.",
+    "description": "Tip for the call to action section."
+  },
+  "customAmountText": {
+    "message": "Ou escolha qualquer outro valor. Obrigado!",
+    "description": "Text for the custom amount in the donation card."
+  },
+  "customAmountTextMonthly": {
+    "message": "Você pode escolher qualquer valor para doar mensalmente.",
+    "description": "Text for the custom amount in the monthly subscription card."
+  }
 }

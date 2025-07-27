@@ -1,114 +1,418 @@
 {
-  "extensionName": { "message": "Quantum Highlighter PRO", "description": "The name of the extension." },
-  "extensionDescription": { "message": "Система веб-аннотаций, вдохновленная Zotero. Выделяйте, подчеркивайте и управляйте аннотациями на любой странице.", "description": "The description of the extension." },
-  "sidebarTitle": { "message": "Аннотации", "description": "Title for the sidebar." },
-  "noAnnotationsTitle": { "message": "Пока нет аннотаций", "description": "Title when no annotations are present." },
-  "noAnnotations": { "message": "Выделите текст на странице, чтобы начать!", "description": "Helper text when no annotations are present." },
-  "noComment": { "message": "Без комментариев", "description": "Placeholder for an empty comment." },
-  "deleteAnnotation": { "message": "Удалить аннотацию", "description": "Tooltip for the delete annotation button." },
-  "lockSidebarWidth": { "message": "Заблокировать ширину боковой панели", "description": "Tooltip for the lock sidebar button." },
-  "unlockSidebarWidth": { "message": "Разблокировать ширину боковой панели", "description": "Tooltip for the unlock sidebar button." },
-  "settingsButton": { "message": "Настройки", "description": "Tooltip for the settings button." },
-  "languageLabel": { "message": "Язык", "description": "Label for the language selector." },
-  "errorLoading": { "message": "Не удалось загрузить аннотации. Пожалуйста, обновите страницу.", "description": "Error message when annotations fail to load." },
-  "closeButton": { "message": "Закрыть боковую панель", "description": "Tooltip for the close sidebar button." },
-  "disableOnPageLabel": { "message": "Отключить на этой странице", "description": "Label for the disable on page switch." },
-  "disableOnDomainLabel": { "message": "Отключить на всем сайте", "description": "Label for the disable on domain switch." },
-  "forceBlackColorLabel": { "message": "Принудительно использовать черный цвет для выделенного текста", "description": "Label for the force black text switch." },
-  "forceBlackColorTooltip": { "message": "Принудительно окрашивает весь выделенный текст в черный цвет. Это улучшает читаемость, но может затруднить распознавание цветного текста, например, ссылок.", "description": "Tooltip for the force black text switch." },
-  "editLinkTitle": { "message": "Редактировать ссылку", "description": "Title for the link editor modal." },
-  "textLabel": { "message": "Текст", "description": "Label for the link text input." },
-  "linkTextPlaceholder": { "message": "Текст ссылки", "description": "Placeholder for the link text input." },
-  "urlPlaceholder": { "message": "https://пример.com", "description": "Placeholder for the link URL input." },
-  "urlLabel": { "message": "URL", "description": "Label for the link URL input." },
-  "unlinkButton": { "message": "Удалить ссылку", "description": "Button to remove a link." },
-  "toolbarBold": { "message": "Полужирный", "description": "Toolbar button for bold text." },
-  "toolbarItalic": { "message": "Курсив", "description": "Toolbar button for italic text." },
-  "toolbarStrike": { "message": "Зачеркнутый", "description": "Toolbar button for strikethrough text." },
-  "toolbarBlockquote": { "message": "Цитата", "description": "Toolbar button for blockquote." },
-  "toolbarCodeBlock": { "message": "Блок кода", "description": "Toolbar button for code block." },
-  "toolbarLink": { "message": "Ссылка", "description": "Toolbar button for link." },
-  "toolbarUnderline": { "message": "Подчеркнутый", "description": "Toolbar button for underline." },
-  "highlight": { "message": "Выделить", "description": "Action to highlight text." },
-  "underline": { "message": "Подчеркнуть", "description": "Action to underline text." },
-  "delete": { "message": "Удалить", "description": "Action to delete." },
-  "comment": { "message": "Комментарий", "description": "Noun for comment." },
-  "addComment": { "message": "Добавить комментарий", "description": "Action to add a comment." },
-  "commentPlaceholder": { "message": "Добавить заметку...", "description": "Placeholder for the comment input." },
-  "paragraphPlaceholder": { "message": "Введите что-нибудь...", "description": "Placeholder for a paragraph." },
-  "listPlaceholder": { "message": "Элемент списка", "description": "Placeholder for a list item." },
-  "quotePlaceholder": { "message": "Цитата", "description": "Placeholder for a quote." },
-  "codePlaceholder": { "message": "Введите код...", "description": "Placeholder for a code block." },
-  "heading": { "message": "Заголовок", "description": "Noun for heading." },
-  "save": { "message": "Сохранить", "description": "Action to save." },
-  "cancel": { "message": "Отмена", "description": "Action to cancel." },
-  "close": { "message": "Закрыть", "description": "Action to close." },
-  "colors_yellow": { "message": "Желтый", "description": "The color yellow." },
-  "colors_red": { "message": "Красный", "description": "The color red." },
-  "colors_green": { "message": "Зеленый", "description": "The color green." },
-  "colors_blue": { "message": "Синий", "description": "The color blue." },
-  "colors_purple": { "message": "Фиолетовый", "description": "The color purple." },
-  "colors_pink": { "message": "Розовый", "description": "The color pink." },
-  "colors_orange": { "message": "Оранжевый", "description": "The color orange." },
-  "colors_grey": { "message": "Серый", "description": "The color grey." },
-  "shortcutsDisabled": { "message": "Горячие клавиши отключены в полях ввода.", "description": "Warning message." },
-  "hideUntilNextVisit": { "message": "Скрыть до следующего посещения", "description": "Action to hide the menu." },
-  "disableOnThisPage": { "message": "Отключить на этой странице", "description": "Action to disable on the current page." },
-  "disableOnThisWebsite": { "message": "Отключить на всем сайте", "description": "Action to disable on the current website." },
-  "openSidebar": { "message": "Открыть боковую панель", "description": "Action to open the sidebar." },
-  "closeSidebar": { "message": "Закрыть боковую панель", "description": "Action to close the sidebar." },
-  "refreshAnnotations": { "message": "Обновить аннотации", "description": "Action to refresh annotations." },
-  "annotationsRefreshed": { "message": "Аннотации обновлены!", "description": "Toast message after refreshing." },
-  "donationsTitle": { "message": "Вы помогаете Quantum Highlighter PRO оставаться бесплатным и доступным", "description": "Title for the donation modal." },
-  "donationsText": { "message": "Привет! Я Джордж, создатель и единственный разработчик Quantum Highlighter. Мое обещание — и всегда им будет — что этот инструмент останется бесплатным и высочайшего качества. За ним не стоит крупная компания, только бесчисленные часы работы и мечта создать что-то действительно полезное для вас. Чтобы продолжать развиваться, мне нужна ваша помощь.", "description": "Text for the donation modal." },
-  "oneTimeDonationTitle": { "message": "Сделать разовое пожертвование", "description": "Title for one-time donation." },
-  "oneTimeDonationDescription": { "message": "Поддержите разработку Quantum Highlighter PRO одним жестом. Каждое пожертвование приближает нас к следующему большому обновлению.", "description": "Description for one-time donation." },
-  "oneTimeDonationButton": { "message": "Конечно, я куплю вам кофе!", "description": "Button for one-time donation." },
-  "monthlySubscriptionTitle": { "message": "Стать ежемесячным спонсором", "description": "Title for monthly subscription." },
-  "monthlySubscriptionDescription": { "message": "Обеспечьте будущее проекта с помощью регулярной поддержки. Наши спонсоры — это основа устойчивого роста.", "description": "Description for monthly subscription." },
-  "subscribeButton": { "message": "Стать спонсором", "description": "Button for monthly subscription." },
-  "remindMeLater": { "message": "Может быть, позже, спасибо!", "description": "Button to remind later for donation." },
-  "dontRemindAgain": { "message": "Хорошо, я обещаю не забывать (но больше не напоминайте)", "description": "Button to never remind for donation." },
-  "remindMeLaterTooltip": { "message": "Вам напомнят снова после еще 80 выделений.", "description": "Tooltip for the remind me later button." },
-  "donationThanksTitle": { "message": "Спасибо за вашу поддержку!", "description": "Title for the donation thank you message." },
-  "donationThanksText": { "message": "Ваш вклад необходим для дальнейшего улучшения и предоставления качественного инструмента. Продолжим работать вместе, чтобы создать самый полезный и впечатляющий инструмент на рынке.", "description": "Text for the donation thank you message." },
-  "pageTitle": { "message": "Добро пожаловать в Quantum Highlighter", "description": "Title for the welcome page." },
-  "githubLink": { "message": "Посмотреть на GitHub", "description": "Link to the GitHub repository." },
-  "donateButton": { "message": "Пожертвовать", "description": "Button to open the donation section." },
-  "heroTitle": { "message": "Добро пожаловать в Quantum Highlighter PRO!", "description": "Main title of the welcome page." },
-  "heroSubtitle": { "message": "Самый умный способ выделять, подчеркивать и делать заметки на любом веб-сайте.", "description": "Subtitle of the welcome page." },
-  "howItWorksTitle": { "message": "Как это работает?", "description": "Title for the 'How it works' section." },
-  "step1Title": { "message": "1. Выделите", "description": "Title for the first step." },
-  "step1Text": { "message": "Просто выделите любой текст на веб-странице.", "description": "Text for the first step." },
-  "step2Title": { "message": "2. Выделите цветом", "description": "Title for the second step." },
-  "step2Text": { "message": "Выберите цвет и тип выделения в появившемся меню.", "description": "Text for the second step." },
-  "step3Title": { "message": "3. Комментируйте", "description": "Title for the third step." },
-  "step3Text": { "message": "Добавляйте к выделениям заметки с расширенным форматированием.", "description": "Text for the third step." },
-  "demoTitle": { "message": "Посмотрите в действии", "description": "Title for the demo section." },
-  "featuresTitle": { "message": "Основные возможности", "description": "Title for the features section." },
-  "feature1Title": { "message": "Несколько цветов", "description": "Title for the first feature." },
-  "feature1Text": { "message": "Организуйте свои идеи с помощью яркой цветовой палитры.", "description": "Text for the first feature." },
-  "feature2Title": { "message": "Выделение и подчеркивание", "description": "Title for the second feature." },
-  "feature2Text": { "message": "Выбирайте между выделением фона или элегантным подчеркиванием.", "description": "Text for the second feature." },
-  "feature3Title": { "message": "Расширенные комментарии", "description": "Title for the third feature." },
-  "feature3Text": { "message": "Используйте жирный шрифт, списки, ссылки и многое другое в своих заметках.", "description": "Text for the third feature." },
-  "feature4Title": { "message": "Умная боковая панель", "description": "Title for the fourth feature." },
-  "feature4Text": { "message": "Управляйте и просматривайте все свои заметки в одном месте.", "description": "Text for the fourth feature." },
-  "feature5Title": { "message": "Надежный и динамичный", "description": "Title for the fifth feature." },
-  "feature5Text": { "message": "Отлично работает на динамических сайтах, таких как ChatGPT.", "description": "Text for the fifth feature." },
-  "feature6Title": { "message": "Гибкая настройка", "description": "Title for the sixth feature." },
-  "feature6Text": { "message": "Настройте расширение по своему вкусу в меню настроек.", "description": "Text for the sixth feature." },
-  "ctaTitle": { "message": "Готовы начать!", "description": "Title for the call to action section." },
-  "ctaText": { "message": "Перейдите на любую веб-страничку, выделите текст и начните организовывать свои знания.", "description": "Text for the call to action section." },
-  "ctaTip": { "message": "<strong>Совет:</strong> Вы можете открыть боковую панель в любое время с помощью сочетания клавиш (по умолчанию <strong>Ctrl + Shift + H</strong>) или через значок расширения.", "description": "Tip for the call to action section." },
-  "welcomeDonationsTitle": { "message": "Quantum Highlighter PRO ВСЕГДА будет бесплатным", "description": "Title for the donations section in the welcome page." },
-  "welcomeDonationsText": { "message": "Quantum Highlighter — это проект с открытым исходным кодом, созданный с большой самоотдачей. Ваши пожертвования помогают поддерживать его и позволяют разрабатывать новые функции. Каждый вклад, независимо от размера, имеет огромное значение. Большое спасибо за вашу поддержку!", "description": "Text for the donations section in the welcome page." },
-  "welcomeOneTimeDonationTitle": { "message": "Единовременное пожертвование", "description": "Title for the one-time donation card in the welcome page." },
-  "welcomeOneTimeDonationButton": { "message": "Пожертвовать", "description": "Button for the one-time donation in the welcome page." },
-  "welcomeOneTimeDonationDescription": { "message": "Поддержите проект единовременным взносом. Любая помощь важна!", "description": "Description for the one-time donation card in the welcome page." },
-  "customAmountText": { "message": "Или выберите любую другую сумму. Спасибо!", "description": "Text for the custom amount in the donation card." },
-  "welcomeMonthlySubscriptionTitle": { "message": "Ежемесячная подписка", "description": "Title for the monthly subscription card in the welcome page." },
-  "welcomeSubscribeButton": { "message": "Подписаться", "description": "Button for the monthly subscription in the welcome page." },
-  "welcomeMonthlySubscriptionDescription": { "message": "Станьте постоянным спонсором и помогите обеспечить будущее проекта.", "description": "Description for the monthly subscription card in the welcome page." },
-  "customAmountTextMonthly": { "message": "Вы можете выбрать любую сумму для ежемесячного пожертвования.", "description": "Text for the custom amount in the monthly subscription card." }
+  "extensionName": {
+    "message": "Quantum Highlighter PRO",
+    "description": "The name of the extension."
+  },
+  "extensionDescription": {
+    "message": "Система веб-аннотаций, вдохновленная Zotero. Выделяйте, подчеркивайте и управляйте аннотациями на любой странице.",
+    "description": "The description of the extension."
+  },
+  "sidebarTitle": {
+    "message": "Аннотации",
+    "description": "Title for the sidebar."
+  },
+  "noAnnotationsTitle": {
+    "message": "Пока нет аннотаций",
+    "description": "Title when no annotations are present."
+  },
+  "noAnnotations": {
+    "message": "Выделите текст на странице, чтобы начать!",
+    "description": "Helper text when no annotations are present."
+  },
+  "noComment": {
+    "message": "Без комментариев",
+    "description": "Placeholder for an empty comment."
+  },
+  "deleteAnnotation": {
+    "message": "Удалить аннотацию",
+    "description": "Tooltip for the delete annotation button."
+  },
+  "lockSidebarWidth": {
+    "message": "Заблокировать ширину боковой панели",
+    "description": "Tooltip for the lock sidebar button."
+  },
+  "unlockSidebarWidth": {
+    "message": "Разблокировать ширину боковой панели",
+    "description": "Tooltip for the unlock sidebar button."
+  },
+  "settingsButton": {
+    "message": "Настройки",
+    "description": "Tooltip for the settings button."
+  },
+  "languageLabel": {
+    "message": "Язык",
+    "description": "Label for the language selector."
+  },
+  "errorLoading": {
+    "message": "Не удалось загрузить аннотации. Пожалуйста, обновите страницу.",
+    "description": "Error message when annotations fail to load."
+  },
+  "closeButton": {
+    "message": "Закрыть боковую панель",
+    "description": "Tooltip for the close sidebar button."
+  },
+  "disableOnPageLabel": {
+    "message": "Отключить на этой странице",
+    "description": "Label for the disable on page switch."
+  },
+  "disableOnDomainLabel": {
+    "message": "Отключить на всем сайте",
+    "description": "Label for the disable on domain switch."
+  },
+  "forceBlackColorLabel": {
+    "message": "Принудительно использовать черный цвет для выделенного текста",
+    "description": "Label for the force black text switch."
+  },
+  "forceBlackColorTooltip": {
+    "message": "Принудительно окрашивает весь выделенный текст в черный цвет. Это улучшает читаемость, но может затруднить распознавание цветного текста, например, ссылок.",
+    "description": "Tooltip for the force black text switch."
+  },
+  "editLinkTitle": {
+    "message": "Редактировать ссылку",
+    "description": "Title for the link editor modal."
+  },
+  "textLabel": {
+    "message": "Текст",
+    "description": "Label for the link text input."
+  },
+  "linkTextPlaceholder": {
+    "message": "Текст ссылки",
+    "description": "Placeholder for the link text input."
+  },
+  "urlPlaceholder": {
+    "message": "https://пример.com",
+    "description": "Placeholder for the link URL input."
+  },
+  "urlLabel": {
+    "message": "URL",
+    "description": "Label for the link URL input."
+  },
+  "unlinkButton": {
+    "message": "Удалить ссылку",
+    "description": "Button to remove a link."
+  },
+  "toolbarBold": {
+    "message": "Полужирный",
+    "description": "Toolbar button for bold text."
+  },
+  "toolbarItalic": {
+    "message": "Курсив",
+    "description": "Toolbar button for italic text."
+  },
+  "toolbarStrike": {
+    "message": "Зачеркнутый",
+    "description": "Toolbar button for strikethrough text."
+  },
+  "toolbarBlockquote": {
+    "message": "Цитата",
+    "description": "Toolbar button for blockquote."
+  },
+  "toolbarCodeBlock": {
+    "message": "Блок кода",
+    "description": "Toolbar button for code block."
+  },
+  "toolbarLink": {
+    "message": "Ссылка",
+    "description": "Toolbar button for link."
+  },
+  "toolbarUnderline": {
+    "message": "Подчеркнутый",
+    "description": "Toolbar button for underline."
+  },
+  "highlight": {
+    "message": "Выделить",
+    "description": "Action to highlight text."
+  },
+  "underline": {
+    "message": "Подчеркнуть",
+    "description": "Action to underline text."
+  },
+  "delete": {
+    "message": "Удалить",
+    "description": "Action to delete."
+  },
+  "comment": {
+    "message": "Комментарий",
+    "description": "Noun for comment."
+  },
+  "addComment": {
+    "message": "Добавить комментарий",
+    "description": "Action to add a comment."
+  },
+  "commentPlaceholder": {
+    "message": "Добавить заметку...",
+    "description": "Placeholder for the comment input."
+  },
+  "paragraphPlaceholder": {
+    "message": "Введите что-нибудь...",
+    "description": "Placeholder for a paragraph."
+  },
+  "listPlaceholder": {
+    "message": "Элемент списка",
+    "description": "Placeholder for a list item."
+  },
+  "quotePlaceholder": {
+    "message": "Цитата",
+    "description": "Placeholder for a quote."
+  },
+  "codePlaceholder": {
+    "message": "Введите код...",
+    "description": "Placeholder for a code block."
+  },
+  "heading": {
+    "message": "Заголовок",
+    "description": "Noun for heading."
+  },
+  "save": {
+    "message": "Сохранить",
+    "description": "Action to save."
+  },
+  "cancel": {
+    "message": "Отмена",
+    "description": "Action to cancel."
+  },
+  "close": {
+    "message": "Закрыть",
+    "description": "Action to close."
+  },
+  "colors_yellow": {
+    "message": "Желтый",
+    "description": "The color yellow."
+  },
+  "colors_red": {
+    "message": "Красный",
+    "description": "The color red."
+  },
+  "colors_green": {
+    "message": "Зеленый",
+    "description": "The color green."
+  },
+  "colors_blue": {
+    "message": "Синий",
+    "description": "The color blue."
+  },
+  "colors_purple": {
+    "message": "Фиолетовый",
+    "description": "The color purple."
+  },
+  "colors_pink": {
+    "message": "Розовый",
+    "description": "The color pink."
+  },
+  "colors_orange": {
+    "message": "Оранжевый",
+    "description": "The color orange."
+  },
+  "colors_grey": {
+    "message": "Серый",
+    "description": "The color grey."
+  },
+  "shortcutsDisabled": {
+    "message": "Горячие клавиши отключены в полях ввода.",
+    "description": "Warning message."
+  },
+  "hideUntilNextVisit": {
+    "message": "Скрыть до следующего посещения",
+    "description": "Action to hide the menu."
+  },
+  "disableOnThisPage": {
+    "message": "Отключить на этой странице",
+    "description": "Action to disable on the current page."
+  },
+  "disableOnThisWebsite": {
+    "message": "Отключить на всем сайте",
+    "description": "Action to disable on the current website."
+  },
+  "openSidebar": {
+    "message": "Открыть боковую панель",
+    "description": "Action to open the sidebar."
+  },
+  "closeSidebar": {
+    "message": "Закрыть боковую панель",
+    "description": "Action to close the sidebar."
+  },
+  "refreshAnnotations": {
+    "message": "Обновить аннотации",
+    "description": "Action to refresh annotations."
+  },
+  "annotationsRefreshed": {
+    "message": "Аннотации обновлены!",
+    "description": "Toast message after refreshing."
+  },
+  "donationsTitle": {
+    "message": "Вы помогаете Quantum Highlighter PRO оставаться бесплатным и доступным",
+    "description": "Title for the donation modal."
+  },
+  "donationsText": {
+    "message": "Привет! Я Джордж, создатель и единственный разработчик Quantum Highlighter. Мое обещание — и всегда им будет — что этот инструмент останется бесплатным и высочайшего качества. За ним не стоит крупная компания, только бесчисленные часы работы и мечта создать что-то действительно полезное для вас. Чтобы продолжать развиваться, мне нужна ваша помощь.",
+    "description": "Text for the donation modal."
+  },
+  "oneTimeDonationTitle": {
+    "message": "Сделать разовое пожертвование",
+    "description": "Title for one-time donation."
+  },
+  "oneTimeDonationDescription": {
+    "message": "Поддержите разработку Quantum Highlighter PRO одним жестом. Каждое пожертвование приближает нас к следующему большому обновлению.",
+    "description": "Description for one-time donation."
+  },
+  "oneTimeDonationButton": {
+    "message": "Конечно, я куплю вам кофе!",
+    "description": "Button for one-time donation."
+  },
+  "monthlySubscriptionTitle": {
+    "message": "Стать ежемесячным спонсором",
+    "description": "Title for monthly subscription."
+  },
+  "monthlySubscriptionDescription": {
+    "message": "Обеспечьте будущее проекта с помощью регулярной поддержки. Наши спонсоры — это основа устойчивого роста.",
+    "description": "Description for monthly subscription."
+  },
+  "subscribeButton": {
+    "message": "Стать спонсором",
+    "description": "Button for monthly subscription."
+  },
+  "remindMeLater": {
+    "message": "Может быть, позже, спасибо!",
+    "description": "Button to remind later for donation."
+  },
+  "dontRemindAgain": {
+    "message": "Хорошо, я обещаю не забывать (но больше не напоминайте)",
+    "description": "Button to never remind for donation."
+  },
+  "remindMeLaterTooltip": {
+    "message": "Вам напомнят снова после еще 80 выделений.",
+    "description": "Tooltip for the remind me later button."
+  },
+  "donationThanksTitle": {
+    "message": "Спасибо за вашу поддержку!",
+    "description": "Title for the donation thank you message."
+  },
+  "donationThanksText": {
+    "message": "Ваш вклад необходим для дальнейшего улучшения и предоставления качественного инструмента. Продолжим работать вместе, чтобы создать самый полезный и впечатляющий инструмент на рынке.",
+    "description": "Text for the donation thank you message."
+  },
+  "pageTitle": {
+    "message": "Добро пожаловать в Quantum Highlighter",
+    "description": "Title for the welcome page."
+  },
+  "githubLink": {
+    "message": "Посмотреть на GitHub",
+    "description": "Link to the GitHub repository."
+  },
+  "donateButton": {
+    "message": "Пожертвовать",
+    "description": "Button to open the donation section."
+  },
+  "heroTitle": {
+    "message": "Добро пожаловать в Quantum Highlighter PRO!",
+    "description": "Main title of the welcome page."
+  },
+  "heroSubtitle": {
+    "message": "Самый умный способ выделять, подчеркивать и делать заметки на любом веб-сайте.",
+    "description": "Subtitle of the welcome page."
+  },
+  "howItWorksTitle": {
+    "message": "Как это работает?",
+    "description": "Title for the 'How it works' section."
+  },
+  "step1Title": {
+    "message": "1. Выделите",
+    "description": "Title for the first step."
+  },
+  "step1Text": {
+    "message": "Просто выделите любой текст на веб-странице.",
+    "description": "Text for the first step."
+  },
+  "step2Title": {
+    "message": "2. Выделите цветом",
+    "description": "Title for the second step."
+  },
+  "step2Text": {
+    "message": "Выберите цвет и тип выделения в появившемся меню.",
+    "description": "Text for the second step."
+  },
+  "step3Title": {
+    "message": "3. Комментируйте",
+    "description": "Title for the third step."
+  },
+  "step3Text": {
+    "message": "Добавляйте к выделениям заметки с расширенным форматированием.",
+    "description": "Text for the third step."
+  },
+  "demoTitle": {
+    "message": "Посмотрите в действии",
+    "description": "Title for the demo section."
+  },
+  "featuresTitle": {
+    "message": "Основные возможности",
+    "description": "Title for the features section."
+  },
+  "feature1Title": {
+    "message": "Несколько цветов",
+    "description": "Title for the first feature."
+  },
+  "feature1Text": {
+    "message": "Организуйте свои идеи с помощью яркой цветовой палитры.",
+    "description": "Text for the first feature."
+  },
+  "feature2Title": {
+    "message": "Выделение и подчеркивание",
+    "description": "Title for the second feature."
+  },
+  "feature2Text": {
+    "message": "Выбирайте между выделением фона или элегантным подчеркиванием.",
+    "description": "Text for the second feature."
+  },
+  "feature3Title": {
+    "message": "Расширенные комментарии",
+    "description": "Title for the third feature."
+  },
+  "feature3Text": {
+    "message": "Используйте жирный шрифт, списки, ссылки и многое другое в своих заметках.",
+    "description": "Text for the third feature."
+  },
+  "feature4Title": {
+    "message": "Умная боковая панель",
+    "description": "Title for the fourth feature."
+  },
+  "feature4Text": {
+    "message": "Управляйте и просматривайте все свои заметки в одном месте.",
+    "description": "Text for the fourth feature."
+  },
+  "feature5Title": {
+    "message": "Надежный и динамичный",
+    "description": "Title for the fifth feature."
+  },
+  "feature5Text": {
+    "message": "Отлично работает на динамических сайтах, таких как ChatGPT.",
+    "description": "Text for the fifth feature."
+  },
+  "feature6Title": {
+    "message": "Гибкая настройка",
+    "description": "Title for the sixth feature."
+  },
+  "feature6Text": {
+    "message": "Настройте расширение по своему вкусу в меню настроек.",
+    "description": "Text for the sixth feature."
+  },
+  "ctaTitle": {
+    "message": "Готовы начать!",
+    "description": "Title for the call to action section."
+  },
+  "ctaText": {
+    "message": "Перейдите на любую веб-страничку, выделите текст и начните организовывать свои знания.",
+    "description": "Text for the call to action section."
+  },
+  "ctaTip": {
+    "message": "<strong>Совет:</strong> Вы можете открыть боковую панель в любое время с помощью сочетания клавиш (по умолчанию <strong>Ctrl + Shift + H</strong>) или через значок расширения.",
+    "description": "Tip for the call to action section."
+  },
+  "customAmountText": {
+    "message": "Или выберите любую другую сумму. Спасибо!",
+    "description": "Text for the custom amount in the donation card."
+  },
+  "customAmountTextMonthly": {
+    "message": "Вы можете выбрать любую сумму для ежемесячного пожертвования.",
+    "description": "Text for the custom amount in the monthly subscription card."
+  }
 }

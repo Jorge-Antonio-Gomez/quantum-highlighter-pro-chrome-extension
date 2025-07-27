@@ -101,14 +101,6 @@
   "ctaTitle": { "message": "Ready to Get Started!", "description": "Title for the call to action section." },
   "ctaText": { "message": "Go to any webpage, select some text, and start organizing your knowledge.", "description": "Text for the call to action section." },
   "ctaTip": { "message": "<strong>Tip:</strong> You can open the sidebar at any time using the keyboard shortcut (<strong>Ctrl + Shift + H</strong> by default) or from the extension icon.", "description": "Tip for the call to action section." },
-  "welcomeDonationsTitle": { "message": "Quantum Highlighter PRO will ALWAYS be free", "description": "Title for the donations section in the welcome page." },
-  "welcomeDonationsText": { "message": "Quantum Highlighter is an open-source project built with dedication. Your donation helps keep it alive and allows for the development of new features. Every contribution, no matter the size, makes a huge difference. Thank you so much for your support!", "description": "Text for the donations section in the welcome page." },
-  "welcomeOneTimeDonationTitle": { "message": "One-Time Donation", "description": "Title for the one-time donation card in the welcome page." },
-  "welcomeOneTimeDonationButton": { "message": "Donate", "description": "Button for the one-time donation in the welcome page." },
-  "welcomeOneTimeDonationDescription": { "message": "Support the project with a single contribution. Every little bit helps!", "description": "Description for the one-time donation card in the welcome page." },
   "customAmountText": { "message": "Or choose any other amount. Thank you!", "description": "Text for the custom amount in the donation card." },
-  "welcomeMonthlySubscriptionTitle": { "message": "Monthly Subscription", "description": "Title for the monthly subscription card in the welcome page." },
-  "welcomeSubscribeButton": { "message": "Subscribe", "description": "Button for the monthly subscription in the welcome page." },
-  "welcomeMonthlySubscriptionDescription": { "message": "Become a regular supporter and help ensure the project's future.", "description": "Description for the monthly subscription card in the welcome page." },
   "customAmountTextMonthly": { "message": "You can choose any amount to donate monthly.", "description": "Text for the custom amount in the monthly subscription card." }
 }
