@@ -10,8 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const disableDomainSwitch = document.getElementById('disable-domain-switch');
     const configPopup = document.getElementById('config-popup');
     const languageSelectWrapper = document.getElementById('language-select-wrapper');
-    const languageSelectTrigger = document.getElementById('language-select-trigger');
-    const languageOptions = document.getElementById('language-options');
     const websiteInfoCard = document.getElementById('website-info-card');
     const websiteFavicon = document.getElementById('website-favicon');
     const websiteTitle = document.getElementById('website-title');
@@ -23,11 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const refreshToastText = document.getElementById('refresh-toast-text');
 
     // --- STATE ---
-    let myTabId = null; // This sidebar's host tab ID
+    let myTabId = null;
     let isLocked = false;
-    let lastStoredWidth = 420; // Default width
+    let lastStoredWidth = 420;
     let settings = {
-        language: 'en',
         useDarkText: false,
     };
 
@@ -38,7 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function saveSettings() {
         chrome.storage.sync.set({ 'highlighter-settings': settings });
-        // Notify the specific content script of the change
         if (myTabId) {
             chrome.tabs.sendMessage(myTabId, {
                 action: 'settingChanged',
@@ -47,47 +43,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const applyTranslations = () => {
-        const lang = settings.language;
+    function localizeUI() {
         document.querySelectorAll('[data-i18n-key]').forEach(el => {
             const key = el.dataset.i18nKey;
-            if (translations[lang] && translations[lang][key]) {
-                const value = translations[lang][key];
+            const message = chrome.i18n.getMessage(key);
+            if (message) {
                 if (el.tagName === 'H2' || el.tagName === 'H3' || el.tagName === 'LABEL' || el.tagName === 'SPAN' || el.tagName === 'P') {
-                    el.textContent = value;
+                    el.textContent = message;
                 } else {
-                    el.setAttribute('aria-label', value);
+                    el.setAttribute('aria-label', message);
                 }
             }
         });
         const lockLabelKey = isLocked ? 'unlockSidebarWidth' : 'lockSidebarWidth';
-        const fallbackLockLabel = isLocked ? 'Unlock sidebar width' : 'Lock sidebar width';
-        const lockLabel = translations[lang]?.[lockLabelKey] || fallbackLockLabel;
+        const lockLabel = chrome.i18n.getMessage(lockLabelKey);
         lockButton.setAttribute('aria-label', lockLabel);
-    };
-
-    const setLanguage = (lang) => {
-        if (!translations[lang]) lang = 'en'; // Fallback to English
-        settings.language = lang;
-
-        const triggerSpan = languageSelectTrigger.querySelector('span');
-        const selectedOption = document.querySelector(`.custom-select-option[data-lang="${lang}"]`);
-        if (triggerSpan && selectedOption) {
-            triggerSpan.textContent = selectedOption.textContent;
-        }
-
-        applyTranslations();
-
-        if (myTabId) {
-            chrome.tabs.sendMessage(myTabId, { action: 'languageChanged', language: lang });
-        }
-
-        document.querySelectorAll('.custom-select-option').forEach(opt => {
-            opt.classList.toggle('active', opt.dataset.lang === lang);
-        });
-
-        loadAnnotations();
-    };
+    }
 
     function updateAnnotationTextStyles() {
         annotationsList.classList.toggle('dark-text', settings.useDarkText);
@@ -98,7 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const setLockedState = (locked) => {
         isLocked = locked;
         document.body.classList.toggle('locked', locked);
-        applyTranslations(); // Re-apply translations to update lock button label
+        const lockLabelKey = isLocked ? 'unlockSidebarWidth' : 'lockSidebarWidth';
+        lockButton.setAttribute('aria-label', chrome.i18n.getMessage(lockLabelKey));
         chrome.storage.sync.set({ sidebarLocked: locked });
 
         if (!myTabId) return;
@@ -133,14 +105,9 @@ document.addEventListener('DOMContentLoaded', () => {
         configPopup.style.display = 'none';
     };
 
-    const toggleLanguageDropdown = () => {
-        languageOptions.classList.toggle('show');
-    };
-
     // --- ANNOTATION RENDERING ---
 
     function renderAnnotations(annotations) {
-        const langStrings = translations[settings.language] || translations.en;
         const emptyStateContent = document.getElementById('empty-state-content');
         const hasAnnotations = annotations && annotations.length > 0;
 
@@ -177,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const colorBar = card.querySelector('.annotation-color-bar');
 
                 if (textEl.innerHTML !== annotation.text) textEl.innerHTML = annotation.text;
-                const newCommentHtml = annotation.comment || `<span class="no-comment-placeholder">${langStrings.noComment}</span>`;
+                const newCommentHtml = annotation.comment || `<span class="no-comment-placeholder">${chrome.i18n.getMessage('noComment')}</span>`;
                 if (commentEl.innerHTML !== newCommentHtml) commentEl.innerHTML = newCommentHtml;
                 if (colorBar.style.backgroundColor !== annotation.color) colorBar.style.backgroundColor = annotation.color;
                 card.dataset.comment = annotation.comment || '';
@@ -197,7 +164,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function createAnnotationCard(id, annotation) {
-        const langStrings = translations[settings.language] || translations.en;
         const card = document.createElement('div');
         card.className = 'annotation-card';
         card.dataset.annotationId = id;
@@ -217,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const commentDisplay = document.createElement('div');
         commentDisplay.className = 'comment';
-        commentDisplay.innerHTML = annotation.comment ? annotation.comment : `<span class="no-comment-placeholder">${langStrings.noComment}</span>`;
+        commentDisplay.innerHTML = annotation.comment ? annotation.comment : `<span class="no-comment-placeholder">${chrome.i18n.getMessage('noComment')}</span>`;
         
         mainContent.appendChild(text);
         mainContent.appendChild(commentDisplay);
@@ -227,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-btn';
-        deleteBtn.setAttribute('aria-label', langStrings.deleteAnnotation || 'Delete annotation');
+        deleteBtn.setAttribute('aria-label', chrome.i18n.getMessage('deleteAnnotation'));
         deleteBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V6H17H19C19.5523 6 20 6.44772 20 7C20 7.55228 19.5523 8 19 8H18V18C18 19.6569 16.6569 21 15 21H9C7.34315 21 6 19.6569 6 18V8H5C4.44772 8 4 7.55228 4 7C4 6.44772 4.44772 6 5 6H7H9V5ZM10 8H8V18C8 18.5523 8.44772 19 9 19H15C15.5523 19 16 18.5523 16 18V8H14H10ZM13 6H11V5H13V6ZM10 9C10.5523 9 11 9.44772 11 10V17C11 17.5523 10.5523 18 10 18C9.44772 18 9 17.5523 9 17V10C9 9.44772 9.44772 9 10 9ZM14 9C14.5523 9 15 9.44772 15 10V17C15 17.5523 14.5523 18 14 18C13.4477 18 13 17.5523 13 17V10C13 9.44772 13.4477 9 14 9Z" fill="currentColor"/></svg>`;
         actionsContainer.appendChild(deleteBtn);
 
@@ -251,8 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showToast(messageKey) {
-        const langStrings = translations[settings.language] || translations.en;
-        const message = langStrings[messageKey] || 'Done!';
+        const message = chrome.i18n.getMessage(messageKey);
         refreshToastText.textContent = message;
         if (refreshContainer.classList.contains('visible')) {
             const containerHeight = refreshContainer.offsetHeight;
@@ -277,9 +242,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderAnnotations([]);
                 return;
             }
-            const langStrings = translations[settings.language] || translations.en;
             if (currentTab.url && currentTab.url.startsWith('chrome-extension://')) {
-                annotationsList.innerHTML = `<p data-i18n-key="noAnnotations">${langStrings.noAnnotations}</p>`;
+                annotationsList.innerHTML = `<p>${chrome.i18n.getMessage('noAnnotations')}</p>`;
                 return;
             }
             refreshButtons.forEach(button => {
@@ -295,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 600);
                 if (chrome.runtime.lastError) {
                     console.warn(`Highlighter: Could not connect. ${chrome.runtime.lastError.message}`);
-                    annotationsList.innerHTML = `<p data-i18n-key="errorLoading">${langStrings.errorLoading}</p>`;
+                    annotationsList.innerHTML = `<p>${chrome.i18n.getMessage('errorLoading')}</p>`;
                     return;
                 }
                 renderAnnotations(response?.data || []);
@@ -345,7 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (sender.tab && sender.tab.id !== myTabId) {
-            return; // Ignore messages from other tabs
+            return;
         }
         if (request.action === 'annotationsUpdated') {
             renderAnnotations(request.data);
@@ -372,18 +336,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    languageSelectTrigger.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleLanguageDropdown();
-    });
-
-    document.querySelectorAll('.custom-select-option').forEach(option => {
-        option.addEventListener('click', (e) => {
-            setLanguage(e.target.dataset.lang);
-            saveSettings();
-            languageOptions.classList.remove('show');
-        });
-    });
+    // The language selector is now managed by browser settings, this can be removed.
+    if (languageSelectWrapper) {
+        languageSelectWrapper.style.display = 'none';
+    }
 
     forceBlackSwitch.addEventListener('change', () => {
         settings.useDarkText = forceBlackSwitch.checked;
@@ -434,7 +390,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             if (configPopup.style.display === 'block') hidePopup();
-            if (languageOptions.classList.contains('show')) languageOptions.classList.remove('show');
         }
     });
 
@@ -442,13 +397,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (configPopup.style.display === 'block' && !configPopup.contains(e.target) && !configButton.contains(e.target)) {
             hidePopup();
         }
-        if (languageOptions.classList.contains('show') && !languageSelectWrapper.contains(e.target)) {
-            languageOptions.classList.remove('show');
-        }
     });
 
     // --- INITIALIZATION ---
     const initialize = () => {
+        localizeUI();
+
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             if (!tabs || tabs.length === 0) {
                 console.error("Highlighter sidebar: Could not identify the host tab.");
@@ -466,12 +420,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 lastStoredWidth = Math.max(data.sidebarWidth || 420, 380);
 
                 const defaultSettings = {
-                    language: navigator.language.split('-')[0] || 'en',
                     useDarkText: false
                 };
                 settings = { ...defaultSettings, ...data['highlighter-settings'] };
                 
-                setLanguage(settings.language);
                 forceBlackSwitch.checked = settings.useDarkText;
                 updateAnnotationTextStyles();
                 saveSettings();

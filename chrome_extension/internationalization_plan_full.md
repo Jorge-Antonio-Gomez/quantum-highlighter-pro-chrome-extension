@@ -101,7 +101,7 @@ Y en tus archivos `messages.json` (por ejemplo, en `en/messages.json`), añade e
 }
 ```
 
-**4. Usar las Traducciones en JavaScript (`script.js`, `sidebar.js`)**
+**4. [HECHO] Usar las Traducciones en JavaScript (`script.js`, `sidebar.js`)**
 
 Ahora puedes reemplazar tu lógica personalizada. En lugar de pasar un objeto `lang`, usarás la API `chrome.i18n.getMessage()`.
 

@@ -22,7 +22,7 @@
         editor.chain().focus().setTextSelection({ from: newFrom, to: newTo })[commandName]().setTextSelection({ from: from, to: to }).run();
     };
 
-    function handleToolbarClick(action, editor, lang) {
+    function handleToolbarClick(action, editor) {
         switch (action) {
             case 'bold':
             case 'italic':
@@ -46,7 +46,7 @@
                 editor.chain().focus().toggleHeading({ level: 3 }).run();
                 break;
             case 'link':
-                promptForLink(editor, lang);
+                promptForLink(editor);
                 break;
         }
     }
@@ -81,18 +81,18 @@
         });
     }
 
-    function buildToolbar(toolbarContainer, editor, lang) {
+    function buildToolbar(toolbarContainer, editor) {
         toolbarContainer.innerHTML = `
-                    <button data-action="bold" title="${lang.toolbarBold}"><img src="${chrome.runtime.getURL('images/toolbar-icons/bold.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
-                    <button data-action="italic" title="${lang.toolbarItalic}"><img src="${chrome.runtime.getURL('images/toolbar-icons/italic.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
-                    <button data-action="underline" title="${lang.toolbarUnderline}"><img src="${chrome.runtime.getURL('images/toolbar-icons/underline.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
-                    <button data-action="strike" title="${lang.toolbarStrike}"><img src="${chrome.runtime.getURL('images/toolbar-icons/strikethrough.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
-                    <button data-action="blockquote" title="${lang.toolbarBlockquote}"><img src="${chrome.runtime.getURL('images/toolbar-icons/chat-left.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
-                    <button data-action="codeBlock" title="${lang.toolbarCodeBlock}"><img src="${chrome.runtime.getURL('images/toolbar-icons/bracket.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
-                    <button data-action="link" title="${lang.toolbarLink}"><img src="${chrome.runtime.getURL('images/toolbar-icons/link-alt.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
-                    <button data-action="h1" title="${lang.heading} 1"><img src="${chrome.runtime.getURL('images/toolbar-icons/heading-1.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
-                    <button data-action="h2" title="${lang.heading} 2"><img src="${chrome.runtime.getURL('images/toolbar-icons/heading-2.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
-                    <button data-action="h3" title="${lang.heading} 3"><img src="${chrome.runtime.getURL('images/toolbar-icons/heading-3.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
+                    <button data-action="bold" title="${chrome.i18n.getMessage('toolbarBold')}"><img src="${chrome.runtime.getURL('images/toolbar-icons/bold.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
+                    <button data-action="italic" title="${chrome.i18n.getMessage('toolbarItalic')}"><img src="${chrome.runtime.getURL('images/toolbar-icons/italic.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
+                    <button data-action="underline" title="${chrome.i18n.getMessage('toolbarUnderline')}"><img src="${chrome.runtime.getURL('images/toolbar-icons/underline.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
+                    <button data-action="strike" title="${chrome.i18n.getMessage('toolbarStrike')}"><img src="${chrome.runtime.getURL('images/toolbar-icons/strikethrough.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
+                    <button data-action="blockquote" title="${chrome.i18n.getMessage('toolbarBlockquote')}"><img src="${chrome.runtime.getURL('images/toolbar-icons/chat-left.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
+                    <button data-action="codeBlock" title="${chrome.i18n.getMessage('toolbarCodeBlock')}"><img src="${chrome.runtime.getURL('images/toolbar-icons/bracket.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
+                    <button data-action="link" title="${chrome.i18n.getMessage('toolbarLink')}"><img src="${chrome.runtime.getURL('images/toolbar-icons/link-alt.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
+                    <button data-action="h1" title="${chrome.i18n.getMessage('heading')} 1"><img src="${chrome.runtime.getURL('images/toolbar-icons/heading-1.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
+                    <button data-action="h2" title="${chrome.i18n.getMessage('heading')} 2"><img src="${chrome.runtime.getURL('images/toolbar-icons/heading-2.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
+                    <button data-action="h3" title="${chrome.i18n.getMessage('heading')} 3"><img src="${chrome.runtime.getURL('images/toolbar-icons/heading-3.svg')}" style="max-height: 12px; max-width: 12px; height: 12px; width: 12px;"></button>
                 `;
 
         toolbarContainer.querySelectorAll('button').forEach(button => {
@@ -100,13 +100,13 @@
                 e.preventDefault();
                 e.stopPropagation();
                 const action = e.currentTarget.dataset.action;
-                handleToolbarClick(action, editor, lang);
-                updateToolbar(editor, toolbarContainer); // Update toolbar state immediately after action
+                handleToolbarClick(action, editor);
+                updateToolbar(editor, toolbarContainer);
             });
         });
     }
 
-    function setupTiptapEditor(element, toolbarContainer, content, onUpdate, lang, rootNode) {
+    function setupTiptapEditor(element, toolbarContainer, content, onUpdate, rootNode) {
         const { Editor, Extension, InputRule, wrappingInputRule, Plugin, PluginKey } = Tiptap;
 
         const CustomInputRules = Extension.create({
@@ -342,8 +342,6 @@
             element: element,
             extensions: [
                 window.Tiptap.StarterKit.configure({
-                    // We leave StarterKit as is, so we get all its functionality.
-                    // Our rule has a higher priority, so it runs first.
                     link: {
                         openOnClick: false,
                         HTMLAttributes: {
@@ -363,11 +361,11 @@
                         const parentType = parent ? parent.type.name : null;
 
                         if (nodeType === 'paragraph' && parentType === 'blockquote' && parent.firstChild === node && node.content.size === 0) {
-                            return lang.quotePlaceholder;
+                            return chrome.i18n.getMessage('quotePlaceholder');
                         }
 
                         if (editor.isEmpty && nodeType === 'paragraph') {
-                            return lang.commentPlaceholder;
+                            return chrome.i18n.getMessage('commentPlaceholder');
                         }
 
                         if (nodeType === 'paragraph' && parentType === 'listItem' && parent.childCount === 1) {
@@ -376,20 +374,20 @@
 
                         if (node.content.size === 0) {
                             if (nodeType === 'paragraph') {
-                                return lang.paragraphPlaceholder;
+                                return chrome.i18n.getMessage('paragraphPlaceholder');
                             }
                             if (nodeType === 'heading') {
-                                return `${lang.heading} ${node.attrs.level}`;
+                                return `${chrome.i18n.getMessage('heading')} ${node.attrs.level}`;
                             }
                             if (nodeType === 'codeBlock') {
-                                return lang.codePlaceholder;
+                                return chrome.i18n.getMessage('codePlaceholder');
                             }
                         }
 
                         const isNodeWithOneEmptyChild = node.childCount === 1 && node.firstChild.content.size === 0;
                         if (isNodeWithOneEmptyChild) {
                             if (nodeType === 'listItem') {
-                                return lang.listPlaceholder;
+                                return chrome.i18n.getMessage('listPlaceholder');
                             }
                         }
 
@@ -418,8 +416,6 @@
                 toolbarContainer.classList.add('is-visible');
             },
             onBlur: ({ event }) => {
-                // Don't hide the toolbar if focus is moving to another part of the toolbar
-                // or to the link editing modal, which is a legitimate next step in the editing flow.
                 if (event.relatedTarget && 
                     (toolbarContainer.contains(event.relatedTarget) || 
                      event.relatedTarget.closest('.highlighter-link-modal'))) {
@@ -496,7 +492,7 @@
                     }
                     if (event.ctrlKey && !event.altKey && !event.shiftKey && event.key === 'k') {
                         event.preventDefault();
-                        promptForLink(editor, lang);
+                        promptForLink(editor);
                         return true;
                     }
 
@@ -506,14 +502,14 @@
         });
 
         editor.rootNode = rootNode;
-        buildToolbar(toolbarContainer, editor, lang);
+        buildToolbar(toolbarContainer, editor);
         updateToolbar(editor, toolbarContainer);
 
         return editor;
     }
 
 
-    function showLinkEditor(previousUrl = '', previousText = '', lang, rootNode) {
+    function showLinkEditor(previousUrl = '', previousText = '', rootNode) {
         return new Promise((resolve) => {
             const overlay = document.createElement('div');
             overlay.className = 'highlighter-modal-overlay';
@@ -521,22 +517,22 @@
             const modal = document.createElement('div');
             modal.className = 'highlighter-link-modal';
             modal.innerHTML = `
-                <h3>${lang.editLinkTitle}</h3>
+                <h3>${chrome.i18n.getMessage('editLinkTitle')}</h3>
                 <div class="form-group">
-                    <label for="link-text">${lang.textLabel}</label>
-                    <input type="text" id="link-text" placeholder="${lang.linkTextPlaceholder}" value="${previousText}">
+                    <label for="link-text">${chrome.i18n.getMessage('textLabel')}</label>
+                    <input type="text" id="link-text" placeholder="${chrome.i18n.getMessage('linkTextPlaceholder')}" value="${previousText}">
                 </div>
                 <div class="form-group">
-                    <label for="link-url">${lang.urlLabel}</label>
-                    <input type="text" id="link-url" placeholder="${lang.urlPlaceholder}" value="${previousUrl}">
+                    <label for="link-url">${chrome.i18n.getMessage('urlLabel')}</label>
+                    <input type="text" id="link-url" placeholder="${chrome.i18n.getMessage('urlPlaceholder')}" value="${previousUrl}">
                 </div>
                 <div class="modal-actions">
                     <div class="left-actions">
-                        <button class="unlink-btn">${lang.unlinkButton}</button>
+                        <button class="unlink-btn">${chrome.i18n.getMessage('unlinkButton')}</button>
                     </div>
                     <div class="right-actions">
-                        <button class="cancel-btn">${lang.cancel}</button>
-                        <button class="save-btn">${lang.save}</button>
+                        <button class="cancel-btn">${chrome.i18n.getMessage('cancel')}</button>
+                        <button class="save-btn">${chrome.i18n.getMessage('save')}</button>
                     </div>
                 </div>
             `;
@@ -570,7 +566,7 @@
 
             const handleUnlink = () => {
                 cleanup();
-                resolve(''); // Resolve with empty string to indicate unlinking
+                resolve('');
             };
             
             const handleEsc = (e) => {
@@ -606,7 +602,7 @@
         });
     }
 
-    async function promptForLink(editor, lang) {
+    async function promptForLink(editor) {
         editor.chain().focus().extendMarkRange('link').run();
 
         const { state } = editor;
@@ -615,7 +611,7 @@
         const selectedText = state.doc.textBetween(from, to, ' ');
         const previousUrl = editor.getAttributes('link').href || '';
         
-        const result = await showLinkEditor(previousUrl, selectedText, lang, editor.rootNode);
+        const result = await showLinkEditor(previousUrl, selectedText, editor.rootNode);
 
         if (result === null) {
             editor.chain().focus().setTextSelection({ from: to, to: to }).run();
@@ -673,14 +669,10 @@
         let sidebar = document.getElementById(SIDEBAR_ID);
 
         if (sidebar) {
-            // Trigger the animations for both the sidebar and the body margin.
-            // The .highlighter-sidebar-open class is still on the body, so the margin transition will apply.
             sidebar.style.transform = 'translateX(100%)';
             document.body.style.marginRight = '0';
 
-            // Listen for the transition to end on the sidebar.
             sidebar.addEventListener('transitionend', () => {
-                // Clean up everything *after* the animation is complete.
                 sidebar.remove();
                 document.body.classList.remove('highlighter-sidebar-open');
             }, { once: true });
@@ -693,10 +685,8 @@
                 sidebar.style.width = `${initialWidth}px`;
                 document.body.appendChild(sidebar);
                 
-                // Add the class *before* triggering the animation.
                 document.body.classList.add('highlighter-sidebar-open');
                 
-                // Force a reflow to ensure the initial state is rendered before the transition starts.
                 void sidebar.offsetWidth; 
 
                 sidebar.style.transform = 'translateX(0)';
@@ -704,8 +694,6 @@
             });
         }
     }
-
-    // Resizing Logic 
 
     const handleDrag = (e) => {
         const guide = document.getElementById(RESIZE_GUIDE_ID);
@@ -769,9 +757,6 @@
             document.addEventListener('mouseup', stopDrag, true);
         });
     }
-
-    // End Resizing Logic
-
 
     const { computePosition, offset, flip, shift, arrow } = FloatingUIDOM;
 
@@ -867,8 +852,6 @@
                 if (node === range.startContainer) nodeRange.setStart(node, range.startOffset);
                 if (node === range.endContainer) nodeRange.setEnd(node, range.endOffset);
                 
-                // FIX: Only wrap the node if the resulting range is not collapsed AND its content is not just whitespace.
-                // This prevents creating empty <mark> tags or marks around newlines between block elements.
                 if (!nodeRange.collapsed && nodeRange.toString().trim() !== '') {
                     const mark = document.createElement('mark');
                     mark.className = 'highlighter-mark';
@@ -957,10 +940,8 @@
             newRange.setStart(startContainer, startOffset);
             newRange.setEnd(endContainer, endOffset);
             
-            // After trimming the boundaries, if the range content is empty, collapse it.
-            // This prevents creating highlights on selections that only contain whitespace.
             if (!newRange.collapsed && newRange.toString().trim() === '') {
-                newRange.collapse(true); // Collapse to the start of the range
+                newRange.collapse(true);
             }
             
             return newRange;
@@ -1037,8 +1018,7 @@
     }
 
     class HighlightMenu {
-        constructor(initialLang) {
-            this.lang = initialLang;
+        constructor() {
             this.host = document.createElement('div');
             this.host.id = 'highlighter-host';
             document.body.appendChild(this.host);
@@ -1096,10 +1076,6 @@
             }).then(({ x, y }) => {
                 Object.assign(this.closeButton.style, { left: `${x}px`, top: `${y}px` });
             });
-        }
-
-        updateLanguage(newLang) {
-            this.lang = newLang;
         }
 
         isVisible() {
@@ -1238,12 +1214,12 @@
 
         showContextMenu(callbacks) {
             const sidebarOpen = document.getElementById(SIDEBAR_ID);
-            const toggleSidebarText = sidebarOpen ? this.lang.closeSidebar : this.lang.openSidebar;
+            const toggleSidebarText = sidebarOpen ? chrome.i18n.getMessage('closeSidebar') : chrome.i18n.getMessage('openSidebar');
 
             this.contextMenu.innerHTML = `
-                <button data-action="hide">${this.lang.hideUntilNextVisit}</button>
-                <button data-action="disablePage">${this.lang.disableOnThisPage}</button>
-                <button data-action="disableSite">${this.lang.disableOnThisWebsite}</button>
+                <button data-action="hide">${chrome.i18n.getMessage('hideUntilNextVisit')}</button>
+                <button data-action="disablePage">${chrome.i18n.getMessage('disableOnThisPage')}</button>
+                <button data-action="disableSite">${chrome.i18n.getMessage('disableOnThisWebsite')}</button>
                 <button data-action="toggleSidebar">${toggleSidebarText}</button>
             `;
             this.contextMenu.onclick = (e) => {
@@ -1276,8 +1252,7 @@
     }
 
     class DonationManager {
-        constructor(lang, shadowRoot) {
-            this.lang = lang;
+        constructor(shadowRoot) {
             this.shadowRoot = shadowRoot;
             this.storageKeys = {
                 count: 'highlighter-annotation-count',
@@ -1287,12 +1262,7 @@
             };
         }
     
-        updateLanguage(newLang) {
-            this.lang = newLang;
-        }
-
         processNewAnnotation() {
-            
             const storageKeysToGet = [
                 this.storageKeys.count,
                 this.storageKeys.neverShow,
@@ -1305,21 +1275,13 @@
                     console.error("Highlighter: Error getting data for annotation count.", chrome.runtime.lastError);
                     return;
                 }
-                
 
                 const neverShow = data[this.storageKeys.neverShow] || false;
-                
-                if (neverShow) {
-                    
-                    return;
-                }
+                if (neverShow) return;
     
                 const disabledUntil = data[this.storageKeys.disabledUntil] || 0;
-                
-                
                 const currentCount = data[this.storageKeys.count] || 0;
                 const newCount = currentCount + 1;
-                
     
                 chrome.storage.local.set({ [this.storageKeys.count]: newCount }, () => {
                     if (chrome.runtime.lastError) {
@@ -1328,24 +1290,15 @@
                     }
                     
                     let remindAt = data[this.storageKeys.remindAt] || 10;
-                    
 
-                    // Check if the disabled period has just ended AND the count has surpassed the old remindAt
-                    // This means the modal *should* have been shown, but was blocked by disabledUntil.
-                    // Now that disabledUntil has passed, we reset remindAt to ensure the modal shows on the *next* annotation.
-                    if (Date.now() >= disabledUntil && currentCount >= remindAt) { // Use currentCount here to check if it was already past the threshold
-                        const newRemindAt = newCount + 1; // Set remindAt for the *next* annotation
-                        chrome.storage.local.set({ [this.storageKeys.remindAt]: newRemindAt }, () => {
-                            
-                        });
-                        remindAt = newRemindAt; // Update local variable for immediate check
+                    if (Date.now() >= disabledUntil && currentCount >= remindAt) {
+                        const newRemindAt = newCount + 1;
+                        chrome.storage.local.set({ [this.storageKeys.remindAt]: newRemindAt });
+                        remindAt = newRemindAt;
                     }
 
-                    // Now, check both conditions: count reached AND not disabled
                     if (newCount >= remindAt && Date.now() >= disabledUntil) {
                         this.showModal(newCount);
-                    } else {
-                        
                     }
                 });
             });
@@ -1360,38 +1313,38 @@
             modal.innerHTML = `
                 <div class="heading-wrapper">
                     <img src="${chrome.runtime.getURL('images/icon128.png')}" alt="Highlighter Icon">
-                    <h3>${this.lang.donationsTitle}</h3>
-                    <button class="close-modal-btn" title="${this.lang.close}">&times;</button>
+                    <h3>${chrome.i18n.getMessage('donationsTitle')}</h3>
+                    <button class="close-modal-btn" title="${chrome.i18n.getMessage('close')}">&times;</button>
                 </div>
-                <p>${this.lang.donationsText}</p>
+                <p>${chrome.i18n.getMessage('donationsText')}</p>
                 <div class="donations-grid">
                     <div class="donation-card donation-card-onetime">
                         <div class="donation-card-content">
-                            <h4>${this.lang.oneTimeDonationTitle}</h4>
-                            <p>${this.lang.oneTimeDonationDescription}</p>
+                            <h4>${chrome.i18n.getMessage('oneTimeDonationTitle')}</h4>
+                            <p>${chrome.i18n.getMessage('oneTimeDonationDescription')}</p>
                         </div>
                         <a href="https://www.paypal.com/ncp/payment/P8GZGDP6GQBB2" target="_blank" class="donation-button">
                             <img src="${chrome.runtime.getURL('images/paypal-logo.svg')}" alt="PayPal" class="paypal-logo">
-                            <span>${this.lang.oneTimeDonationButton}</span>
+                            <span>${chrome.i18n.getMessage('oneTimeDonationButton')}</span>
                         </a>
                     </div>
                     <div class="donation-card donation-card-subscription">
                         <div class="donation-card-content">
-                            <h4>${this.lang.monthlySubscriptionTitle}</h4>
-                            <p>${this.lang.monthlySubscriptionDescription}</p>
+                            <h4>${chrome.i18n.getMessage('monthlySubscriptionTitle')}</h4>
+                            <p>${chrome.i18n.getMessage('monthlySubscriptionDescription')}</p>
                         </div>
                         <a href="https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-2CW39197CN079424VNCCCAAQ" target="_blank" class="donation-button">
                             <img src="${chrome.runtime.getURL('images/paypal-logo.svg')}" alt="PayPal" class="paypal-logo">
-                            <span>${this.lang.subscribeButton}</span>
+                            <span>${chrome.i18n.getMessage('subscribeButton')}</span>
                         </a>
                     </div>
                 </div>
                 <div class="modal-actions">
                     <div class="left-actions">
-                         <button class="never-remind-btn">${this.lang.dontRemindAgain}</button>
+                         <button class="never-remind-btn">${chrome.i18n.getMessage('dontRemindAgain')}</button>
                     </div>
                     <div class="right-actions">
-                        <button class="remind-later-btn">${this.lang.remindMeLater}</button>
+                        <button class="remind-later-btn">${chrome.i18n.getMessage('remindMeLater')}</button>
                     </div>
                 </div>
             `;
@@ -1419,10 +1372,9 @@
 
             modal.querySelectorAll('.donation-button').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    const disabledUntil = Date.now() + (180 * 24 * 60 * 60 * 1000); // ~6 months
+                    const disabledUntil = Date.now() + (180 * 24 * 60 * 60 * 1000);
                     chrome.storage.local.set({ [this.storageKeys.disabledUntil]: disabledUntil });
             
-                    // Change content after a brief delay to allow the new tab to open
                     setTimeout(() => {
                         modal.innerHTML = `
                             <div class="highlighter-thank-you-content">
@@ -1432,9 +1384,9 @@
                                         <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
                                     </svg>
                                 </div>
-                                <h3>${this.lang.donationThanksTitle}</h3>
-                                <p>${this.lang.donationThanksText}</p>
-                                <button class="close-thank-you-btn">${this.lang.close}</button>
+                                <h3>${chrome.i18n.getMessage('donationThanksTitle')}</h3>
+                                <p>${chrome.i18n.getMessage('donationThanksText')}</p>
+                                <button class="close-thank-you-btn">${chrome.i18n.getMessage('close')}</button>
                             </div>
                         `;
                         modal.querySelector('.close-thank-you-btn').addEventListener('click', cleanup);
@@ -1462,7 +1414,7 @@
                     if (tooltip) return;
                     tooltip = document.createElement('div');
                     tooltip.className = 'highlighter-dynamic-tooltip';
-                    tooltip.textContent = this.lang.remindMeLaterTooltip;
+                    tooltip.textContent = chrome.i18n.getMessage('remindMeLaterTooltip');
                     this.shadowRoot.appendChild(tooltip);
                     tooltip.addEventListener('animationend', (e) => {
                         if (tooltip && tooltip.classList.contains('popup-bounce-out')) {
@@ -1526,12 +1478,11 @@
     }
 
     class Highlighter {
-        constructor(initialLang, initialSettings) {
-            this.lang = initialLang;
+        constructor(initialSettings) {
             this.settings = initialSettings || { useDarkText: false };
             this.storage = new HighlightStorage();
-            this.menu = new HighlightMenu(this.lang);
-            this.donationManager = new DonationManager(this.lang, this.menu.shadowRoot);
+            this.menu = new HighlightMenu();
+            this.donationManager = new DonationManager(this.menu.shadowRoot);
             this.annotations = new Map();
             this.colors = {
                 yellow: 'var(--highlighter-color-yellow)', red: 'var(--highlighter-color-red)',
@@ -1586,46 +1537,17 @@
             });
         }
 
-        updateLanguage(newLangCode) {
-            if (translations[newLangCode]) {
-                this.lang = translations[newLangCode];
-                this.menu.updateLanguage(this.lang);
-                this.donationManager.updateLanguage(this.lang);
-                
-                if (this.menu.isVisible()) {
-                    if (this.activeAnnotationId) {
-                        const element = document.querySelector(`[data-annotation-id="${this.activeAnnotationId}"]`);
-
-                        if (this.tiptapEditor) {
-                            this.tiptapEditor.destroy();
-                            this.tiptapEditor = null;
-                        }
-
-                        if (element) this._showContextMenuFor(element, true);
-                    } else if (this.activeRange) {
-                        this._showCreationMenu(this.activeRange.getBoundingClientRect());
-                    }
-                }
-            }
-        }
-
         _setupEventListeners() {
             document.addEventListener('mouseup', this._onMouseUp.bind(this));
             document.addEventListener('mousedown', this._onMouseDown.bind(this), true);
             document.addEventListener('keydown', this._onKeyDown.bind(this));
 
-            // Listen for the global shortcut from the manifest.
             document.addEventListener('keydown', (event) => {
-                // Check for Ctrl+Shift+H (or Cmd+Shift+H on Mac)
                 if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'h') {
-                    // We use a timeout to check the event status *after* the host page has had a chance to process it.
                     setTimeout(() => {
-                        // If the page prevented the default action, it means it "claimed" the shortcut.
-                        // In that case, our extension should do nothing.
                         if (event.defaultPrevented) {
                             return;
                         }
-                        // If the shortcut was not claimed, the extension is free to use it.
                         toggleSidebar();
                     }, 0);
                 }
@@ -1669,17 +1591,13 @@
                 await this.deleteAnnotation();
             }
 
-            // If the user copies or cuts text from the main page, close the menu.
             if (event.ctrlKey && (event.key.toLowerCase() === 'c' || event.key.toLowerCase() === 'x')) {
                 if (!this.menu.isVisible()) return;
 
-                // If the action is inside the comment editor, do nothing.
                 if (event.composedPath().includes(this.menu.host)) {
                     return;
                 }
 
-                // Use a timeout to allow the default copy/cut action to complete
-                // before we remove the selection and hide the menu.
                 setTimeout(() => {
                     if (window.getSelection().toString()) {
                         window.getSelection()?.removeAllRanges();
@@ -1716,7 +1634,6 @@
             }
 
             const target = event.composedPath()[0] || event.target;
-            // Use composedPath to correctly detect clicks inside the Shadow DOM
             if (this.isGloballyDisabled || this.isTemporarilyHidden || event.composedPath().includes(this.menu.host) || target.closest('.highlighter-mark')) {
                 return;
             }
@@ -1764,11 +1681,11 @@
                 },
                 buttons: {
                     colors: Object.entries(this.colors).map(([name, color]) => ({
-                        action: 'create', value: color, label: this.lang.colors[name] || name, className: 'highlighter-color-selector', content: `<div style="width:100%; height:100%; background-color:${this.solidColors[name]}; border-radius:3px;"></div>`
+                        action: 'create', value: color, label: chrome.i18n.getMessage(`colors_${name}`), className: 'highlighter-color-selector', content: `<div style="width:100%; height:100%; background-color:${this.solidColors[name]}; border-radius:3px;"></div>`
                     })),
                     types: [
-                        { action: 'setType', value: 'highlight', label: this.lang.highlight, content: 'A', className: `highlighter-type-selector ${this.currentAnnotationType === 'highlight' ? 'active' : ''}` },
-                        { action: 'setType', value: 'underline', label: this.lang.underline, content: '<span class="underline">A</span>', className: `highlighter-type-selector ${this.currentAnnotationType === 'underline' ? 'active' : ''}` }
+                        { action: 'setType', value: 'highlight', label: chrome.i18n.getMessage('highlight'), content: 'A', className: `highlighter-type-selector ${this.currentAnnotationType === 'highlight' ? 'active' : ''}` },
+                        { action: 'setType', value: 'underline', label: chrome.i18n.getMessage('underline'), content: '<span class="underline">A</span>', className: `highlighter-type-selector ${this.currentAnnotationType === 'underline' ? 'active' : ''}` }
                     ]
                 }
             });
@@ -1834,7 +1751,6 @@
                                         this.activeDebouncedUpdate(html);
                                     }
                                 },
-                                this.lang,
                                 this.menu.shadowRoot
                             );
                             this.menu.updatePosition(element);
@@ -1843,14 +1759,14 @@
                 },
                 buttons: {
                     colors: Object.entries(this.colors).map(([name, color]) => ({
-                        action: 'changeColor', value: color, label: this.lang.colors[name] || name, className: `highlighter-color-selector ${annotation.color === color ? 'active' : ''}`, content: `<div style="width:100%; height:100%; background-color:${this.solidColors[name]}; border-radius:3px;"></div>`
+                        action: 'changeColor', value: color, label: chrome.i18n.getMessage(`colors_${name}`), className: `highlighter-color-selector ${annotation.color === color ? 'active' : ''}`, content: `<div style="width:100%; height:100%; background-color:${this.solidColors[name]}; border-radius:3px;"></div>`
                     })),
                     types: [
-                        { action: 'changeType', value: 'highlight', label: this.lang.highlight, content: 'A', className: `highlighter-type-selector ${annotation.type === 'highlight' ? 'active' : ''}` },
-                        { action: 'changeType', value: 'underline', label: this.lang.underline, content: '<span class="underline">A</span>', className: `highlighter-type-selector ${annotation.type === 'underline' ? 'active' : ''}` }
+                        { action: 'changeType', value: 'highlight', label: chrome.i18n.getMessage('highlight'), content: 'A', className: `highlighter-type-selector ${annotation.type === 'highlight' ? 'active' : ''}` },
+                        { action: 'changeType', value: 'underline', label: chrome.i18n.getMessage('underline'), content: '<span class="underline">A</span>', className: `highlighter-type-selector ${annotation.type === 'underline' ? 'active' : ''}` }
                     ],
                     actions: [
-                        { action: 'delete', label: this.lang.delete, content: `<svg class="delete-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V6H17H19C19.5523 6 20 6.44772 20 7C20 7.55228 19.5523 8 19 8H18V18C18 19.6569 16.6569 21 15 21H9C7.34315 21 6 19.6569 6 18V8H5C4.44772 8 4 7.55228 4 7C4 6.44772 4.44772 6 5 6H7H9V5ZM10 8H8V18C8 18.5523 8.44772 19 9 19H15C15.5523 19 16 18.5523 16 18V8H14H10ZM13 6H11V5H13V6Z"/></svg><span>${this.lang.delete}</span>`, className: 'highlighter-delete-btn' }
+                        { action: 'delete', label: chrome.i18n.getMessage('delete'), content: `<svg class="delete-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V6H17H19C19.5523 6 20 6.44772 20 7C20 7.55228 19.5523 8 19 8H18V18C18 19.6569 16.6569 21 15 21H9C7.34315 21 6 19.6569 6 18V8H5C4.44772 8 4 7.55228 4 7C4 6.44772 4.44772 6 5 6H7H9V5ZM10 8H8V18C8 18.5523 8.44772 19 9 19H15C15.5523 19 16 18.5523 16 18V8H14H10ZM13 6H11V5H13V6Z"/></svg><span>${chrome.i18n.getMessage('delete')}</span>`, className: 'highlighter-delete-btn' }
                     ]
                 },
                 commentBox: {
@@ -1926,23 +1842,19 @@
         }
 
         _reapplyAnnotations() {
-            // Disconnect the observer temporarily to avoid infinite loops while we're modifying the DOM.
             if (this.observer) this.observer.disconnect();
         
             this.annotations.forEach(annotation => {
-                // Check if the highlight is already on the page. If so, do nothing.
                 if (document.querySelector(`[data-annotation-id="${annotation.id}"]`)) {
                     return;
                 }
         
-                // If not, try to find its position and re-wrap it.
                 const range = DOMManager.getRangeFromPointers(annotation.pointers);
                 if (range) {
                     DOMManager.wrapRange(range, annotation);
                 }
             });
         
-            // Reconnect the observer to continue watching for changes.
             if (this.observer) {
                 this.observer.observe(document.body, {
                     childList: true,
@@ -1952,13 +1864,11 @@
         }
 
         _setupMutationObserver() {
-            // Use the existing debounce function.
             this.debouncedReapply = debounce(() => this._reapplyAnnotations(), 500);
         
             this.observer = new MutationObserver((mutations) => {
                 let shouldReapply = false;
                 for (const mutation of mutations) {
-                    // A quick check to avoid re-applying when our own UI is added/removed.
                     const targetId = mutation.target.id;
                     if (targetId === 'highlighter-host' || targetId === 'highlighter-sidebar-instance' || targetId === RESIZE_COVER_ID || targetId === RESIZE_GUIDE_ID) {
                         continue;
@@ -2000,240 +1910,174 @@
         }
 
         disableForSite() {
-            const hostname = window.location.hostname;
-            chrome.storage.sync.get({ disabledSites: [] }, (data) => {
-                const disabledSites = data.disabledSites;
-                if (!disabledSites.includes(hostname)) {
-                    disabledSites.push(hostname);
-                    chrome.storage.sync.set({ disabledSites }, () => {
-                        window.location.reload();
-                    });
-                }
-            });
+            const href = window.location.href;
+            try {
+                const hostname = new URL(href).hostname;
+                chrome.storage.sync.get({ disabledSites: [] }, (data) => {
+                    const disabledSites = data.disabledSites;
+                    if (!disabledSites.includes(hostname)) {
+                        disabledSites.push(hostname);
+                        chrome.storage.sync.set({ disabledSites }, () => {
+                            window.location.reload();
+                        });
+                    }
+                });
+            } catch (e) {
+                console.error("Highlighter: Could not parse URL to disable site.", e);
+            }
         }
 
         _loadAnnotations() {
+            if (this.isTemporarilyHidden || this.isGloballyDisabled) return;
             this.annotations.forEach(annotation => {
                 const range = DOMManager.getRangeFromPointers(annotation.pointers);
                 if (range) DOMManager.wrapRange(range, annotation);
             });
-            this._notifySidebarOfUpdate();
         }
 
         _notifySidebarOfUpdate() {
-            this.storage.load((annotations) => {
-                const sortedAnnotations = Array.from(annotations.entries()).sort(([, a], [, b]) => {
-                    const elementA = document.querySelector(`[data-annotation-id="${a.id}"]`);
-                    const elementB = document.querySelector(`[data-annotation-id="${b.id}"]`);
-                    if (!elementA || !elementB) return 0;
-                    const position = elementA.compareDocumentPosition(elementB);
-                    if (position & Node.DOCUMENT_POSITION_FOLLOWING) return -1;
-                    if (position & Node.DOCUMENT_POSITION_PRECEDING) return 1;
-                    return 0;
-                });
-                chrome.runtime.sendMessage({ action: 'annotationsUpdated', data: sortedAnnotations });
+            chrome.runtime.sendMessage({
+                action: 'annotationsUpdated',
+                data: Array.from(this.annotations.entries())
             });
         }
 
-        createAnnotation(color, type) {
+        async createAnnotation(color, type) {
             if (!this.activeRange) return;
-            const id = this.storage.generateId();
-            const pointers = DOMManager.getRangePointers(this.activeRange);
-            const text = DOMManager.getSanitizedHtmlFromRange(this.activeRange);
-            const annotation = { id, color, type, pointers, text, comment: '' };
-            const marks = DOMManager.wrapRange(this.activeRange, annotation);
-            
-            if (marks.length > 0) {
-                this.annotations.set(id, annotation);
+            const range = this.activeRange;
+            this.activeRange = null;
+            await this.menu.hide();
+
+            const annotation = {
+                id: this.storage.generateId(),
+                text: DOMManager.getSanitizedHtmlFromRange(range),
+                pointers: DOMManager.getRangePointers(range),
+                color: color,
+                type: type,
+                comment: '',
+                createdAt: new Date().toISOString()
+            };
+
+            this.annotations.set(annotation.id, annotation);
+            DOMManager.wrapRange(range, annotation);
+            this.storage.save(this.annotations, () => {
+                this._notifySidebarOfUpdate();
+                this.donationManager.processNewAnnotation();
+            });
+        }
+
+        async updateAnnotation(updates, annotationId = this.activeAnnotationId, isCommentUpdate = false) {
+            if (!annotationId) return;
+            const annotation = this.annotations.get(annotationId);
+            if (!annotation) return;
+
+            Object.assign(annotation, updates);
+            this.annotations.set(annotationId, annotation);
+
+            document.querySelectorAll(`[data-annotation-id="${annotationId}"]`).forEach(el => {
+                DOMManager.applyAnnotationStyle(el, annotation, el);
+            });
+
+            if (!isCommentUpdate) {
                 this.storage.save(this.annotations, () => {
                     this._notifySidebarOfUpdate();
                 });
-
-                this.donationManager.processNewAnnotation();
-
-                this.menu.hide();
-                this.activeRange = null;
             }
-
-            window.getSelection()?.removeAllRanges();
-            this.menu.hide();
-            this.activeRange = null;
         }
 
-        async updateAnnotation(updates, idToUpdate, keepMenuOpen = false) {
-            const id = idToUpdate || this.activeAnnotationId;
-            if (!id) return;
-            const annotation = this.annotations.get(id);
-            if (!annotation) return;
-            Object.assign(annotation, updates);
-            document.querySelectorAll(`[data-annotation-id="${id}"]`).forEach(el => {
-                DOMManager.applyAnnotationStyle(el, annotation, el);
-            });
-            this.annotations.set(id, annotation);
+        async deleteAnnotation(annotationId = this.activeAnnotationId) {
+            if (!annotationId) return;
+            await this.menu.hide();
+            document.querySelectorAll(`[data-annotation-id="${annotationId}"]`).forEach(el => DOMManager.unwrap(el));
+            this.annotations.delete(annotationId);
             this.storage.save(this.annotations, () => {
                 this._notifySidebarOfUpdate();
             });
-        
-            if (!keepMenuOpen) {
-                await this._closeOrFinalizeContextMenu();
-            }
-        }
-
-        async deleteAnnotation(idToDelete) {
-            const id = idToDelete || this.activeAnnotationId;
-            if (!id) return;
-
-            document.querySelectorAll(`[data-annotation-id="${id}"]`).forEach(el => DOMManager.unwrap(el));
-            
-            const deleted = this.annotations.delete(id);
-
-            if (deleted) {
-                if (this.annotations.size === 0) {
-                    this.storage.remove(() => {
-                        this._notifySidebarOfUpdate();
-                    });
-                } else {
-                    this.storage.save(this.annotations, () => {
-                        this._notifySidebarOfUpdate();
-                    });
-                }
-            }
-
-            if (id === this.activeAnnotationId) {
-                await this._closeOrFinalizeContextMenu();
-            }
-        }
-
-        scrollToAnnotation(id) {
-            const elements = document.querySelectorAll(`.highlighter-mark[data-annotation-id="${id}"]`);
-            const element = elements.length > 0 ? elements[0] : null;
-
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-                elements.forEach(el => {
-                    el.style.transition = 'background-color 150ms ease-in-out, color 150ms ease-in-out';
-                    el.style.backgroundColor = '#90caf9';
-                    el.style.color = '#1a1a1a';
-                });
-
-                setTimeout(() => {
-                    const annotation = this.annotations.get(id);
-                    if (annotation) {
-                        elements.forEach(el => {
-                            el.style.transition = '';
-                            DOMManager.applyAnnotationStyle(el, annotation, null);
-                        });
-                    }
-                }, 1200);
-            }
+            this.activeAnnotationId = null;
         }
     }
 
-    
-
     function initializeHighlighter() {
-        chrome.storage.sync.get(['highlighter-settings'], (data) => {
-            const defaultSettings = {
-                language: navigator.language.split('-')[0] || 'en',
-                useDarkText: false
-            };
-            const settings = { ...defaultSettings, ...data['highlighter-settings'] };
+        chrome.storage.sync.get(['disabledSites', 'disabledPages', 'highlighter-settings'], (data) => {
+            const disabledSites = data.disabledSites || [];
+            const disabledPages = data.disabledPages || [];
+            const hostname = window.location.hostname;
 
-            let userLang = settings.language;
-            if (!translations[userLang]) userLang = 'en';
-            const lang = translations[userLang];
-
-            const start = () => {
-                if (window.highlighterInstance) return;
-                window.highlighterInstance = new Highlighter(lang, settings);
-                window.highlighterInstance._reapplyAllAnnotationStyles();
-            };
-
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', start);
-            } else {
-                start();
+            if (disabledSites.includes(hostname) || disabledPages.includes(window.location.href)) {
+                console.log(`Highlighter disabled on ${hostname}`);
+                return;
             }
+
+            const settings = data['highlighter-settings'] || {};
+            window.highlighterInstance = new Highlighter(settings);
         });
     }
 
-    chrome.storage.sync.get(['disabledSites', 'disabledPages'], (data) => {
-        const disabledSites = data.disabledSites || [];
-        const disabledPages = data.disabledPages || [];
-        if (disabledSites.includes(window.location.hostname) || disabledPages.includes(window.location.href)) {
-            console.log('Quantum Highlighter: Disabled on this site or page.');
-            return;
-        }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeHighlighter);
+    } else {
         initializeHighlighter();
-    });
+    }
 
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-        const { action, annotationId, language, width, settings } = request;
-
-        if (action === 'toggleSidebar') {
+        if (request.action === 'toggleSidebar') {
             toggleSidebar();
-        } else if (action === 'getAnnotations') {
-            if (window.highlighterInstance) {
-                window.highlighterInstance.storage.load((annotations) => {
-                    const sortedAnnotations = Array.from(annotations.entries()).sort(([, a], [, b]) => {
-                        const elementA = document.querySelector(`[data-annotation-id="${a.id}"]`);
-                        const elementB = document.querySelector(`[data-annotation-id="${b.id}"]`);
-                        if (!elementA || !elementB) return 0;
-                        const position = elementA.compareDocumentPosition(elementB);
-                        if (position & Node.DOCUMENT_POSITION_FOLLOWING) return -1;
-                        if (position & Node.DOCUMENT_POSITION_PRECEDING) return 1;
-                        return 0;
-                    });
-                    sendResponse({ data: sortedAnnotations });
-                });
-            } else {
-                sendResponse({ data: [] });
-            }
-            return true;
-        } else if (action === 'getPageInfo') {
-            const title = document.title;
-            const description = document.querySelector('meta[name="description"]')?.content || '';
-            const image = document.querySelector('meta[property="og:image"]')?.content || '';
-            let favicon = document.querySelector('link[rel="shortcut icon"]')?.href || document.querySelector('link[rel="icon"]')?.href;
-            const domain = window.location.hostname;
-            
-            if (favicon && !favicon.startsWith('http')) {
-                favicon = new URL(favicon, window.location.href).href;
-            }
-
-            sendResponse({ title, description, image, favicon, domain });
-            return true;
-        } else if (action === 'scrollToAnnotation' && annotationId) {
-            window.highlighterInstance?.scrollToAnnotation(annotationId);
-        } else if (action === 'deleteAnnotation' && annotationId) {
-            window.highlighterInstance?.deleteAnnotation(annotationId);
-        } else if (action === 'updateAnnotation' && annotationId) {
-            window.highlighterInstance?.updateAnnotation(request.updates, annotationId);
-        } else if (action === 'languageChanged' && language) {
-            window.highlighterInstance?.updateLanguage(language);
-        } else if (action === 'settingChanged' && settings) {
-            window.highlighterInstance?.updateSettings(settings);
-        } else if (action === 'toggleActivation') {
-            if (request.disabled) {
-                window.highlighterInstance?.disableGlobally();
-            } else {
-                window.highlighterInstance?.enableGlobally();
-            }
-        } else if (action === 'startSidebarResize') {
+        } else if (request.action === 'startSidebarResize') {
             startSidebarResize();
-        } else if (action === 'getSidebarWidth') {
+        } else if (request.action === 'getSidebarWidth') {
             const sidebar = document.getElementById(SIDEBAR_ID);
-            sendResponse({ width: sidebar ? sidebar.offsetWidth : 420 });
-            return true;
-        } else if (action === 'setSidebarWidth' && width) {
+            if (sidebar) sendResponse({ width: sidebar.offsetWidth });
+        } else if (request.action === 'setSidebarWidth') {
             const sidebar = document.getElementById(SIDEBAR_ID);
             if (sidebar) {
-                const newWidth = Math.max(MIN_WIDTH, Math.min(width, MAX_WIDTH));
-                sidebar.style.width = `${newWidth}px`;
-                document.body.style.marginRight = `${newWidth}px`;
+                sidebar.style.width = `${request.width}px`;
+                document.body.style.marginRight = `${request.width}px`;
             }
+        } else if (request.action === 'getAnnotations') {
+            if (window.highlighterInstance) {
+                sendResponse({ data: Array.from(window.highlighterInstance.annotations.entries()) });
+            }
+        } else if (request.action === 'scrollToAnnotation') {
+            const element = document.querySelector(`[data-annotation-id="${request.annotationId}"]`);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                element.classList.add('flash-animation');
+                element.addEventListener('animationend', () => {
+                    element.classList.remove('flash-animation');
+                }, { once: true });
+            }
+        } else if (request.action === 'deleteAnnotation') {
+            if (window.highlighterInstance) {
+                window.highlighterInstance.deleteAnnotation(request.annotationId);
+            }
+        } else if (request.action === 'settingChanged') {
+            if (window.highlighterInstance) {
+                window.highlighterInstance.updateSettings(request.settings);
+            }
+        } else if (request.action === 'languageChanged') {
+            if (window.highlighterInstance) {
+                // No longer need to do anything here, UI will update on its own or next menu open
+            }
+        } else if (request.action === 'toggleActivation') {
+            if (request.disabled) {
+                if (window.highlighterInstance) {
+                    window.highlighterInstance.disableGlobally();
+                }
+            } else {
+                if (!window.highlighterInstance) {
+                    initializeHighlighter();
+                } else {
+                    window.highlighterInstance.enableGlobally();
+                }
+            }
+        } else if (request.action === 'getPageInfo') {
+            const title = document.title;
+            const description = document.querySelector('meta[name="description"]')?.content || '';
+            const domain = window.location.hostname;
+            const favicon = document.querySelector('link[rel="icon"]')?.href || document.querySelector('link[rel="shortcut icon"]')?.href;
+            const image = document.querySelector('meta[property="og:image"]')?.content;
+            sendResponse({ title, description, domain, favicon, image });
         }
-        return ["getAnnotations", "getSidebarWidth", "getPageInfo"].includes(action);
     });
+
 })();
