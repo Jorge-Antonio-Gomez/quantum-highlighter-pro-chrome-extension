@@ -56,7 +56,7 @@
         }
     ],
     "action": {
-        "default_title": "Show Highlighter Pcanel"
+        "default_title": "Show Highlighter Panel"
     },
     "commands": {
       "toggle-sidebar": {
@@ -64,7 +64,7 @@
           "default": "Ctrl+Shift+H",
           "mac": "Command+Shift+H"
         },
-        "description": "Abrir/Cerrar la barra lateral de Highlighter"
+        "description": "Abrir/Cerrar la barra lateral de Quantum Highlighter PRO"
       }
     }
 }
