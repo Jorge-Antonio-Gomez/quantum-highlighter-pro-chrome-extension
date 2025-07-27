@@ -25,7 +25,7 @@
                 "libs/floating-ui-core.js",
                 "libs/floating-ui-dom.umd.js",
                 "libs/tiptap.js",
-                "i18n.js",
+                
                 "script.js"
             ],
             "css": [

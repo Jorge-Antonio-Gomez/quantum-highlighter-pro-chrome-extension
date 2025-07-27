@@ -139,11 +139,9 @@ Archivos a revisar (al menos):
 
 Ya no necesitarías importar `i18n.js` ni tener la lógica para seleccionar el idioma; Chrome lo hace por ti.
 
-**5. Usar las Traducciones en HTML (`welcome.html`, `sidebar.html`)**
+**5. [HECHO] Usar las Traducciones en HTML (`welcome.html`, `sidebar.html`)**
 
-Tienes dos opciones para el HTML:
-
-*   **Opción A (Recomendada para ti):** Mantén tus atributos `data-i18n` y usa JavaScript para poblarlos. Esto es más limpio y potente. En `welcome.html`, podrías reemplazar todo el objeto `translations` y la lógica de `applyTranslations` con una función más simple:
+Mantén tus atributos `data-i18n` y usa JavaScript para poblarlos. Esto es más limpio y potente. En `welcome.html`, podrías reemplazar todo el objeto `translations` y la lógica de `applyTranslations` con una función más simple:
 
     ```javascript
     // En welcome.html, dentro del script
@@ -170,15 +168,6 @@ Tienes dos opciones para el HTML:
         localizeHtmlPage();
         // Aquí iría el resto de tu lógica de `initialize()` para la página.
     });
-    ```
-
-*   **Opción B (Menos flexible):** Usar marcadores `__MSG_key__` directamente en el HTML. Chrome los reemplazará al cargar la página.
-
-    ```html
-    <h1>__MSG_heroTitle__</h1>
-    <p class="subtitle">__MSG_heroSubtitle__</p>
-    ```
-    Esta opción no funciona para atributos que no sean de texto (como `title`) y puede ser menos flexible si necesitas lógica compleja.
 
 ### Resumen de Ventajas del Método Nativo
 
