@@ -80,3 +80,9 @@ chrome_extension/internationalization_plan_full.md
 # Build directories
 dist/
 build/
+
+# Chrome extension build artifacts
+*.crx
+*.zip
+chrome_extension.crx
+chrome_extension.zip
