@@ -1,0 +1,13 @@
+# Pendientes
+
+## Sidebar
+
+- [ ] Integración de edición de comentarios en la barra lateral.
+
+## Varios
+
+- [ ] Actualizar el readme.md con los idiomas precisos:
+    - [ ] pt -> pt_BR
+    - [ ] zh -> zh_CN
+
+- [ ] Actualizar el readme.md con el enlace a la página de la tienda de Chrome (ahora es un mockup).
