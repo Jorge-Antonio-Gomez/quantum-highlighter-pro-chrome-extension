@@ -41,6 +41,7 @@ const translations = {
         heading: "Heading",
         save: "Save",
         cancel: "Cancel",
+        close: "Close",
         colors: { yellow: "Yellow", red: "Red", green: "Green", blue: "Blue", purple: "Purple", pink: "Pink", orange: "Orange", grey: "Grey" },
         shortcutsDisabled: "Shortcuts disabled in input fields.",
         hideUntilNextVisit: "Hide Until Next Visit",
@@ -60,7 +61,9 @@ const translations = {
         subscribeButton: "Join as a sponsor",
         remindMeLater: "Maybe later, thanks!",
         dontRemindAgain: "Ok, I promise I won't forget (but don't notify me again)",
-        remindMeLaterTooltip: "You will be reminded again after 80 more highlights."
+        remindMeLaterTooltip: "I will remind you again after 80 more highlights.",
+        donationThanksTitle: "Thank You for Your Support!",
+        donationThanksText: "Your contribution is essential to keep improving and offering a quality tool. Let's keep working together to achieve the most useful and impressive tool on the market."
     },
     es: {
         sidebarTitle: "Anotaciones",
@@ -104,6 +107,7 @@ const translations = {
         heading: "Encabezado",
         save: "Guardar",
         cancel: "Cancelar",
+        close: "Cerrar",
         colors: { yellow: "Amarillo", red: "Rojo", green: "Verde", blue: "Azul", purple: "Morado", pink: "Rosa", orange: "Naranja", grey: "Gris" },
         shortcutsDisabled: "Atajos desactivados en los campos de texto.",
         hideUntilNextVisit: "Ocultar hasta la próxima visita",
@@ -123,7 +127,9 @@ const translations = {
         subscribeButton: "Unirme como patrocinador",
         remindMeLater: "En otro ratito, ¡gracias!",
         dontRemindAgain: "Ok, prometo no olvidarlo (pero no avises más)",
-        remindMeLaterTooltip: "Se te notificará de nuevo tras 80 resaltados más."
+        remindMeLaterTooltip: "Te recordaré de nuevo 80 resaltados en el futuro.",
+        donationThanksTitle: "¡Gracias por tu apoyo!",
+        donationThanksText: "Tu contribución es esencial para seguir mejorando y ofreciendo una herramienta de calidad. Sigamos trabajando juntos para lograr la herramienta más útil e impresionante del mercado."
     },
     fr: {
         sidebarTitle: "Annotations",
@@ -167,6 +173,7 @@ const translations = {
         heading: "Titre",
         save: "Enregistrer",
         cancel: "Annuler",
+        close: "Fermer",
         colors: { yellow: "Jaune", red: "Rouge", green: "Vert", blue: "Bleu", purple: "Violet", pink: "Rose", orange: "Orange", grey: "Gris" },
         shortcutsDisabled: "Raccourcis désactivés dans les champs de saisie.",
         hideUntilNextVisit: "Masquer jusqu'à la prochaine visite",
@@ -186,7 +193,9 @@ const translations = {
         subscribeButton: "Devenir mécène",
         remindMeLater: "Peut-être plus tard, merci !",
         dontRemindAgain: "OK, promis, je n'oublierai pas (mais ne me prévenez plus)",
-        remindMeLaterTooltip: "Un rappel vous sera envoyé après 80 autres surlignages."
+        remindMeLaterTooltip: "Un rappel vous sera envoyé après 80 autres surlignages.",
+        donationThanksTitle: "Merci pour votre soutien !",
+        donationThanksText: "Votre contribution est essentielle pour continuer à nous améliorer et à offrir un outil de qualité. Continuons à travailler ensemble pour créer l'outil le plus utile et le plus impressionnant du marché."
     },
     pt: {
         sidebarTitle: "Anotações",
@@ -230,6 +239,7 @@ const translations = {
         heading: "Título",
         save: "Salvar",
         cancel: "Cancelar",
+        close: "Fechar",
         colors: { yellow: "Amarelo", red: "Vermelho", green: "Verde", blue: "Azul", purple: "Roxo", pink: "Rosa", orange: "Laranja", grey: "Cinza" },
         shortcutsDisabled: "Atalhos desativados nos campos de entrada.",
         hideUntilNextVisit: "Ocultar até a próxima visita",
@@ -249,7 +259,9 @@ const translations = {
         subscribeButton: "Tornar-se patrocinador",
         remindMeLater: "Talvez mais tarde, obrigado!",
         dontRemindAgain: "Ok, prometo não esquecer (mas não me avise de novo)",
-        remindMeLaterTooltip: "Você será lembrado novamente após mais 80 destaques."
+        remindMeLaterTooltip: "Você será lembrado novamente após mais 80 destaques.",
+        donationThanksTitle: "Obrigado pelo seu apoio!",
+        donationThanksText: "Sua contribuição é essencial para continuar melhorando e oferecendo uma ferramenta de qualidade. Vamos continuar trabalhando juntos para criar a ferramenta mais útil e impressionante do mercado."
     },
     ru: {
         sidebarTitle: "Аннотации",
@@ -293,6 +305,7 @@ const translations = {
         heading: "Заголовок",
         save: "Сохранить",
         cancel: "Отмена",
+        close: "Закрыть",
         colors: { yellow: "Желтый", red: "Красный", green: "Зеленый", blue: "Синий", purple: "Фиолетовый", pink: "Розовый", orange: "Оранжевый", grey: "Серый" },
         shortcutsDisabled: "Горячие клавиши отключены в полях ввода.",
         hideUntilNextVisit: "Скрыть до следующего посещения",
@@ -312,7 +325,9 @@ const translations = {
         subscribeButton: "Стать спонсором",
         remindMeLater: "Может быть, позже, спасибо!",
         dontRemindAgain: "Хорошо, я обещаю не забывать (но больше не напоминайте)",
-        remindMeLaterTooltip: "Вам напомнят снова после еще 80 выделений."
+        remindMeLaterTooltip: "Вам напомнят снова после еще 80 выделений.",
+        donationThanksTitle: "Спасибо за вашу поддержку!",
+        donationThanksText: "Ваш вклад необходим для дальнейшего улучшения и предоставления качественного инструмента. Продолжим работать вместе, чтобы создать самый полезный и впечатляющий инструмент на рынке."
     },
     zh: {
         sidebarTitle: "注释",
@@ -356,6 +371,7 @@ const translations = {
         heading: "标题",
         save: "保存",
         cancel: "取消",
+        close: "关闭",
         colors: { yellow: "黄色", red: "红色", green: "绿色", blue: "蓝色", purple: "紫色", pink: "粉色", orange: "橙色", grey: "灰色" },
         shortcutsDisabled: "在输入字段中禁用快捷键。",
         hideUntilNextVisit: "隐藏至下次访问",
@@ -375,6 +391,8 @@ const translations = {
         subscribeButton: "成为赞助商",
         remindMeLater: "稍后再说，谢谢！",
         dontRemindAgain: "好的，我保证不会忘记（但请不要再通知我）",
-        remindMeLaterTooltip: "再高亮80次后，系统会再次提醒您。"
+        remindMeLaterTooltip: "再高亮80次后，系统会再次提醒您。",
+        donationThanksTitle: "感谢您的支持！",
+        donationThanksText: "您的贡献对于不断改进和提供高质量的工具至关重要。让我们继续共同努力，打造市场上最有用、最令人印象深刻的工具。"
     }
 };

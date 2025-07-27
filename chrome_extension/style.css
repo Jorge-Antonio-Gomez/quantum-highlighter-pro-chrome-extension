@@ -846,6 +846,7 @@ body.ctrl-is-pressed .tiptap a {
     color: #2c2c2c;
     animation: slideInUp 0.3s ease-out;
     border-top: 4px solid var(--highlighter-primary, #eb8521);
+    position: relative;
 }
 
 .highlighter-donation-modal h3 {
@@ -991,6 +992,7 @@ body.ctrl-is-pressed .tiptap a {
     align-items: center;
     gap: 12px;
     margin-bottom: 12px;
+    /* position: relative; */
 }
 
 .highlighter-donation-modal .heading-wrapper img {
@@ -1003,6 +1005,32 @@ body.ctrl-is-pressed .tiptap a {
     font-size: 20px;
     font-weight: 700;
     color: var(--highlighter-primary, #eb8521);
+}
+
+
+.highlighter-donation-modal .close-modal-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none; /* Asegura que no haya borde */
+    outline: none; /* Elimina el contorno al enfocar */
+    font-size: 20px; /* Tamaño de la X más sutil */
+    cursor: pointer;
+    color: #ccc; /* Gris claro */
+    padding: 0; /* Sin padding para un look más ajustado */
+    transition: background-color 0.2s ease, color 0.2s ease;
+    line-height: 1;
+    width: 24px; /* Tamaño más pequeño */
+    height: 24px; /* Tamaño más pequeño */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.highlighter-donation-modal .close-modal-btn:hover {
+    background-color: rgba(255, 165, 0, 0.3); /* Naranja primario un poco más visible */
+    color: orange; /* Naranja primario */
 }
 
 .highlighter-dynamic-tooltip {
@@ -1024,6 +1052,102 @@ body.ctrl-is-pressed .tiptap a {
     display: block;
 }
 
+
 .highlighter-dynamic-tooltip.popup-bounce-out {
     animation: popup-bounce-out 150ms ease-in forwards;
+}
+
+/* --- Thank You Message --- */
+.highlighter-thank-you-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.highlighter-thank-you-content h3 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--highlighter-primary, #eb8521);
+    margin: 0 0 10px 0;
+}
+
+.highlighter-thank-you-content p {
+    font-size: 15px;
+    color: #555;
+    line-height: 1.6;
+    margin: 0 0 24px 0;
+}
+
+.highlighter-thank-you-content .close-thank-you-btn {
+    background-color: var(--highlighter-primary, #eb8521);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.highlighter-thank-you-content .close-thank-you-btn:hover {
+    background-color: #c86f1c;
+}
+
+.thank-you-animation {
+    margin-bottom: 20px;
+}
+
+.checkmark {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: block;
+    stroke-width: 3;
+    stroke: #fff;
+    stroke-miterlimit: 10;
+    box-shadow: inset 0px 0px 0px #4caf50;
+    animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+}
+
+.checkmark-circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 3;
+    stroke-miterlimit: 10;
+    stroke: #4caf50;
+    fill: none;
+    animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark-check {
+    transform-origin: 50% 50%;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+}
+
+@keyframes stroke {
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes scale {
+    0%, 100% {
+        transform: none;
+    }
+    50% {
+        transform: scale3d(1.1, 1.1, 1);
+    }
+}
+
+@keyframes fill {
+    100% {
+        box-shadow: inset 0px 0px 0px 40px #4caf50;
+    }
 }

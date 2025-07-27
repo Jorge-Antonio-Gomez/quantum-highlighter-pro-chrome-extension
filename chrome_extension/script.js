@@ -1292,7 +1292,7 @@
         }
 
         processNewAnnotation() {
-            console.log("Highlighter: Processing new annotation for donation count.");
+            
             const storageKeysToGet = [
                 this.storageKeys.count,
                 this.storageKeys.neverShow,
@@ -1305,33 +1305,47 @@
                     console.error("Highlighter: Error getting data for annotation count.", chrome.runtime.lastError);
                     return;
                 }
-                console.log("Highlighter: Fetched data from storage:", data);
+                
 
                 const neverShow = data[this.storageKeys.neverShow] || false;
+                
                 if (neverShow) {
-                    console.log("Highlighter: Donation reminders are permanently disabled.");
+                    
                     return;
                 }
     
                 const disabledUntil = data[this.storageKeys.disabledUntil] || 0;
-                if (Date.now() < disabledUntil) {
-                    console.log("Highlighter: Donation reminders are temporarily disabled.");
-                    return;
-                }
-    
+                
+                
                 const currentCount = data[this.storageKeys.count] || 0;
                 const newCount = currentCount + 1;
-                console.log(`Highlighter: Annotation count updated from ${currentCount} to ${newCount}.`);
+                
     
                 chrome.storage.local.set({ [this.storageKeys.count]: newCount }, () => {
                     if (chrome.runtime.lastError) {
                         console.error("Highlighter: Error saving new annotation count.", chrome.runtime.lastError);
                         return;
                     }
-                    console.log("Highlighter: New annotation count saved successfully.");
-                    const remindAt = data[this.storageKeys.remindAt] || 10;
-                    if (newCount >= remindAt) {
+                    
+                    let remindAt = data[this.storageKeys.remindAt] || 10;
+                    
+
+                    // Check if the disabled period has just ended AND the count has surpassed the old remindAt
+                    // This means the modal *should* have been shown, but was blocked by disabledUntil.
+                    // Now that disabledUntil has passed, we reset remindAt to ensure the modal shows on the *next* annotation.
+                    if (Date.now() >= disabledUntil && currentCount >= remindAt) { // Use currentCount here to check if it was already past the threshold
+                        const newRemindAt = newCount + 1; // Set remindAt for the *next* annotation
+                        chrome.storage.local.set({ [this.storageKeys.remindAt]: newRemindAt }, () => {
+                            
+                        });
+                        remindAt = newRemindAt; // Update local variable for immediate check
+                    }
+
+                    // Now, check both conditions: count reached AND not disabled
+                    if (newCount >= remindAt && Date.now() >= disabledUntil) {
                         this.showModal(newCount);
+                    } else {
+                        
                     }
                 });
             });
@@ -1347,6 +1361,7 @@
                 <div class="heading-wrapper">
                     <img src="${chrome.runtime.getURL('images/icon128.png')}" alt="Highlighter Icon">
                     <h3>${this.lang.donationsTitle}</h3>
+                    <button class="close-modal-btn" title="${this.lang.close}">&times;</button>
                 </div>
                 <p>${this.lang.donationsText}</p>
                 <div class="donations-grid">
@@ -1396,21 +1411,47 @@
                 if (e.key === 'Escape') {
                     e.preventDefault();
                     e.stopPropagation();
+                    const nextReminder = currentCount + 80;
+                    chrome.storage.local.set({ [this.storageKeys.remindAt]: nextReminder });
                     cleanup();
                 }
             };
 
             modal.querySelectorAll('.donation-button').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const disabledUntil = Date.now() + (180 * 24 * 60 * 60 * 1000);
+                btn.addEventListener('click', (e) => {
+                    const disabledUntil = Date.now() + (180 * 24 * 60 * 60 * 1000); // ~6 months
                     chrome.storage.local.set({ [this.storageKeys.disabledUntil]: disabledUntil });
-                    // No cleanup here, let the user go to paypal
+            
+                    // Change content after a brief delay to allow the new tab to open
+                    setTimeout(() => {
+                        modal.innerHTML = `
+                            <div class="highlighter-thank-you-content">
+                                <div class="thank-you-animation">
+                                    <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                                        <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                                        <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                                    </svg>
+                                </div>
+                                <h3>${this.lang.donationThanksTitle}</h3>
+                                <p>${this.lang.donationThanksText}</p>
+                                <button class="close-thank-you-btn">${this.lang.close}</button>
+                            </div>
+                        `;
+                        modal.querySelector('.close-thank-you-btn').addEventListener('click', cleanup);
+                    }, 100);
                 });
             });
 
             const remindLaterBtn = modal.querySelector('.remind-later-btn');
+            const closeModalBtn = modal.querySelector('.close-modal-btn');
 
             remindLaterBtn.addEventListener('click', () => {
+                const nextReminder = currentCount + 80;
+                chrome.storage.local.set({ [this.storageKeys.remindAt]: nextReminder });
+                cleanup();
+            });
+
+            closeModalBtn.addEventListener('click', () => {
                 const nextReminder = currentCount + 80;
                 chrome.storage.local.set({ [this.storageKeys.remindAt]: nextReminder });
                 cleanup();
