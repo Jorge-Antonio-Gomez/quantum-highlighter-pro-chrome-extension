@@ -1,8 +1,9 @@
 {
     "manifest_version": 3,
-    "name": "Quantum Highlighter PRO",
+    "name": "__MSG_extensionName__",
+    "description": "__MSG_extensionDescription__",
+    "default_locale": "en",
     "version": "2025.0725.4",
-    "description": "Web annotation system inspired by Zotero. Highlight, underline, and manage annotations on any page.",
     "permissions": [
         "storage",
         "activeTab",

@@ -75,6 +75,7 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+chrome_extension/internationalization_plan_full.md
 
 # Build directories
 dist/
