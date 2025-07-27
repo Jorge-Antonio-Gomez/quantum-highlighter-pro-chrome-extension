@@ -152,27 +152,6 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- ELEMENTS ---
-            const colorIcon = document.getElementById('color-cycle-icon');
-
-            // --- FUNCTIONS ---
-            function initialize() {
-                // Color cycle animation for the feature icon
-                if (colorIcon) {
-                    const colors = ['#ffd400', '#ff6666', '#5fb236', '#2ea8e5', '#a28ae5', '#e56eee', '#f19837', '#aaaaaa'];
-                    let currentIndex = 0;
-                    colorIcon.style.backgroundColor = colors[currentIndex];
-                    setInterval(() => {
-                        currentIndex = (currentIndex + 1) % colors.length;
-                        colorIcon.style.backgroundColor = colors[currentIndex];
-                    }, 9000 / colors.length);
-                }
-            }
-
-            initialize();
-        });
-    </script>
+    <script src="welcome.js"></script>
 </body>
 </html>

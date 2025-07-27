@@ -192,6 +192,11 @@ h2 {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     border: 1px solid #e2e8f0;
     line-height: 0; /* To remove any extra space below the image */
+    width: 100%;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative; /* For positioning the image */
 }
 
 .demo-gif {
@@ -299,7 +304,7 @@ h2 {
 }
 
 #donations p {
-    font-size: 1.1em;
+    /* font-size: 1.1em; */
     color: #64748b;
     max-width: 600px;
     margin: 0 auto 20px auto;
@@ -350,7 +355,6 @@ h2 {
 }
 
 .donation-description {
-    font-size: 0.95em;
     color: #64748b;
     margin-bottom: 15px;
     min-height: 55px;
