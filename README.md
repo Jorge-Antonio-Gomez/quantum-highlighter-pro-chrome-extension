@@ -1,8 +1,8 @@
 # Quantum Highlighter PRO
 
-A powerful, open-source web annotation extension for Chrome, inspired by Zotero's annotation system. Highlight, underline, and manage annotations with rich-text comments on any webpage.
+![Demo Light Theme](chrome_extension/images/Front_marquee.png)
 
-![Demo Light Theme](chrome_extension/images/demo_light_4_640x400.png)
+A powerful, open-source web annotation extension for Chrome, inspired by Zotero's annotation system. Highlight, underline, and manage annotations with rich-text comments on any webpage.
 
 ## Key Features
 
