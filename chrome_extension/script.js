@@ -1176,6 +1176,13 @@
                     e.preventDefault();
                 }
 
+                if (button.classList.contains('highlighter-color-selector')) {
+                    button.classList.add('vibrating');
+                    setTimeout(() => {
+                        button.classList.remove('vibrating');
+                    }, 150);
+                }
+
                 if (!button.closest('.tiptap-toolbar')) {
                     e.stopPropagation();
                 }
@@ -2169,22 +2176,40 @@
             });
         }
 
-        async updateAnnotation(updates, annotationId = this.activeAnnotationId, isCommentUpdate = false) {
-            if (!annotationId) return;
-            const annotation = this.annotations.get(annotationId);
+        async updateAnnotation(updates, id = this.activeAnnotationId, isDebouncedUpdate = false) {
+            if (!id) return;
+            const annotation = this.annotations.get(id);
             if (!annotation) return;
 
+            const oldColor = annotation.color;
+            const oldType = annotation.type;
+        
             Object.assign(annotation, updates);
-            this.annotations.set(annotationId, annotation);
-
-            document.querySelectorAll(`[data-annotation-id="${annotationId}"]`).forEach(el => {
+            this.annotations.set(id, annotation);
+        
+            document.querySelectorAll(`[data-annotation-id="${id}"]`).forEach(el => {
                 DOMManager.applyAnnotationStyle(el, annotation, el);
             });
-
-            if (!isCommentUpdate) {
+        
+            if (!isDebouncedUpdate) {
                 this.storage.save(this.annotations, () => {
                     this._notifySidebarOfUpdate();
                 });
+            }
+
+            if (this.menu.isVisible() && !isDebouncedUpdate) {
+                if (updates.color && updates.color !== oldColor) {
+                    const oldButton = this.menu.shadowRoot.querySelector(`.highlighter-color-selector[data-value="${oldColor}"]`);
+                    if (oldButton) oldButton.classList.remove('active');
+                    const newButton = this.menu.shadowRoot.querySelector(`.highlighter-color-selector[data-value="${updates.color}"]`);
+                    if (newButton) newButton.classList.add('active');
+                }
+                if (updates.type && updates.type !== oldType) {
+                    const oldButton = this.menu.shadowRoot.querySelector(`.highlighter-type-selector[data-value="${oldType}"]`);
+                    if (oldButton) oldButton.classList.remove('active');
+                    const newButton = this.menu.shadowRoot.querySelector(`.highlighter-type-selector[data-value="${updates.type}"]`);
+                    if (newButton) newButton.classList.add('active');
+                }
             }
         }
 

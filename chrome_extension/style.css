@@ -99,6 +99,12 @@
     }
 }
 
+@keyframes shake-sideways {
+    0%, 100% { transform: translateX(0) rotate(0); }
+    25% { transform: translateX(-1px) rotate(-2deg); }
+    75% { transform: translateX(1px) rotate(2deg); }
+}
+
 .highlighter-close-btn {
     position: absolute;
     width: 10px;
@@ -147,6 +153,12 @@
 .highlighter-menu .menu-row.types { background-color: #f0f0f0; padding: 3px; border-radius: 6px; }
 .highlighter-menu button { background: none; border: none; border-radius: 5px; cursor: pointer; transition: var(--highlighter-transition); display: flex; align-items: center; justify-content: center; }
 .highlighter-color-selector { width: 22px; height: 22px; border: 1px solid rgba(0,0,0,0.1); padding: 2.5px; flex-shrink: 0; }
+.highlighter-color-selector div {
+    transition: box-shadow 0.2s ease-in-out;
+}
+.highlighter-color-selector.vibrating {
+    animation: shake-sideways 150ms ease-in-out;
+}
 .highlighter-color-selector.active div {
     /* box-shadow: 0 0 0 3px color-mix(in srgb, var(--highlighter-primary) 50%, transparent); */
     box-shadow: 0 0 0 3px color-mix(in srgb, black 15%, transparent);
@@ -226,6 +238,10 @@
 .highlighter-menu .menu-row.actions .highlighter-delete-btn:hover {
     background-color: #FFE0E0;
     color: #D8000C; /* This will now apply to the SVG via currentColor */
+}
+
+.menu-row.actions:has(.highlighter-delete-btn:hover) {
+    background-color: #fff4f4;
 }
 
 .highlighter-menu .highlighter-shortcut-warning { font-size: 11px; color: #888; text-align: center; padding: 4px 0 0 0; border-top: 1px solid #f0f0f0; margin-top: 4px; }
