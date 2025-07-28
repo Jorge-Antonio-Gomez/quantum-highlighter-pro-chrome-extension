@@ -2,23 +2,25 @@
 
 A powerful, open-source web annotation extension for Chrome, inspired by Zotero's annotation system. Highlight, underline, and manage annotations with rich-text comments on any webpage.
 
-![Demo Light Theme](chrome_extension/images/demo_light_4.png)
+![Demo Light Theme](chrome_extension/images/demo_light_4_640x400.png)
 
 ## Key Features
 
 ### 🎨 Advanced Annotation System
 
-![Demo Light Theme](chrome_extension/images/demo_light_2.png)
+![Demo Light Theme](chrome_extension/images/demo_light_2_640x400.png)
 
 *   **Two Annotation Types:** Choose between highlighting text with a background color or underlining it.
 *   **Eight Colors:** A palette of 8 colors to organize your notes (yellow, red, green, blue, purple, pink, orange, gray).
 
     
 *   **Robust & Dynamic:** Annotations persist reliably, even on dynamic websites like YouTube, thanks to a `MutationObserver`-based re-application system.
+*   **SPA Compatibility:** Advanced support for Single Page Applications (SPAs) with intelligent URL change detection and annotation management.
+*   **Smart URL Handling:** Intelligent parameter filtering for consistent annotation storage across different URL variations.
 
 ### 📝 Rich-Text Comments
 
-![Demo Light Theme](chrome_extension/images/demo_light_3.png)
+![Demo Light Theme](chrome_extension/images/demo_light_3_640x400.png)
 
 *   **Full-Featured Editor:** Powered by **Tiptap**, the comment editor supports rich formatting.
 *   **Formatting Toolbar:** Includes tools for **bold**, *italic*, <u>underline</u>, ~~strikethrough~~, links, code blocks, quotes, and headings (H1, H2, H3).
@@ -34,16 +36,16 @@ A powerful, open-source web annotation extension for Chrome, inspired by Zotero'
 ### ⚙️ Advanced Configuration
 *   **Granular Control:** Disable the extension on a specific page or an entire website.
 *   **Force Dark Text:** An option to force black text on highlights to ensure readability on any background.
-*   **Smart Persistence:** All your settings and annotations are saved across browser sessions using `chrome.storage`.
+*   **Smart Persistence:** All your settings and annotations are synchronized across devices using `chrome.storage.sync`.
 
 ### 🌍 Full Internationalization (i18n)
 *   **Multi-Language Support:** The entire interface is professionally translated into 6 languages:
     *   **English** _(en)_
     *   **Spanish** _(es)_
     *   **French** _(fr)_
-    *   **Portuguese** _(pt)_
+    *   **Portuguese (Brazil)** _(pt_BR)_
     *   **Russian** _(ru)_
-    *   **Chinese** _(zh)_
+    *   **Chinese (Simplified)** _(zh_CN)_
 *   **Localized Placeholders:** All help texts are culturally adapted.
 
 ### ⌨️ Optimized User Experience
@@ -75,7 +77,9 @@ A powerful, open-source web annotation extension for Chrome, inspired by Zotero'
 ### From the Chrome Web Store (Recommended)
 Install the extension directly from the Chrome Web Store for the most stable version and automatic updates.
 
-[**➡️ Install from Chrome Web Store**](https://chrome.google.com/webstore/detail/mock-link-for-quantum-highlighter)
+> **📋 Note:** The Chrome Web Store listing is currently under review. The extension will be available soon!
+
+[**➡️ Install from Chrome Web Store**](https://chrome.google.com/webstore/detail/mock-link-for-quantum-highlighter) _(Coming Soon)_
 
 ### Manual Installation (for Developers)
 If you prefer to install manually or want to test the latest development version:
