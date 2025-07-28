@@ -17,3 +17,7 @@ This is a web annotation system inspired by Zotero. It allows you to highlight, 
 3.  Select text on a web page to bring up the highlighter menu.
 4.  Choose a color to highlight or underline the text.
 5.  Your annotations will appear in the sidebar.
+
+## Privacy Policy
+
+We take your privacy seriously. All your data is stored locally in your browser. For more details, please read our [Privacy Policy](PRIVACY_POLICY_en.md).
