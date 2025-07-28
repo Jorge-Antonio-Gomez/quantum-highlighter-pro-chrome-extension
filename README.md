@@ -116,6 +116,14 @@ If you prefer to install manually or want to test the latest development version
 *   **Floating UI:** A powerful library for intelligently positioning floating elements like context menus.
 *   **Custom i18n System:** A dependency-free internationalization system.
 
+## Privacy and Security
+
+The extension is designed with your privacy in mind. All your data is stored locally on your device. For more details, please see the following documents:
+
+*   **[Privacy Policy](PRIVACY_POLICY.md):** Understand how your data is handled.
+*   **[Permissions and Data Usage](PERSMISSIONS_AND_DATA_USAGE.md):** A detailed explanation of the permissions requested by the extension.
+*   **[Security Policy](SECURITY.md):** Our commitment to keeping the extension secure.
+
 ## Contributing
 
 Contributions are welcome! Please:
@@ -140,9 +148,15 @@ Quantum Highlighter PRO is a free, open-source project developed with love in my
 
 ## License
 
-This project is licensed under the **Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0)**.
+This project is licensed under the [Creative Commons Attribution-ShareAlike 4.0 International License](LICENSE). This means you are free to:
 
-You are free to use, modify, and distribute this software, provided you give appropriate credit and share your modifications under the same license.
+*   **Share:** Copy and redistribute the material in any medium or format.
+*   **Adapt:** Remix, transform, and build upon the material for any purpose, even commercially.
+
+Under the following terms:
+
+*   **Attribution:** You must give appropriate credit, provide a link to the license, and indicate if changes were made.
+*   **ShareAlike:** If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original.
 
 ---
 

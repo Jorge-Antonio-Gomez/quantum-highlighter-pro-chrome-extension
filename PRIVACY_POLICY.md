@@ -57,3 +57,10 @@ We may update this Privacy Policy from time to time to reflect changes in the ex
 ### 7. Contact Us
 
 If you have any questions, concerns, or suggestions regarding this Privacy Policy, please feel free to open an issue on our [GitHub repository](https://github.com/Jorge-Antonio-Gomez/quantum-highlighter-pro-chrome-extension).
+
+---
+### 8. Related Documents
+
+- **[README](README.md)**
+- **[Permissions and Data Usage](PERSMISSIONS_AND_DATA_USAGE.md)**
+- **[Security Policy](SECURITY.md)**

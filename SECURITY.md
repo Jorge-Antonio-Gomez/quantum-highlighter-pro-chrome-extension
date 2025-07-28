@@ -22,7 +22,7 @@ We take all security reports seriously. If you believe you have found a security
 1.  **Primary Method (Recommended):** Please use GitHub's private vulnerability reporting feature. You can do this by navigating to the "Security" tab of our repository and clicking on "Report a vulnerability". This is the most secure and efficient way to reach us.
     *   [**Report a vulnerability here**](https://github.com/Jorge-Antonio-Gomez/quantum-highlighter-pro-chrome-extension/security/advisories/new)
 
-2.  **Alternate Method:** If you are unable to use GitHub's private reporting feature, you can send an email with the full details. Please contact `security.gomez.antonio@gmail.com` with the subject line "Security Vulnerability Report: Quantum Highlighter PRO".
+2.  **Alternate Method:** If you are unable to use GitHub's private reporting feature, you can send an email with the full details. Please contact `goga.jorge.antonio@gmail.com` with the subject line "Security Vulnerability Report: Quantum Highlighter PRO".
 
 ### What to Include
 
@@ -41,3 +41,10 @@ To help us resolve the issue quickly, please include the following in your repor
 *   We will provide a public advisory and credit you for your discovery (unless you prefer to remain anonymous) once the vulnerability has been patched and a new version has been released.
 
 Thank you for helping to keep Quantum Highlighter PRO secure.
+
+---
+## Related Documents
+
+- **[README](README.md)**
+- **[Privacy Policy](PRIVACY_POLICY.md)**
+- **[Permissions and Data Usage](PERSMISSIONS_AND_DATA_USAGE.md)**

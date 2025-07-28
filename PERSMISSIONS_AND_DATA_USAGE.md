@@ -38,4 +38,11 @@ The extension handles the following types of user data, all of which are stored 
 
 ## 4. Privacy Policy
 
-For a complete and detailed explanation of our data handling practices, please see our full **[Privacy Policy](privacy_policy_en.md)**.
+For a complete and detailed explanation of our data handling practices, please see our full **[Privacy Policy](PRIVACY_POLICY.md)**.
+
+---
+
+## 5. Related Documents
+
+- **[README](README.md)**
+- **[Security Policy](SECURITY.md)**
