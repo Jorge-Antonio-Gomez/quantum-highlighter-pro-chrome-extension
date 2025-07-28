@@ -1114,9 +1114,18 @@
                 const commentBoxWrapper = this.element.querySelector('.highlighter-comment-box');
                 if (commentBoxWrapper) {
                     commentBoxWrapper.addEventListener('click', e => e.stopPropagation());
+                    
+                    commentBoxWrapper.addEventListener('keydown', (e) => {
+                        if (e.ctrlKey || e.altKey || e.metaKey || 
+                            ['Escape', 'Tab', 'Backspace', 'Delete'].includes(e.key)) {
+                            return;
+                        }
+                        e.stopPropagation();
+                    });
+
                     if (config.callbacks.onCommentMousedown) {
-                        commentBoxWrapper.addEventListener('mousedown', config.callbacks.onCommentMousedown);
-                    }
+                         commentBoxWrapper.addEventListener('mousedown', config.callbacks.onCommentMousedown);
+                     }
                 }
 
                 if (config.callbacks.onCommentBoxReady) {
@@ -1504,6 +1513,7 @@
             this.tiptapToolbarPopup = null;
             this.observer = null;
             this.debouncedReapply = null;
+            this.isCreatingAnnotation = false;
 
             this.storage.load((loadedAnnotations) => {
                 this.annotations = loadedAnnotations;
@@ -1628,6 +1638,8 @@
         }
 
         async _onMouseUp(event) {
+            if (this.isCreatingAnnotation) return;
+            
             if (this.isDraggingInCommentBox) {
                 this.isDraggingInCommentBox = false;
                 return;
@@ -1944,6 +1956,7 @@
 
         async createAnnotation(color, type) {
             if (!this.activeRange) return;
+            this.isCreatingAnnotation = true;
             const range = this.activeRange;
             this.activeRange = null;
             await this.menu.hide();
@@ -1960,9 +1973,11 @@
 
             this.annotations.set(annotation.id, annotation);
             DOMManager.wrapRange(range, annotation);
+            window.getSelection()?.removeAllRanges();
             this.storage.save(this.annotations, () => {
                 this._notifySidebarOfUpdate();
                 this.donationManager.processNewAnnotation();
+                this.isCreatingAnnotation = false;
             });
         }
 
@@ -2002,7 +2017,6 @@
             const disabledSites = data.disabledSites || [];
             const disabledPages = data.disabledPages || [];
             const hostname = window.location.hostname;
-
             if (disabledSites.includes(hostname) || disabledPages.includes(window.location.href)) {
                 console.log(`Highlighter disabled on ${hostname}`);
                 return;
