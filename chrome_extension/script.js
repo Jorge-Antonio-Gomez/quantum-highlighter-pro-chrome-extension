@@ -1035,7 +1035,7 @@
         save(annotations, callback) {
             const key = this.getKey();
             const dataToSave = { [key]: JSON.stringify(Array.from(annotations.entries())) };
-            chrome.storage.local.set(dataToSave, () => {
+            chrome.storage.sync.set(dataToSave, () => {
                 if (chrome.runtime.lastError) {
                     console.error("Error saving annotations:", chrome.runtime.lastError);
                 }
@@ -1045,7 +1045,7 @@
 
         remove(callback) {
             const key = this.getKey();
-            chrome.storage.local.remove(key, () => {
+            chrome.storage.sync.remove(key, () => {
                 if (chrome.runtime.lastError) {
                     console.error("Error removing annotations key:", chrome.runtime.lastError);
                 }
@@ -1057,7 +1057,7 @@
             const newKey = this.getKey();
             const oldKey = `highlighter-annotations-${window.location.hostname}${window.location.pathname}`;
 
-            chrome.storage.local.get(newKey, (data) => {
+            chrome.storage.sync.get(newKey, (data) => {
                 if (chrome.runtime.lastError) {
                     console.error("Error loading annotations:", chrome.runtime.lastError);
                     callback(new Map());
@@ -1354,7 +1354,7 @@
                 this.storageKeys.disabledUntil
             ];
 
-            chrome.storage.local.get(storageKeysToGet, (data) => {
+            chrome.storage.sync.get(storageKeysToGet, (data) => {
                 if (chrome.runtime.lastError) {
                     console.error("Highlighter: Error getting data for annotation count.", chrome.runtime.lastError);
                     return;
@@ -1367,7 +1367,7 @@
                 const currentCount = data[this.storageKeys.count] || 0;
                 const newCount = currentCount + 1;
     
-                chrome.storage.local.set({ [this.storageKeys.count]: newCount }, () => {
+                chrome.storage.sync.set({ [this.storageKeys.count]: newCount }, () => {
                     if (chrome.runtime.lastError) {
                         console.error("Highlighter: Error saving new annotation count.", chrome.runtime.lastError);
                         return;
@@ -1377,7 +1377,7 @@
 
                     if (Date.now() >= disabledUntil && currentCount >= remindAt) {
                         const newRemindAt = newCount + 1;
-                        chrome.storage.local.set({ [this.storageKeys.remindAt]: newRemindAt });
+                        chrome.storage.sync.set({ [this.storageKeys.remindAt]: newRemindAt });
                         remindAt = newRemindAt;
                     }
 
@@ -1449,7 +1449,7 @@
                     e.preventDefault();
                     e.stopPropagation();
                     const nextReminder = currentCount + 80;
-                    chrome.storage.local.set({ [this.storageKeys.remindAt]: nextReminder });
+                    chrome.storage.sync.set({ [this.storageKeys.remindAt]: nextReminder });
                     cleanup();
                 }
             };
@@ -1457,7 +1457,7 @@
             modal.querySelectorAll('.donation-button').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const disabledUntil = Date.now() + (180 * 24 * 60 * 60 * 1000);
-                    chrome.storage.local.set({ [this.storageKeys.disabledUntil]: disabledUntil });
+                    chrome.storage.sync.set({ [this.storageKeys.disabledUntil]: disabledUntil });
             
                     setTimeout(() => {
                         modal.innerHTML = `
@@ -1483,13 +1483,13 @@
 
             remindLaterBtn.addEventListener('click', () => {
                 const nextReminder = currentCount + 80;
-                chrome.storage.local.set({ [this.storageKeys.remindAt]: nextReminder });
+                chrome.storage.sync.set({ [this.storageKeys.remindAt]: nextReminder });
                 cleanup();
             });
 
             closeModalBtn.addEventListener('click', () => {
                 const nextReminder = currentCount + 80;
-                chrome.storage.local.set({ [this.storageKeys.remindAt]: nextReminder });
+                chrome.storage.sync.set({ [this.storageKeys.remindAt]: nextReminder });
                 cleanup();
             });
 
@@ -1547,7 +1547,7 @@
             setupTooltip();
 
             modal.querySelector('.never-remind-btn').addEventListener('click', () => {
-                chrome.storage.local.set({ [this.storageKeys.neverShow]: true });
+                chrome.storage.sync.set({ [this.storageKeys.neverShow]: true });
                 cleanup();
             });
             
@@ -2121,15 +2121,24 @@
             }
         }
 
-        async deleteAnnotation(annotationId = this.activeAnnotationId) {
-            if (!annotationId) return;
-            await this.menu.hide();
-            document.querySelectorAll(`[data-annotation-id="${annotationId}"]`).forEach(el => DOMManager.unwrap(el));
-            this.annotations.delete(annotationId);
-            this.storage.save(this.annotations, () => {
-                this._notifySidebarOfUpdate();
-            });
-            this.activeAnnotationId = null;
+        async deleteAnnotation(id = this.activeAnnotationId) {
+            if (!id) return;
+            const annotationIdToDelete = id;
+
+            await this._closeOrFinalizeContextMenu();
+
+            this.annotations.delete(annotationIdToDelete);
+            document.querySelectorAll(`[data-annotation-id="${annotationIdToDelete}"]`).forEach(el => DOMManager.unwrap(el));
+
+            if (this.annotations.size === 0) {
+                this.storage.remove(() => {
+                    this._notifySidebarOfUpdate();
+                });
+            } else {
+                this.storage.save(this.annotations, () => {
+                    this._notifySidebarOfUpdate();
+                });
+            }
         }
     }
 
