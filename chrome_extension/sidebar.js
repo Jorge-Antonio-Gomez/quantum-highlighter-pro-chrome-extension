@@ -64,6 +64,40 @@ document.addEventListener('DOMContentLoaded', () => {
         annotationsList.classList.toggle('dark-text', settings.useDarkText);
     }
 
+    function updateSwitchStates() {
+        if (!myTabId) {
+            disablePageSwitch.disabled = true;
+            disableDomainSwitch.disabled = true;
+            return;
+        }
+    
+        chrome.tabs.sendMessage(myTabId, { action: 'getPageInfo' }, (response) => {
+            if (chrome.runtime.lastError || !response || !response.url) {
+                console.warn("Highlighter: Could not get page info for switch states.", chrome.runtime.lastError?.message);
+                disablePageSwitch.disabled = true;
+                disableDomainSwitch.disabled = true;
+                return;
+            }
+    
+            const { url, domain } = response;
+    
+            chrome.storage.sync.get(['disabledPages', 'disabledSites'], (data) => {
+                if (chrome.runtime.lastError) {
+                    console.warn("Highlighter: Error getting disabled sites/pages.", chrome.runtime.lastError);
+                    return;
+                }
+                const disabledPages = data.disabledPages || [];
+                const disabledSites = data.disabledSites || [];
+    
+                disablePageSwitch.checked = disabledPages.includes(url);
+                disableDomainSwitch.checked = disabledSites.includes(domain);
+    
+                disablePageSwitch.disabled = false;
+                disableDomainSwitch.disabled = false;
+            });
+        });
+    }
+
     // --- RESIZE AND LOCK LOGIC ---
 
     const setLockedState = (locked) => {
@@ -314,6 +348,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (request.action === 'annotationsUpdated') {
             renderAnnotations(request.data);
         }
+        if (request.action === 'settingsChanged') {
+            // Re-initialize to get the latest settings for the switches
+            initialize();
+        }
     });
 
     lockButton.addEventListener('mousedown', (e) => e.stopPropagation());
@@ -348,43 +386,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     disablePageSwitch.addEventListener('change', (e) => {
-        const checked = e.target.checked;
-        if (!myTabId) return;
-        chrome.tabs.get(myTabId, (tab) => {
-            if (!tab || !tab.url) return;
-            const href = tab.url;
-            chrome.storage.sync.get({ disabledPages: [] }, (data) => {
-                let disabledPages = data.disabledPages;
-                if (checked) {
-                    if (!disabledPages.includes(href)) disabledPages.push(href);
-                } else {
-                    disabledPages = disabledPages.filter(page => page !== href);
-                }
-                chrome.storage.sync.set({ disabledPages }, () => {
-                    chrome.tabs.sendMessage(myTabId, { action: 'toggleActivation', disabled: checked });
-                });
-            });
-        });
+        if (myTabId) {
+            chrome.tabs.sendMessage(myTabId, { action: 'toggleDisablePage', disable: e.target.checked });
+        }
     });
 
     disableDomainSwitch.addEventListener('change', (e) => {
-        const checked = e.target.checked;
-        if (!myTabId) return;
-        chrome.tabs.get(myTabId, (tab) => {
-            if (!tab || !tab.url) return;
-            const hostname = new URL(tab.url).hostname;
-            chrome.storage.sync.get({ disabledSites: [] }, (data) => {
-                let disabledSites = data.disabledSites;
-                if (checked) {
-                    if (!disabledSites.includes(hostname)) disabledSites.push(hostname);
-                } else {
-                    disabledSites = disabledSites.filter(site => site !== hostname);
-                }
-                chrome.storage.sync.set({ disabledSites }, () => {
-                    chrome.tabs.sendMessage(myTabId, { action: 'toggleActivation', disabled: checked });
-                });
-            });
-        });
+        if (myTabId) {
+            chrome.tabs.sendMessage(myTabId, { action: 'toggleDisableSite', disable: e.target.checked });
+        }
     });
 
     document.addEventListener('keydown', (e) => {
@@ -399,13 +409,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    chrome.storage.onChanged.addListener((changes, namespace) => {
+        if (namespace !== 'sync') return;
+
+        if (changes.disabledPages || changes.disabledSites) {
+            updateSwitchStates();
+        }
+        if (changes['highlighter-settings']) {
+            const newSettings = changes['highlighter-settings'].newValue;
+            settings = { ...settings, ...newSettings };
+            forceBlackSwitch.checked = settings.useDarkText;
+            updateAnnotationTextStyles();
+        }
+    });
+
     // --- INITIALIZATION ---
     const initialize = () => {
         localizeUI();
+        configButton.disabled = true;
+        disablePageSwitch.disabled = true;
+        disableDomainSwitch.disabled = true;
+        forceBlackSwitch.disabled = true;
 
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             if (!tabs || tabs.length === 0) {
                 console.error("Highlighter sidebar: Could not identify the host tab.");
+                configButton.disabled = false;
                 return;
             }
             const currentTab = tabs[0];
@@ -414,7 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loadPageInfo();
             loadAnnotations();
 
-            chrome.storage.sync.get(['sidebarLocked', 'sidebarWidth', 'highlighter-settings', 'disabledPages', 'disabledSites'], (data) => {
+            chrome.storage.sync.get(['sidebarLocked', 'sidebarWidth', 'highlighter-settings'], (data) => {
                 const isLocked = data.sidebarLocked === undefined ? true : data.sidebarLocked;
                 setLockedState(isLocked);
                 lastStoredWidth = Math.max(data.sidebarWidth || 420, 380);
@@ -426,15 +455,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 forceBlackSwitch.checked = settings.useDarkText;
                 updateAnnotationTextStyles();
-                saveSettings();
-
-                if (currentTab.url) {
-                    const url = new URL(currentTab.url);
-                    const disabledSites = data.disabledSites || [];
-                    const disabledPages = data.disabledPages || [];
-                    disableDomainSwitch.checked = disabledSites.includes(url.hostname);
-                    disablePageSwitch.checked = disabledPages.includes(url.href);
-                }
+                
+                updateSwitchStates();
+                
+                configButton.disabled = false;
+                forceBlackSwitch.disabled = false;
             });
         });
     };

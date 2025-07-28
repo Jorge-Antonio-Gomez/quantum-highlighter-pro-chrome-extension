@@ -3,6 +3,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     chrome.tabs.create({
       url: "welcome.html"
     });
+    await chrome.storage.sync.set({ 'highlighter-settings': { useDarkText: true } });
   }
   if (details.reason === "install" || details.reason === "update") {
     const url = chrome.runtime.getURL("excluded-websites.json");

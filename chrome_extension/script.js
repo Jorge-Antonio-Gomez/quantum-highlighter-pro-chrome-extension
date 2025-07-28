@@ -1957,6 +1957,42 @@
             this.activeAnnotationId = null;
         }
 
+        async toggleDisablePage(disable) {
+            const url = window.location.href;
+            const { disabledPages = [] } = await chrome.storage.sync.get('disabledPages');
+            
+            const wasDisabled = disabledPages.includes(url);
+
+            if (disable && !wasDisabled) {
+                disabledPages.push(url);
+                await chrome.storage.sync.set({ disabledPages });
+                this.disableGlobally();
+            } else if (!disable && wasDisabled) {
+                const index = disabledPages.indexOf(url);
+                disabledPages.splice(index, 1);
+                await chrome.storage.sync.set({ disabledPages });
+                this.enableGlobally();
+            }
+        }
+
+        async toggleDisableSite(disable) {
+            const hostname = window.location.hostname;
+            const { disabledSites = [] } = await chrome.storage.sync.get('disabledSites');
+
+            const wasDisabled = disabledSites.includes(hostname);
+
+            if (disable && !wasDisabled) {
+                disabledSites.push(hostname);
+                await chrome.storage.sync.set({ disabledSites });
+                this.disableGlobally();
+            } else if (!disable && wasDisabled) {
+                const index = disabledSites.indexOf(hostname);
+                disabledSites.splice(index, 1);
+                await chrome.storage.sync.set({ disabledSites });
+                this.enableGlobally();
+            }
+        }
+
         _getContextMenuCallbacks() {
             return {
                 hide: () => this.hideTemporarily(),
@@ -1971,6 +2007,7 @@
         }
 
         _reapplyAnnotations() {
+            if (this.isGloballyDisabled) return;
             if (this.bodyObserver) this.bodyObserver.disconnect();
         
             this.annotations.forEach(annotation => {
@@ -2035,7 +2072,9 @@
                 if (!disabledPages.includes(href)) {
                     disabledPages.push(href);
                     chrome.storage.sync.set({ disabledPages }, () => {
-                        window.location.reload();
+                        this.disableGlobally();
+                        // Also notify the sidebar to update its switch state
+                        chrome.runtime.sendMessage({ action: 'settingsChanged' });
                     });
                 }
             });
@@ -2050,12 +2089,40 @@
                     if (!disabledSites.includes(hostname)) {
                         disabledSites.push(hostname);
                         chrome.storage.sync.set({ disabledSites }, () => {
-                            window.location.reload();
+                            this.disableGlobally();
+                            chrome.runtime.sendMessage({ action: 'settingsChanged' });
                         });
                     }
                 });
             } catch (e) {
                 console.error("Highlighter: Could not parse URL to disable site.", e);
+            }
+        }
+
+        enableForPage() {
+            const href = window.location.href;
+            chrome.storage.sync.get({ disabledPages: [] }, (data) => {
+                let disabledPages = data.disabledPages.filter(page => page !== href);
+                chrome.storage.sync.set({ disabledPages }, () => {
+                    this.enableGlobally();
+                    chrome.runtime.sendMessage({ action: 'settingsChanged' });
+                });
+            });
+        }
+
+        enableForSite() {
+            const href = window.location.href;
+            try {
+                const hostname = new URL(href).hostname;
+                chrome.storage.sync.get({ disabledSites: [] }, (data) => {
+                    let disabledSites = data.disabledSites.filter(site => site !== hostname);
+                    chrome.storage.sync.set({ disabledSites }, () => {
+                        this.enableGlobally();
+                        chrome.runtime.sendMessage({ action: 'settingsChanged' });
+                    });
+                });
+            } catch (e) {
+                console.error("Highlighter: Could not parse URL to enable site.", e);
             }
         }
 
@@ -2143,85 +2210,142 @@
     }
 
     function initializeHighlighter() {
-        chrome.storage.sync.get(['disabledSites', 'disabledPages', 'highlighter-settings'], (data) => {
-            const disabledSites = data.disabledSites || [];
-            const disabledPages = data.disabledPages || [];
-            const hostname = window.location.hostname;
-            if (disabledSites.includes(hostname) || disabledPages.includes(window.location.href)) {
-                console.log(`Highlighter disabled on ${hostname}`);
-                return;
-            }
+    if (window.highlighterInstance) return;
 
-            const settings = data['highlighter-settings'] || {};
-            window.highlighterInstance = new Highlighter(settings);
-        });
-    }
+    // Create instance immediately with default settings, but disabled.
+    // This ensures the instance is available for the message listener.
+    window.highlighterInstance = new Highlighter({});
+    window.highlighterInstance.disableGlobally();
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeHighlighter);
-    } else {
-        initializeHighlighter();
-    }
+    // Asynchronously load settings and check if the highlighter should be enabled.
+    chrome.storage.sync.get(['disabledSites', 'disabledPages', 'highlighter-settings'], (data) => {
+        const settings = data['highlighter-settings'] || {};
+        window.highlighterInstance.updateSettings(settings);
 
-    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-        if (request.action === 'toggleSidebar') {
-            toggleSidebar();
-        } else if (request.action === 'startSidebarResize') {
-            startSidebarResize();
-        } else if (request.action === 'getSidebarWidth') {
-            const sidebar = document.getElementById(SIDEBAR_ID);
-            if (sidebar) sendResponse({ width: sidebar.offsetWidth });
-        } else if (request.action === 'setSidebarWidth') {
-            const sidebar = document.getElementById(SIDEBAR_ID);
-            if (sidebar) {
-                sidebar.style.width = `${request.width}px`;
-                document.body.style.marginRight = `${request.width}px`;
-            }
-        } else if (request.action === 'getAnnotations') {
-            if (window.highlighterInstance) {
-                sendResponse({ data: Array.from(window.highlighterInstance.annotations.entries()) });
-            }
-        } else if (request.action === 'scrollToAnnotation') {
-            const element = document.querySelector(`[data-annotation-id="${request.annotationId}"]`);
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                element.classList.add('flash-animation');
-                element.addEventListener('animationend', () => {
-                    element.classList.remove('flash-animation');
-                }, { once: true });
-            }
-        } else if (request.action === 'deleteAnnotation') {
-            if (window.highlighterInstance) {
-                window.highlighterInstance.deleteAnnotation(request.annotationId);
-            }
-        } else if (request.action === 'settingChanged') {
-            if (window.highlighterInstance) {
-                window.highlighterInstance.updateSettings(request.settings);
-            }
-        } else if (request.action === 'languageChanged') {
-            if (window.highlighterInstance) {
-                // No longer need to do anything here, UI will update on its own or next menu open
-            }
-        } else if (request.action === 'toggleActivation') {
-            if (request.disabled) {
-                if (window.highlighterInstance) {
-                    window.highlighterInstance.disableGlobally();
-                }
-            } else {
-                if (!window.highlighterInstance) {
-                    initializeHighlighter();
-                } else {
-                    window.highlighterInstance.enableGlobally();
-                }
-            }
-        } else if (request.action === 'getPageInfo') {
-            const title = document.title;
-            const description = document.querySelector('meta[name="description"]')?.content || '';
-            const domain = window.location.hostname;
-            const favicon = document.querySelector('link[rel="icon"]')?.href || document.querySelector('link[rel="shortcut icon"]')?.href;
-            const image = document.querySelector('meta[property="og:image"]')?.content;
-            sendResponse({ title, description, domain, favicon, image });
+        const disabledSites = data.disabledSites || [];
+        const disabledPages = data.disabledPages || [];
+        const hostname = window.location.hostname;
+        const isDisabled = disabledSites.includes(hostname) || disabledPages.includes(window.location.href);
+
+        if (isDisabled) {
+            console.log(`Highlighter is disabled on ${hostname}`);
+        } else {
+            window.highlighterInstance.enableGlobally();
         }
     });
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeHighlighter);
+} else {
+    initializeHighlighter();
+}
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    // Helper to handle enable/disable actions
+    const handleToggle = async (type, disable) => {
+        const key = type === 'page' ? 'disabledPages' : 'disabledSites';
+        const value = type === 'page' ? window.location.href : window.location.hostname;
+        
+        const data = await chrome.storage.sync.get(key);
+        const list = data[key] || [];
+        const wasDisabled = list.includes(value);
+
+        if (disable && !wasDisabled) {
+            list.push(value);
+            await chrome.storage.sync.set({ [key]: list });
+            if (window.highlighterInstance) {
+                window.highlighterInstance.disableGlobally();
+            }
+        } else if (!disable && wasDisabled) {
+            const index = list.indexOf(value);
+            list.splice(index, 1);
+            await chrome.storage.sync.set({ [key]: list });
+            // Re-enable the highlighter instantly without reloading
+            if (window.highlighterInstance) {
+                window.highlighterInstance.enableGlobally();
+            }
+        }
+        sendResponse({ status: 'ok' });
+    };
+
+    // For actions that require the highlighter instance
+    if (window.highlighterInstance) {
+        switch (request.action) {
+            case 'getAnnotations':
+                sendResponse({ data: Array.from(window.highlighterInstance.annotations.entries()) });
+                return;
+            case 'scrollToAnnotation':
+                window.highlighterInstance.scrollToAnnotation(request.annotationId);
+                sendResponse({ status: 'scrolling' });
+                return;
+            case 'deleteAnnotation':
+                window.highlighterInstance.deleteAnnotation(request.annotationId, true)
+                    .then(() => sendResponse({ status: 'deleted' }));
+                return true; // Keep channel open for async response
+            case 'settingChanged':
+                window.highlighterInstance.updateSettings(request.settings);
+                sendResponse({ status: 'settings updated' });
+                return;
+        }
+    }
+
+    // For actions that can run regardless of the highlighter instance
+    switch (request.action) {
+        case 'toggleSidebar':
+            toggleSidebar();
+            sendResponse({ status: 'sidebar toggled' });
+            break;
+        case 'startSidebarResize':
+            startSidebarResize();
+            sendResponse({ status: 'resize started' });
+            break;
+        case 'getSidebarWidth':
+            const sidebar = document.getElementById(SIDEBAR_ID);
+            sendResponse({ width: sidebar ? sidebar.offsetWidth : null });
+            break;
+        case 'setSidebarWidth':
+            const sidebarEl = document.getElementById(SIDEBAR_ID);
+            if (sidebarEl) {
+                sidebarEl.style.width = `${request.width}px`;
+                document.body.style.marginRight = `${request.width}px`;
+            }
+            sendResponse({ status: 'width set' });
+            break;
+        case 'getPageInfo':
+            const title = document.querySelector('meta[property="og:title"]')?.content || document.title;
+            const description = document.querySelector('meta[property="og:description"]')?.content || document.querySelector('meta[name="description"]')?.content;
+            const image = document.querySelector('meta[property="og:image"]')?.content;
+            let favicon = document.querySelector('link[rel="icon"]')?.href || document.querySelector('link[rel="shortcut icon"]')?.href;
+            if (favicon && !favicon.startsWith('http')) {
+                favicon = new URL(favicon, window.location.href).href;
+            }
+            sendResponse({
+                title,
+                description,
+                image,
+                favicon,
+                url: window.location.href,
+                domain: window.location.hostname
+            });
+            break;
+        case 'toggleDisablePage':
+            handleToggle('page', request.disable);
+            return true; // Keep channel open for async response
+        case 'toggleDisableSite':
+            handleToggle('site', request.disable);
+            return true; // Keep channel open for async response
+        default:
+            // This handles cases where the highlighterInstance might not be loaded,
+            // preventing errors for actions that require it.
+            if (window.highlighterInstance) {
+                 sendResponse({ status: 'no action taken' });
+            } else {
+                 sendResponse({ error: 'Highlighter instance not available.' });
+            }
+            break;
+    }
+    return true; // Default to keeping channel open for async cases
+});
 
 })();
