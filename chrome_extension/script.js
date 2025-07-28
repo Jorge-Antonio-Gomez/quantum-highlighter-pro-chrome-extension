@@ -1,6 +1,35 @@
 (function () {
     'use strict';
 
+    // Intercept history changes for Single Page Applications (SPAs)
+    (function(history){
+        const pushState = history.pushState;
+        const replaceState = history.replaceState;
+
+        history.pushState = function(state) {
+            if (typeof history.onpushstate == "function") {
+                history.onpushstate({state: state});
+            }
+            // Call the original pushState with the same arguments
+            const result = pushState.apply(history, arguments);
+            // Dispatch a custom event
+            window.dispatchEvent(new Event('urlchange'));
+            return result;
+        };
+
+        history.replaceState = function(state) {
+            if (typeof history.onreplacestate == "function") {
+                history.onreplacestate({state: state});
+            }
+            // Call the original replaceState with the same arguments
+            const result = replaceState.apply(history, arguments);
+            // Dispatch a custom event
+            window.dispatchEvent(new Event('urlchange'));
+            return result;
+        };
+
+    })(window.history);
+
     // TIPTAP EDITOR FUNCTIONS
     let tiptapEditor = null; // A single instance for the context menu editor
 
@@ -949,10 +978,56 @@
     }
 
     class HighlightStorage {
-        constructor() { this.keyPrefix = `highlighter-annotations-`; }
+        constructor() {
+            this.keyPrefix = `highlighter-annotations-`;
+            this.paramWhitelist = {};
+            this._loadWhitelist();
+        }
+
+        _loadWhitelist() {
+            const url = chrome.runtime.getURL('param-whitelist.json');
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    this.paramWhitelist = data;
+                })
+                .catch(error => {
+                    console.error('Highlighter: Could not load or parse param-whitelist.json. Using empty whitelist.', error);
+                    this.paramWhitelist = {};
+                });
+        }
         
         getKey() {
-            return `${this.keyPrefix}${window.location.hostname}${window.location.pathname}`;
+            const url = new URL(window.location.href);
+            const hostname = url.hostname;
+            // Normaliza el pathname para eliminar la barra final si no es la raíz
+            const pathname = url.pathname.length > 1 && url.pathname.endsWith('/') ? url.pathname.slice(0, -1) : url.pathname;
+            
+            let key = `${this.keyPrefix}${hostname}${pathname}`;
+
+            if (this.paramWhitelist[hostname]) {
+                const paramsToKeep = this.paramWhitelist[hostname];
+                const searchParams = new URLSearchParams(url.search);
+                const keptParams = [];
+
+                searchParams.forEach((value, key) => {
+                    if (paramsToKeep.includes(key)) {
+                        keptParams.push(`${key}=${value}`);
+                    }
+                });
+
+                // Ordena los parámetros para asegurar una clave consistente sin importar el orden
+                if (keptParams.length > 0) {
+                    key += `?${keptParams.sort().join('&')}`;
+                }
+            }
+
+            return key;
         }
 
         generateId() { return `h-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`; }
@@ -1511,9 +1586,11 @@
             this.activeDebouncedUpdate = null;
             this.tiptapEditor = null;
             this.tiptapToolbarPopup = null;
-            this.observer = null;
+            this.bodyObserver = null;
+            this.titleObserver = null;
             this.debouncedReapply = null;
             this.isCreatingAnnotation = false;
+            this.currentUrl = this.storage.getKey();
 
             this.storage.load((loadedAnnotations) => {
                 this.annotations = loadedAnnotations;
@@ -1552,6 +1629,10 @@
             document.addEventListener('mousedown', this._onMouseDown.bind(this), true);
             document.addEventListener('keydown', this._onKeyDown.bind(this));
 
+            // Listen for URL changes in SPAs
+            window.addEventListener('popstate', this._handleURLChange.bind(this));
+            window.addEventListener('urlchange', this._handleURLChange.bind(this));
+
             document.addEventListener('keydown', (event) => {
                 if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'h') {
                     setTimeout(() => {
@@ -1576,6 +1657,42 @@
             window.addEventListener('blur', () => {
                 document.body.classList.remove('ctrl-is-pressed');
             });
+        }
+
+        _handleURLChange() {
+            // Use a short timeout to allow the SPA to update its content
+            setTimeout(async () => {
+                const newUrl = this.storage.getKey();
+                if (newUrl === this.currentUrl) {
+                    return; // URL hasn't actually changed
+                }
+                this.currentUrl = newUrl;
+
+                if (this.bodyObserver) this.bodyObserver.disconnect();
+                
+                await this._closeOrFinalizeContextMenu();
+                
+                // Clear old highlights from the DOM
+                document.querySelectorAll('.highlighter-mark').forEach(el => DOMManager.unwrap(el));
+                
+                // Reset internal state
+                this.annotations = new Map();
+                this._notifySidebarOfUpdate(); // Notify sidebar with empty list
+
+                // Load annotations for the new URL
+                this.storage.load((loadedAnnotations) => {
+                    this.annotations = loadedAnnotations;
+                    this._loadAnnotations();
+                    this._notifySidebarOfUpdate(); // Send new data to sidebar
+                });
+
+                if (this.bodyObserver) {
+                    this.bodyObserver.observe(document.body, {
+                        childList: true,
+                        subtree: true
+                    });
+                }
+            }, 100); // 100ms delay as a safeguard
         }
 
         async _onKeyDown(event) {
@@ -1854,7 +1971,7 @@
         }
 
         _reapplyAnnotations() {
-            if (this.observer) this.observer.disconnect();
+            if (this.bodyObserver) this.bodyObserver.disconnect();
         
             this.annotations.forEach(annotation => {
                 if (document.querySelector(`[data-annotation-id="${annotation.id}"]`)) {
@@ -1867,8 +1984,8 @@
                 }
             });
         
-            if (this.observer) {
-                this.observer.observe(document.body, {
+            if (this.bodyObserver) {
+                this.bodyObserver.observe(document.body, {
                     childList: true,
                     subtree: true
                 });
@@ -1876,31 +1993,34 @@
         }
 
         _setupMutationObserver() {
+            // For reapplying highlights on dynamic content changes (within the same URL)
             this.debouncedReapply = debounce(() => this._reapplyAnnotations(), 500);
-        
-            this.observer = new MutationObserver((mutations) => {
+            this.bodyObserver = new MutationObserver((mutations) => {
                 let shouldReapply = false;
                 for (const mutation of mutations) {
                     const targetId = mutation.target.id;
                     if (targetId === 'highlighter-host' || targetId === 'highlighter-sidebar-instance' || targetId === RESIZE_COVER_ID || targetId === RESIZE_GUIDE_ID) {
                         continue;
                     }
-
                     if (mutation.type === 'childList' && (mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0)) {
                         shouldReapply = true;
                         break;
                     }
                 }
-        
                 if (shouldReapply) {
                     this.debouncedReapply();
                 }
             });
-        
-            this.observer.observe(document.body, {
-                childList: true,
-                subtree: true
-            });
+            this.bodyObserver.observe(document.body, { childList: true, subtree: true });
+
+            // For detecting SPA navigation by observing title changes
+            const titleElement = document.querySelector('head > title');
+            if (titleElement) {
+                this.titleObserver = new MutationObserver(() => {
+                    this._handleURLChange();
+                });
+                this.titleObserver.observe(titleElement, { childList: true });
+            }
         }
 
         hideTemporarily() {
@@ -1950,6 +2070,7 @@
         _notifySidebarOfUpdate() {
             chrome.runtime.sendMessage({
                 action: 'annotationsUpdated',
+                url: this.currentUrl,
                 data: Array.from(this.annotations.entries())
             });
         }
