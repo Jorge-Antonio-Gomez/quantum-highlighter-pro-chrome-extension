@@ -1780,6 +1780,13 @@
                     }
                     return;
                 }
+
+                // Do not show menu in editable areas
+                const container = selection.getRangeAt(0).commonAncestorContainer;
+                const elementContainer = container.nodeType === Node.ELEMENT_NODE ? container : container.parentElement;
+                if (elementContainer && elementContainer.closest('textarea, input, [contenteditable="true"]')) {
+                    return;
+                }
                 
                 let range = selection.getRangeAt(0);
                 let trimmedRange = DOMManager.trimRange(range);
