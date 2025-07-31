@@ -1176,13 +1176,6 @@
                     e.preventDefault();
                 }
 
-                if (button.classList.contains('highlighter-color-selector')) {
-                    button.classList.add('vibrating');
-                    setTimeout(() => {
-                        button.classList.remove('vibrating');
-                    }, 150);
-                }
-
                 if (!button.closest('.tiptap-toolbar')) {
                     e.stopPropagation();
                 }
@@ -2176,40 +2169,40 @@
             });
         }
 
-        async updateAnnotation(updates, id = this.activeAnnotationId, isDebouncedUpdate = false) {
+        updateAnnotation(updates, id = this.activeAnnotationId, isCommentUpdate = false) {
             if (!id) return;
             const annotation = this.annotations.get(id);
             if (!annotation) return;
-
-            const oldColor = annotation.color;
-            const oldType = annotation.type;
+        
+            const hasChanged = Object.keys(updates).some(key => annotation[key] !== updates[key]);
+            if (!hasChanged && !isCommentUpdate) return;
         
             Object.assign(annotation, updates);
             this.annotations.set(id, annotation);
+        
+            if (!isCommentUpdate) {
+                this.storage.save(this.annotations, () => {
+                    this._notifySidebarOfUpdate();
+                });
+            }
         
             document.querySelectorAll(`[data-annotation-id="${id}"]`).forEach(el => {
                 DOMManager.applyAnnotationStyle(el, annotation, el);
             });
         
-            if (!isDebouncedUpdate) {
-                this.storage.save(this.annotations, () => {
-                    this._notifySidebarOfUpdate();
+            // Update active class for color selectors
+            if (updates.color) {
+                const colorButtons = this.menu.element.querySelectorAll('.highlighter-color-selector');
+                colorButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.value === updates.color);
                 });
             }
 
-            if (this.menu.isVisible() && !isDebouncedUpdate) {
-                if (updates.color && updates.color !== oldColor) {
-                    const oldButton = this.menu.shadowRoot.querySelector(`.highlighter-color-selector[data-value="${oldColor}"]`);
-                    if (oldButton) oldButton.classList.remove('active');
-                    const newButton = this.menu.shadowRoot.querySelector(`.highlighter-color-selector[data-value="${updates.color}"]`);
-                    if (newButton) newButton.classList.add('active');
-                }
-                if (updates.type && updates.type !== oldType) {
-                    const oldButton = this.menu.shadowRoot.querySelector(`.highlighter-type-selector[data-value="${oldType}"]`);
-                    if (oldButton) oldButton.classList.remove('active');
-                    const newButton = this.menu.shadowRoot.querySelector(`.highlighter-type-selector[data-value="${updates.type}"]`);
-                    if (newButton) newButton.classList.add('active');
-                }
+            if (updates.type) {
+                const typeButtons = this.menu.element.querySelectorAll('.highlighter-type-selector');
+                typeButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.value === updates.type);
+                });
             }
         }
 
