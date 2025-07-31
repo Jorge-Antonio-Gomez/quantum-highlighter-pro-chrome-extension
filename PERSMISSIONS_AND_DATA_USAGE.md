@@ -16,8 +16,6 @@ To achieve its purpose, the extension requires the following permissions:
 
 *   **`activeTab`:** This permission allows the user to interact with the extension's icon in the Chrome toolbar. When clicked, it signals the currently active page to open or close the annotation sidebar. This ensures the extension only acts on the page the user is viewing and only upon their explicit action.
 
-*   **`scripting`:** This is the central permission for the extension. It is required to inject the necessary JavaScript code into webpages. This code is responsible for detecting text selections, displaying the highlighter menu, applying visual styles for highlights, and managing the sidebar. Without it, creating and viewing annotations would be impossible.
-
 *   **Host Permission (`*://*/*`):** This permission is requested to fulfill the promise of being a universal annotation tool. It allows the extension to work on any website the user visits, such as news articles, blogs, or research sites. The extension remains inactive until the user initiates an action (e.g., selecting text), ensuring it only runs when needed.
 
 ---
