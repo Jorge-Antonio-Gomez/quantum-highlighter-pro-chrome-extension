@@ -2169,21 +2169,39 @@
             });
         }
 
-        async updateAnnotation(updates, annotationId = this.activeAnnotationId, isCommentUpdate = false) {
-            if (!annotationId) return;
-            const annotation = this.annotations.get(annotationId);
+        updateAnnotation(updates, id = this.activeAnnotationId, isCommentUpdate = false) {
+            if (!id) return;
+            const annotation = this.annotations.get(id);
             if (!annotation) return;
-
+        
+            const hasChanged = Object.keys(updates).some(key => annotation[key] !== updates[key]);
+            if (!hasChanged && !isCommentUpdate) return;
+        
             Object.assign(annotation, updates);
-            this.annotations.set(annotationId, annotation);
-
-            document.querySelectorAll(`[data-annotation-id="${annotationId}"]`).forEach(el => {
-                DOMManager.applyAnnotationStyle(el, annotation, el);
-            });
-
+            this.annotations.set(id, annotation);
+        
             if (!isCommentUpdate) {
                 this.storage.save(this.annotations, () => {
                     this._notifySidebarOfUpdate();
+                });
+            }
+        
+            document.querySelectorAll(`[data-annotation-id="${id}"]`).forEach(el => {
+                DOMManager.applyAnnotationStyle(el, annotation, el);
+            });
+        
+            // Update active class for color selectors
+            if (updates.color) {
+                const colorButtons = this.menu.element.querySelectorAll('.highlighter-color-selector');
+                colorButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.value === updates.color);
+                });
+            }
+
+            if (updates.type) {
+                const typeButtons = this.menu.element.querySelectorAll('.highlighter-type-selector');
+                typeButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.value === updates.type);
                 });
             }
         }
