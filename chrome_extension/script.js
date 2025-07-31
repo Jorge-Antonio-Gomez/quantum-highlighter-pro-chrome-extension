@@ -2248,6 +2248,26 @@
                 });
             }
         }
+
+        scrollToAnnotation(annotationId) {
+            const elements = document.querySelectorAll(`.highlighter-mark[data-annotation-id="${annotationId}"]`);
+            if (elements.length > 0) {
+                elements[0].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+
+                elements.forEach(el => {
+                    const originalTransition = el.style.transition;
+                    el.style.transition = 'box-shadow 300ms ease-in-out';
+                    el.style.boxShadow = '0 0 0 3px rgba(50, 150, 255, 0.7)';
+
+                    setTimeout(() => {
+                        el.style.boxShadow = 'none';
+                        setTimeout(() => {
+                            el.style.transition = originalTransition;
+                        }, 300);
+                    }, 1000);
+                });
+            }
+        }
     }
 
     function initializeHighlighter() {
