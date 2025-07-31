@@ -64,7 +64,7 @@
     "description": "Label for the force black text switch."
   },
   "forceBlackColorTooltip": {
-    "message": "Force tout le texte surligné en noir. Cela améliore la lisibilité mais peut compliquer l'identification des textes en couleur, comme les liens.",
+    "message": "Force tout le texte surligné en noir. Cela améliore la lisibilité mais peut affecter la couleur d'origine de divers éléments (à l'exception des liens, qui sont maintenant distinguables).",
     "description": "Tooltip for the force black text switch."
   },
   "editLinkTitle": {

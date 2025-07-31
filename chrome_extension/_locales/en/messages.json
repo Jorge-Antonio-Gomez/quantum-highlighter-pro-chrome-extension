@@ -15,7 +15,7 @@
   "disableOnPageLabel": { "message": "Disable on This Page", "description": "Label for the disable on page switch." },
   "disableOnDomainLabel": { "message": "Disable on This Entire Website", "description": "Label for the disable on domain switch." },
   "forceBlackColorLabel": { "message": "Force Black Text on Highlights", "description": "Label for the force black text switch." },
-  "forceBlackColorTooltip": { "message": "Forces all highlighted text to be black. This improves readability but can make it harder to identify colored text like links.", "description": "Tooltip for the force black text switch." },
+  "forceBlackColorTooltip": { "message": "Forces all highlighted text to be black. This improves readability but can affect the original color of various elements (except for links, which are now distinguishable).", "description": "Tooltip for the force black text switch." },
   "editLinkTitle": { "message": "Edit Link", "description": "Title for the link editor modal." },
   "textLabel": { "message": "Text", "description": "Label for the link text input." },
   "linkTextPlaceholder": { "message": "Link text", "description": "Placeholder for the link text input." },

@@ -64,7 +64,7 @@
     "description": "Label for the force black text switch."
   },
   "forceBlackColorTooltip": {
-    "message": "Força todo o texto destacado a ser preto. Isso melhora a legibilidade, mas pode dificultar a identificação de textos coloridos, como links.",
+    "message": "Força todo o texto destacado a ser preto. Isso melhora a legibilidade, mas pode afetar a cor original de vários elementos (exceto links, que agora são distinguíveis).",
     "description": "Tooltip for the force black text switch."
   },
   "editLinkTitle": {

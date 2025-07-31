@@ -845,12 +845,28 @@
 
             element.style.textShadow = 'none';
 
+            // During initial wrapping, `element` is not in the DOM, so we check the `nodeContext`.
+            // `nodeContext` is the text node being wrapped.
+            const parentLink = nodeContext && (nodeContext.nodeType === Node.TEXT_NODE ? nodeContext.parentNode.closest('a') : nodeContext.closest('a'));
             const linksInElement = element.getElementsByTagName('a');
 
             if (settings.useDarkText && annotation.type === 'highlight') {
-                element.style.setProperty('color', '#1a1a1a', 'important');
+                const colorNameMatch = annotation.color.match(/--highlighter-color-([a-z]+)/);
+                const textColorVar = (colorNameMatch && colorNameMatch[1])
+                    ? `var(--highlighter-color-text-${colorNameMatch[1]})`
+                    : '#1a1a1a'; // Fallback
+
+                if (parentLink) {
+                    // If the highlight is inside a link, it should have the link color.
+                    element.style.setProperty('color', 'var(--highlighter-color-text-link)', 'important');
+                } else {
+                    // Otherwise, it gets the standard text color for the highlight.
+                    element.style.setProperty('color', textColorVar, 'important');
+                }
+
+                // And any links nested inside the highlight also get the link color.
                 for (const link of linksInElement) {
-                    link.style.setProperty('color', 'inherit', 'important');
+                    link.style.setProperty('color', 'var(--highlighter-color-text-link)', 'important');
                 }
             } else {
                 element.style.removeProperty('color');
@@ -858,7 +874,7 @@
                     link.style.removeProperty('color');
                 }
 
-                const isLink = (nodeContext && nodeContext.nodeType === Node.TEXT_NODE ? nodeContext.parentNode.closest('a') : (nodeContext ? nodeContext.closest('a') : element.closest('a'))) || element.querySelector('a');
+                const isLink = parentLink || element.querySelector('a');
 
                 if (isLink) {
                     element.style.color = 'inherit';

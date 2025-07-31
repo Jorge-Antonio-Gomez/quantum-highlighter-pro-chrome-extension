@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const refreshContainer = document.getElementById('refresh-container');
     const refreshToast = document.getElementById('refresh-toast');
     const refreshToastText = document.getElementById('refresh-toast-text');
+    const tooltip = document.getElementById('tooltip');
 
     // --- STATE ---
     let myTabId = null;
@@ -30,6 +31,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- FLOATING UI ---
     const { computePosition, offset, flip, shift } = FloatingUIDOM;
+
+    // --- TOOLTIP ---
+    const setupTooltip = (trigger, key) => {
+        const showTooltip = (e) => {
+            const message = chrome.i18n.getMessage(key);
+            if (!message) return;
+
+            tooltip.textContent = message;
+            tooltip.style.display = 'block';
+            
+            computePosition(e.target, tooltip, {
+                placement: 'top',
+                middleware: [offset(5), flip(), shift({ padding: 5 })]
+            }).then(({ x, y }) => {
+                Object.assign(tooltip.style, {
+                    left: `${x}px`,
+                    top: `${y}px`,
+                });
+            });
+        };
+
+        const hideTooltip = () => {
+            tooltip.style.display = 'none';
+        };
+
+        const updatePosition = (e) => {
+            if (tooltip.style.display === 'block') {
+                computePosition(e.target, tooltip, {
+                    placement: 'top',
+                    middleware: [offset(5), flip(), shift({ padding: 5 })]
+                }).then(({ x, y }) => {
+                    Object.assign(tooltip.style, {
+                        left: `${x}px`,
+                        top: `${y}px`,
+                    });
+                });
+            }
+        };
+
+        trigger.addEventListener('mouseover', showTooltip);
+        trigger.addEventListener('mouseout', hideTooltip);
+        trigger.addEventListener('mousemove', updatePosition);
+    };
 
     // --- CORE FUNCTIONS ---
 
@@ -463,6 +507,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     };
+
+    // Tooltip for force black switch
+    const infoIcon = document.querySelector('.info-icon[data-tooltip-key="forceBlackColorTooltip"]');
+    if (infoIcon) {
+        setupTooltip(infoIcon, 'forceBlackColorTooltip');
+    }
 
     initialize();
 });

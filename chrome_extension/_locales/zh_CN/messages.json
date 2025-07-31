@@ -64,7 +64,7 @@
     "description": "Label for the force black text switch."
   },
   "forceBlackColorTooltip": {
-    "message": "强制所有高亮文本显示为黑色。这可以提高可读性，但可能会使识别彩色文本（如链接）变得困难。",
+    "message": "强制所有高亮文本显示为黑色。这可以提高可读性，但可能会影响各种元素的原始颜色（链接除外，链接现在可以区分）。",
     "description": "Tooltip for the force black text switch."
   },
   "editLinkTitle": {
