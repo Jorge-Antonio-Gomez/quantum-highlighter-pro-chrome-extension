@@ -435,6 +435,11 @@ body:not(.locked) #resize-handle {
     line-height: 1.5;
     color: var(--highlighter-text-color);
     word-wrap: break-word;
+    /* Queremos la primera mayúscula */
+}
+
+.annotation-card .text::first-letter {
+    text-transform: uppercase;
 }
 
 /* --- Inspired Comment Section Styles --- */
@@ -1027,10 +1032,13 @@ input:checked + .slider:before {
 }
 
 .no-comment-placeholder {
+    /* Hide element */
+    /* display: inline-block; */
+    display: none;
+
     color: #9b9b9b;
     font-style: italic;
     margin-top: 0.5em;
-    display: inline-block;
 }
 
 /* Toast Notification */
