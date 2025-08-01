@@ -414,5 +414,9 @@
   "customAmountTextMonthly": {
     "message": "您可以选择任何金额进行按月捐赠。",
     "description": "Text for the custom amount in the monthly subscription card."
+  },
+  "highlightSavedLocally": {
+    "message": "高亮已本地保存（超过8KB同步限制）",
+    "description": "Toast message when a highlight is too large to sync."
   }
 }

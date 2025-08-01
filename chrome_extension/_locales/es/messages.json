@@ -414,5 +414,9 @@
   "customAmountTextMonthly": {
     "message": "Puedes elegir cualquier monto para donar mensualmente.",
     "description": "Text for the custom amount in the monthly subscription card."
+  },
+  "highlightSavedLocally": {
+    "message": "Resaltado guardado localmente (excede el límite de 8KB para sincronización)",
+    "description": "Toast message when a highlight is too large to sync."
   }
 }

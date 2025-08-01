@@ -77,3 +77,43 @@ body.highlighter-sidebar-open {
     z-index: 10000001;
     pointer-events: none;
 }
+
+/* --- Local Save Toast Notification --- */
+#highlighter-local-save-toast {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    background-color: #fbe7c6;
+    color: #333;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 12px;
+    z-index: 2147483647;
+    font-family: 'Rubik', sans-serif;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    pointer-events: none; /* So it doesn't interfere with page content */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#highlighter-local-save-toast.show {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.highlighter-toast-close-btn {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 0 0 5px;
+    transition: color 0.2s;
+}
+
+.highlighter-toast-close-btn:hover {
+    color: #000;
+}

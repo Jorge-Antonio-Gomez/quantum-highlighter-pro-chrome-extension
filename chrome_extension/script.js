@@ -995,7 +995,7 @@
 
     class HighlightStorage {
         constructor() {
-            this.keyPrefix = `highlighter-annotations-`;
+            this.annotationKeyPrefix = 'highlighter-annotation-';
             this.paramWhitelist = {};
             this._loadWhitelist();
         }
@@ -1018,13 +1018,13 @@
                 });
         }
         
-        getKey() {
+        getPageUrl() { // Renamed from getKey for clarity
             const url = new URL(window.location.href);
             const hostname = url.hostname;
             // Normaliza el pathname para eliminar la barra final si no es la raíz
             const pathname = url.pathname.length > 1 && url.pathname.endsWith('/') ? url.pathname.slice(0, -1) : url.pathname;
             
-            let key = `${this.keyPrefix}${hostname}${pathname}`;
+            let pageUrl = `${hostname}${pathname}`;
 
             if (this.paramWhitelist[hostname]) {
                 const paramsToKeep = this.paramWhitelist[hostname];
@@ -1039,71 +1039,86 @@
 
                 // Ordena los parámetros para asegurar una clave consistente sin importar el orden
                 if (keptParams.length > 0) {
-                    key += `?${keptParams.sort().join('&')}`;
+                    pageUrl += `?${keptParams.sort().join('&')}`;
                 }
             }
 
-            return key;
+            return pageUrl;
         }
 
         generateId() { return `h-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`; }
         
-        save(annotations, callback) {
-            const key = this.getKey();
-            const dataToSave = { [key]: JSON.stringify(Array.from(annotations.entries())) };
+        saveAnnotation(annotation, callback) {
+            const key = `${this.annotationKeyPrefix}${annotation.id}`;
+            const dataToSave = { [key]: annotation }; // No JSON.stringify needed, storage API handles objects
+            
             chrome.storage.sync.set(dataToSave, () => {
                 if (chrome.runtime.lastError) {
-                    console.error("Error saving annotations:", chrome.runtime.lastError);
+                    // Use a case-insensitive check for "quota" to make it more robust
+                    if (chrome.runtime.lastError.message.toLowerCase().includes('quota')) {
+                         console.warn(`Highlighter: Annotation ${annotation.id} is too large to sync. Storing locally instead.`, chrome.runtime.lastError.message);
+                         
+                         // Dispatch event for the UI to handle the toast notification
+                         document.body.dispatchEvent(new CustomEvent('annotation-saved-locally', {
+                            detail: { annotationId: annotation.id }
+                         }));
+
+                         // Fallback to local storage for this single item
+                         chrome.storage.local.set(dataToSave, callback);
+                    } else {
+                        console.error("Error saving annotation:", chrome.runtime.lastError);
+                    }
+                } else {
+                     if (callback) callback();
                 }
-                if (callback) callback();
             });
         }
 
-        remove(callback) {
-            const key = this.getKey();
+        removeAnnotation(annotationId, callback) {
+            const key = `${this.annotationKeyPrefix}${annotationId}`;
+            // Try removing from both sync and local, in case it was a large annotation
             chrome.storage.sync.remove(key, () => {
-                if (chrome.runtime.lastError) {
-                    console.error("Error removing annotations key:", chrome.runtime.lastError);
-                }
-                if (callback) callback();
+                 chrome.storage.local.remove(key, () => {
+                    if (chrome.runtime.lastError) {
+                        console.error("Error removing annotation:", chrome.runtime.lastError);
+                    }
+                    if (callback) callback();
+                 });
             });
         }
 
         load(callback) {
-            const newKey = this.getKey();
-            const oldKey = `highlighter-annotations-${window.location.hostname}${window.location.pathname}`;
+            const pageUrl = this.getPageUrl();
+            const annotations = new Map();
 
-            chrome.storage.sync.get(newKey, (data) => {
-                if (chrome.runtime.lastError) {
-                    console.error("Error loading annotations:", chrome.runtime.lastError);
-                    callback(new Map());
-                    return;
-                }
-
-                const d = data[newKey];
-                if (d) {
-                    const annotations = new Map(JSON.parse(d));
-                    callback(annotations);
-                } else {
-                    try {
-                        const oldData = localStorage.getItem(oldKey);
-                        if (oldData) {
-                            console.log("Highlighter: Found old annotations in localStorage. Migrating now.");
-                            const annotations = new Map(JSON.parse(oldData));
-                            
-                            this.save(annotations, () => {
-                                console.log("Highlighter: Migration successful. Deleting old data from localStorage.");
-                                localStorage.removeItem(oldKey);
-                                callback(annotations);
-                            });
-                        } else {
-                            callback(new Map());
+            const processResults = (items) => {
+                for (const key in items) {
+                    if (key.startsWith(this.annotationKeyPrefix)) {
+                        const annotation = items[key];
+                        if (annotation && annotation.pageUrl === pageUrl) {
+                            annotations.set(annotation.id, annotation);
                         }
-                    } catch (e) {
-                        console.error("Highlighter: Error during migration from localStorage.", e);
-                        callback(new Map());
                     }
                 }
+            };
+
+            // Chain the storage gets to avoid race conditions.
+            chrome.storage.sync.get(null, (syncItems) => {
+                if (chrome.runtime.lastError) {
+                    console.error("Error loading sync annotations:", chrome.runtime.lastError);
+                } else {
+                    processResults(syncItems);
+                }
+
+                chrome.storage.local.get(null, (localItems) => {
+                    if (chrome.runtime.lastError) {
+                        console.error("Error loading local annotations:", chrome.runtime.lastError);
+                    } else {
+                        processResults(localItems);
+                    }
+                    
+                    callback(annotations);
+                });
             });
         }
     }
@@ -1606,7 +1621,7 @@
             this.titleObserver = null;
             this.debouncedReapply = null;
             this.isCreatingAnnotation = false;
-            this.currentUrl = this.storage.getKey();
+            this.currentUrl = this.storage.getPageUrl();
 
             this.storage.load((loadedAnnotations) => {
                 this.annotations = loadedAnnotations;
@@ -1649,6 +1664,9 @@
             window.addEventListener('popstate', this._handleURLChange.bind(this));
             window.addEventListener('urlchange', this._handleURLChange.bind(this));
 
+            // Listen for custom event to show local storage toast
+            document.body.addEventListener('annotation-saved-locally', () => this._showLocalStorageToast());
+
             document.addEventListener('keydown', (event) => {
                 if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'h') {
                     setTimeout(() => {
@@ -1678,7 +1696,7 @@
         _handleURLChange() {
             // Use a short timeout to allow the SPA to update its content
             setTimeout(async () => {
-                const newUrl = this.storage.getKey();
+                const newUrl = this.storage.getPageUrl();
                 if (newUrl === this.currentUrl) {
                     return; // URL hasn't actually changed
                 }
@@ -1960,7 +1978,7 @@
                 if (annotation.comment !== sanitizedComment) {
                     annotation.comment = sanitizedComment;
                     this.annotations.set(this.activeAnnotationId, annotation);
-                    this.storage.save(this.annotations, () => {
+                    this.storage.saveAnnotation(annotation, () => {
                         this._notifySidebarOfUpdate();
                     });
                 }
@@ -2174,6 +2192,7 @@
 
             const annotation = {
                 id: this.storage.generateId(),
+                pageUrl: this.storage.getPageUrl(),
                 text: DOMManager.getSanitizedHtmlFromRange(range),
                 pointers: DOMManager.getRangePointers(range),
                 color: color,
@@ -2185,7 +2204,8 @@
             this.annotations.set(annotation.id, annotation);
             DOMManager.wrapRange(range, annotation);
             window.getSelection()?.removeAllRanges();
-            this.storage.save(this.annotations, () => {
+
+            this.storage.saveAnnotation(annotation, () => {
                 this._notifySidebarOfUpdate();
                 this.donationManager.processNewAnnotation();
                 this.isCreatingAnnotation = false;
@@ -2203,11 +2223,12 @@
             Object.assign(annotation, updates);
             this.annotations.set(id, annotation);
         
-            if (!isCommentUpdate) {
-                this.storage.save(this.annotations, () => {
+            // Save the entire annotation whenever it's updated.
+            this.storage.saveAnnotation(annotation, () => {
+                if (!isCommentUpdate) { // Avoid spamming sidebar on every keystroke in comment
                     this._notifySidebarOfUpdate();
-                });
-            }
+                }
+            });
         
             document.querySelectorAll(`[data-annotation-id="${id}"]`).forEach(el => {
                 DOMManager.applyAnnotationStyle(el, annotation, el);
@@ -2238,15 +2259,9 @@
             this.annotations.delete(annotationIdToDelete);
             document.querySelectorAll(`[data-annotation-id="${annotationIdToDelete}"]`).forEach(el => DOMManager.unwrap(el));
 
-            if (this.annotations.size === 0) {
-                this.storage.remove(() => {
-                    this._notifySidebarOfUpdate();
-                });
-            } else {
-                this.storage.save(this.annotations, () => {
-                    this._notifySidebarOfUpdate();
-                });
-            }
+            this.storage.removeAnnotation(annotationIdToDelete, () => {
+                this._notifySidebarOfUpdate();
+            });
         }
 
         scrollToAnnotation(annotationId) {
@@ -2267,6 +2282,41 @@
                     }, 1000);
                 });
             }
+        }
+
+        _showLocalStorageToast() {
+            const toastId = 'highlighter-local-save-toast';
+            if (document.getElementById(toastId)) return; // Avoid multiple toasts
+
+            const toast = document.createElement('div');
+            toast.id = toastId;
+
+            const message = document.createElement('span');
+            message.textContent = chrome.i18n.getMessage('highlightSavedLocally') || 'Highlight saved locally (exceeds 8KB sync limit)';
+            toast.appendChild(message);
+
+            const closeButton = document.createElement('button');
+            closeButton.innerHTML = '&times;';
+            closeButton.className = 'highlighter-toast-close-btn';
+            closeButton.onclick = () => {
+                toast.classList.remove('show');
+                toast.addEventListener('transitionend', () => toast.remove());
+            };
+            toast.appendChild(closeButton);
+            
+            document.body.appendChild(toast);
+
+            // Fade in by adding the 'show' class
+            setTimeout(() => toast.classList.add('show'), 100);
+
+            // Fade out and remove
+            const timeoutId = setTimeout(() => {
+                toast.classList.remove('show');
+                toast.addEventListener('transitionend', () => toast.remove());
+            }, 10000); // 10 seconds
+
+            // Ensure timeout is cleared if button is clicked
+            closeButton.addEventListener('click', () => clearTimeout(timeoutId));
         }
     }
 
