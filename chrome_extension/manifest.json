@@ -3,7 +3,7 @@
     "name": "__MSG_extensionName__",
     "description": "__MSG_extensionDescription__",
     "default_locale": "en",
-    "version": "2025.0801.1",
+    "version": "2025.0802.1",
     "permissions": [
         "storage",
         "activeTab"
@@ -65,7 +65,7 @@
           "default": "Ctrl+Shift+H",
           "mac": "Command+Shift+H"
         },
-        "description": "Abrir/Cerrar la barra lateral de Quantum Highlighter PRO"
+        "description": "Abrir/Cerrar la barra lateral de Resaltador Quantum PRO"
       }
     }
 }

@@ -1,6 +1,6 @@
 {
   "extensionName": {
-    "message": "Quantum Highlighter PRO",
+    "message": "Marca-texto Quantum PRO",
     "description": "The name of the extension."
   },
   "extensionDescription": {
@@ -240,11 +240,11 @@
     "description": "Toast message after refreshing."
   },
   "donationsTitle": {
-    "message": "Você mantém o Quantum Highlighter PRO gratuito e vivo",
+    "message": "Você mantém o Marca-texto Quantum PRO gratuito e vivo",
     "description": "Title for the donation modal."
   },
   "donationsText": {
-    "message": "Olá! Eu sou o George, o criador e único desenvolvedor por trás do Quantum Highlighter. Minha promessa é e sempre será que esta ferramenta seja gratuita e da mais alta qualidade. Não há uma grande empresa por trás, apenas inúmeras horas de trabalho e o sonho de criar algo verdadeiramente útil para você. Para continuar a inovar, preciso da sua ajuda.",
+    "message": "Olá! Eu sou o George, o criador e único desenvolvedor por trás do Marca-texto Quantum. Minha promessa é e sempre será que esta ferramenta seja gratuita e da mais alta qualidade. Não há uma grande empresa por trás, apenas inúmeras horas de trabalho e o sonho de criar algo verdadeiramente útil para você. Para continuar a inovar, preciso da sua ajuda.",
     "description": "Text for the donation modal."
   },
   "oneTimeDonationTitle": {
@@ -252,7 +252,7 @@
     "description": "Title for one-time donation."
   },
   "oneTimeDonationDescription": {
-    "message": "Apoie o desenvolvimento do Quantum Highlighter PRO com um único gesto. Cada doação nos aproxima da nossa próxima grande atualização.",
+    "message": "Apoie o desenvolvimento do Marca-texto Quantum PRO com um único gesto. Cada doação nos aproxima da nossa próxima grande atualização.",
     "description": "Description for one-time donation."
   },
   "oneTimeDonationButton": {
@@ -292,7 +292,7 @@
     "description": "Text for the donation thank you message."
   },
   "pageTitle": {
-    "message": "Bem-vindo ao Quantum Highlighter",
+    "message": "Bem-vindo ao Marca-texto Quantum",
     "description": "Title for the welcome page."
   },
   "githubLink": {
@@ -304,7 +304,7 @@
     "description": "Button to open the donation section."
   },
   "heroTitle": {
-    "message": "Bem-vindo ao Quantum Highlighter PRO!",
+    "message": "Bem-vindo ao Marca-texto Quantum PRO!",
     "description": "Main title of the welcome page."
   },
   "heroSubtitle": {
@@ -394,6 +394,14 @@
   "feature6Text": {
     "message": "Ajuste a extensão ao seu gosto no menu de configurações.",
     "description": "Text for the sixth feature."
+  },
+  "feature7Title": {
+    "message": "Sincronização entre dispositivos",
+    "description": "Title for the seventh feature."
+  },
+  "feature7Text": {
+    "message": "Suas notas e configurações são sincronizadas automaticamente em todos os seus dispositivos.",
+    "description": "Text for the seventh feature."
   },
   "ctaTitle": {
     "message": "Pronto para Começar!",

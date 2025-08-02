@@ -1,6 +1,6 @@
 {
   "extensionName": {
-    "message": "Quantum Highlighter PRO",
+    "message": "Квантовый выделитель PRO",
     "description": "The name of the extension."
   },
   "extensionDescription": {
@@ -240,11 +240,11 @@
     "description": "Toast message after refreshing."
   },
   "donationsTitle": {
-    "message": "Вы помогаете Quantum Highlighter PRO оставаться бесплатным и доступным",
+    "message": "Вы помогаете Квантовый выделитель PRO оставаться бесплатным и доступным",
     "description": "Title for the donation modal."
   },
   "donationsText": {
-    "message": "Привет! Я Джордж, создатель и единственный разработчик Quantum Highlighter. Мое обещание — и всегда им будет — что этот инструмент останется бесплатным и высочайшего качества. За ним не стоит крупная компания, только бесчисленные часы работы и мечта создать что-то действительно полезное для вас. Чтобы продолжать развиваться, мне нужна ваша помощь.",
+    "message": "Привет! Я Джордж, создатель и единственный разработчик Квантовый выделитель. Мое обещание — и всегда им будет — что этот инструмент останется бесплатным и высочайшего качества. За ним не стоит крупная компания, только бесчисленные часы работы и мечта создать что-то действительно полезное для вас. Чтобы продолжать развиваться, мне нужна ваша помощь.",
     "description": "Text for the donation modal."
   },
   "oneTimeDonationTitle": {
@@ -252,7 +252,7 @@
     "description": "Title for one-time donation."
   },
   "oneTimeDonationDescription": {
-    "message": "Поддержите разработку Quantum Highlighter PRO одним жестом. Каждое пожертвование приближает нас к следующему большому обновлению.",
+    "message": "Поддержите разработку Квантовый выделитель PRO одним жестом. Каждое пожертвование приближает нас к следующему большому обновлению.",
     "description": "Description for one-time donation."
   },
   "oneTimeDonationButton": {
@@ -292,7 +292,7 @@
     "description": "Text for the donation thank you message."
   },
   "pageTitle": {
-    "message": "Добро пожаловать в Quantum Highlighter",
+    "message": "Добро пожаловать в Квантовый выделитель",
     "description": "Title for the welcome page."
   },
   "githubLink": {
@@ -304,7 +304,7 @@
     "description": "Button to open the donation section."
   },
   "heroTitle": {
-    "message": "Добро пожаловать в Quantum Highlighter PRO!",
+    "message": "Добро пожаловать в Квантовый выделитель PRO!",
     "description": "Main title of the welcome page."
   },
   "heroSubtitle": {
@@ -394,6 +394,14 @@
   "feature6Text": {
     "message": "Настройте расширение по своему вкусу в меню настроек.",
     "description": "Text for the sixth feature."
+  },
+  "feature7Title": {
+    "message": "Синхронизация между устройствами",
+    "description": "Title for the seventh feature."
+  },
+  "feature7Text": {
+    "message": "Ваши заметки и настройки автоматически синхронизируются на всех ваших устройствах.",
+    "description": "Text for the seventh feature."
   },
   "ctaTitle": {
     "message": "Готовы начать!",

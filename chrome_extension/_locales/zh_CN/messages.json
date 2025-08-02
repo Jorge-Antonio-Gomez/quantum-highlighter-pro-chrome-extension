@@ -1,6 +1,6 @@
 {
   "extensionName": {
-    "message": "Quantum Highlighter PRO",
+    "message": "量子荧光笔 PRO",
     "description": "The name of the extension."
   },
   "extensionDescription": {
@@ -240,11 +240,11 @@
     "description": "Toast message after refreshing."
   },
   "donationsTitle": {
-    "message": "您让 Quantum Highlighter PRO 保持免费和活力",
+    "message": "您让 量子荧光笔 PRO 保持免费和活力",
     "description": "Title for the donation modal."
   },
   "donationsText": {
-    "message": "你好！我是 George，Quantum Highlighter 的创造者和唯一开发者。我的承诺是，这个工具将永远免费并保持最高质量。背后没有大公司，只有无数小时的工作和创造一个真正对您有用的东西的梦想。为了继续创新，我需要您的帮助。",
+    "message": "你好！我是 George, 量子荧光笔 的创造者和唯一开发者。我的承诺是，这个工具将永远免费并保持最高质量。背后没有大公司，只有无数小时的工作和创造一个真正对您有用的东西的梦想。为了继续创新，我需要您的帮助。",
     "description": "Text for the donation modal."
   },
   "oneTimeDonationTitle": {
@@ -252,7 +252,7 @@
     "description": "Title for one-time donation."
   },
   "oneTimeDonationDescription": {
-    "message": "只需一个简单的举动，即可支持 Quantum Highlighter PRO 的发展。每一次捐赠都让我们离下一次重大更新更近一步。",
+    "message": "只需一个简单的举动，即可支持 量子荧光笔 PRO 的发展。每一次捐赠都让我们离下一次重大更新更近一步。",
     "description": "Description for one-time donation."
   },
   "oneTimeDonationButton": {
@@ -292,7 +292,7 @@
     "description": "Text for the donation thank you message."
   },
   "pageTitle": {
-    "message": "欢迎使用 Quantum Highlighter",
+    "message": "欢迎使用 量子荧光笔",
     "description": "Title for the welcome page."
   },
   "githubLink": {
@@ -304,7 +304,7 @@
     "description": "Button to open the donation section."
   },
   "heroTitle": {
-    "message": "欢迎使用 Quantum Highlighter PRO！",
+    "message": "欢迎使用 量子荧光笔 PRO！",
     "description": "Main title of the welcome page."
   },
   "heroSubtitle": {
@@ -394,6 +394,14 @@
   "feature6Text": {
     "message": "从设置菜单中根据您的喜好调整扩展。",
     "description": "Text for the sixth feature."
+  },
+  "feature7Title": {
+    "message": "跨设备同步",
+    "description": "Title for the seventh feature."
+  },
+  "feature7Text": {
+    "message": "您的笔记和设置会在所有设备上自动同步。",
+    "description": "Text for the seventh feature."
   },
   "ctaTitle": {
     "message": "准备开始！",

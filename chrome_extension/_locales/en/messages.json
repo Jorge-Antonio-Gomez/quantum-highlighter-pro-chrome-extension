@@ -98,6 +98,8 @@
   "feature5Text": { "message": "Works perfectly on dynamic sites like ChatGPT.", "description": "Text for the fifth feature." },
   "feature6Title": { "message": "Highly Customizable", "description": "Title for the sixth feature." },
   "feature6Text": { "message": "Adjust the extension to your liking from the settings menu.", "description": "Text for the sixth feature." },
+  "feature7Title": { "message": "Cross-Device Sync", "description": "Title for the seventh feature." },
+  "feature7Text": { "message": "Your notes and settings are automatically synced across all your devices.", "description": "Text for the seventh feature." },
   "ctaTitle": { "message": "Ready to Get Started!", "description": "Title for the call to action section." },
   "ctaText": { "message": "Go to any webpage, select some text, and start organizing your knowledge.", "description": "Text for the call to action section." },
   "ctaTip": { "message": "<strong>Tip:</strong> You can open the sidebar at any time using the keyboard shortcut (<strong>Ctrl + Shift + H</strong> by default) or from the extension icon.", "description": "Tip for the call to action section." },

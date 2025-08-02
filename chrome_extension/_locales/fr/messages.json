@@ -1,6 +1,6 @@
 {
   "extensionName": {
-    "message": "Quantum Highlighter PRO",
+    "message": "Surligneur Quantum PRO",
     "description": "The name of the extension."
   },
   "extensionDescription": {
@@ -240,11 +240,11 @@
     "description": "Toast message after refreshing."
   },
   "donationsTitle": {
-    "message": "Vous aidez Quantum Highlighter PRO à rester gratuit et vivant",
+    "message": "Vous aidez Surligneur Quantum PRO à rester gratuit et vivant",
     "description": "Title for the donation modal."
   },
   "donationsText": {
-    "message": "Salut ! Je suis George, le créateur et unique développeur de Quantum Highlighter. Ma promesse est et restera que cet outil soit gratuit et de la plus haute qualité. Il n'y a pas de grande entreprise derrière, juste d'innombrables heures de travail et le rêve de créer quelque chose de vraiment utile pour vous. Pour continuer à innover, j'ai besoin de votre aide.",
+    "message": "Salut ! Je suis George, le créateur et unique développeur de Surligneur Quantum. Ma promesse est et restera que cet outil soit gratuit et de la plus haute qualité. Il n'y a pas de grande entreprise derrière, juste d'innombrables heures de travail et le rêve de créer quelque chose de vraiment utile pour vous. Pour continuer à innover, j'ai besoin de votre aide.",
     "description": "Text for the donation modal."
   },
   "oneTimeDonationTitle": {
@@ -252,7 +252,7 @@
     "description": "Title for one-time donation."
   },
   "oneTimeDonationDescription": {
-    "message": "Soutenez le développement de Quantum Highlighter PRO d'un simple geste. Chaque don nous rapproche de notre prochaine grande mise à jour.",
+    "message": "Soutenez le développement de Surligneur Quantum PRO d'un simple geste. Chaque don nous rapproche de notre prochaine grande mise à jour.",
     "description": "Description for one-time donation."
   },
   "oneTimeDonationButton": {
@@ -292,7 +292,7 @@
     "description": "Text for the donation thank you message."
   },
   "pageTitle": {
-    "message": "Bienvenue chez Quantum Highlighter",
+    "message": "Bienvenue chez Surligneur Quantum",
     "description": "Title for the welcome page."
   },
   "githubLink": {
@@ -304,7 +304,7 @@
     "description": "Button to open the donation section."
   },
   "heroTitle": {
-    "message": "Bienvenue chez Quantum Highlighter PRO !",
+    "message": "Bienvenue chez Surligneur Quantum PRO !",
     "description": "Main title of the welcome page."
   },
   "heroSubtitle": {
@@ -394,6 +394,14 @@
   "feature6Text": {
     "message": "Ajustez l'extension à votre goût depuis le menu des paramètres.",
     "description": "Text for the sixth feature."
+  },
+  "feature7Title": {
+    "message": "Synchronisation multi-appareils",
+    "description": "Title for the seventh feature."
+  },
+  "feature7Text": {
+    "message": "Vos notes et paramètres sont automatiquement synchronisés sur tous vos appareils.",
+    "description": "Text for the seventh feature."
   },
   "ctaTitle": {
     "message": "Prêt à commencer !",

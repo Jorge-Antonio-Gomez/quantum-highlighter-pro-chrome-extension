@@ -36,7 +36,11 @@ A powerful, open-source web annotation extension for Chrome, inspired by Zotero'
 ### ⚙️ Advanced Configuration
 *   **Granular Control:** Disable the extension on a specific page or an entire website.
 *   **Force Dark Text:** An option to force black text on highlights to ensure readability on any background.
-*   **Smart Persistence:** All your settings and annotations are synchronized across devices using `chrome.storage.sync`.
+
+### ☁️ Cross-Device Sync
+*   **Automatic Synchronization:** Your annotations and settings are automatically saved to your Google account via `chrome.storage.sync`.
+*   **Seamless Experience:** Access your notes on any device where you're logged into Chrome with the same Google account. If you make changes while offline, they will sync as soon as you reconnect.
+*   **Privacy-Focused:** This feature uses Chrome's built-in storage, which is subject to Google's privacy policy. Your data is not sent to any third-party servers.
 
 ### 🌍 Full Internationalization (i18n)
 *   **Multi-Language Support:** The entire interface is professionally translated into 6 languages:
@@ -77,9 +81,7 @@ A powerful, open-source web annotation extension for Chrome, inspired by Zotero'
 ### From the Chrome Web Store (Recommended)
 Install the extension directly from the Chrome Web Store for the most stable version and automatic updates.
 
-> **📋 Note:** The Chrome Web Store listing is currently under review. The extension will be available soon!
-
-[**➡️ Install from Chrome Web Store**](https://chrome.google.com/webstore/detail/mock-link-for-quantum-highlighter) _(Coming Soon)_
+[**➡️ Install from Chrome Web Store**](https://chromewebstore.google.com/detail/quantum-highlighter-pro/oekfdeipfendogdebolnjdijifnipipg)
 
 ### Manual Installation (for Developers)
 If you prefer to install manually or want to test the latest development version:
