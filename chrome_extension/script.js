@@ -1681,15 +1681,18 @@
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Control') {
                     document.body.classList.add('ctrl-is-pressed');
+                    this.menu.host.classList.add('ctrl-is-pressed');
                 }
             });
             document.addEventListener('keyup', (e) => {
                 if (e.key === 'Control') {
                     document.body.classList.remove('ctrl-is-pressed');
+                    this.menu.host.classList.remove('ctrl-is-pressed');
                 }
             });
             window.addEventListener('blur', () => {
                 document.body.classList.remove('ctrl-is-pressed');
+                this.menu.host.classList.remove('ctrl-is-pressed');
             });
         }
 

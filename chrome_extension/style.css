@@ -601,6 +601,10 @@ img.ProseMirror-separator {
 .tiptap ul { list-style-type: disc; }
 .tiptap ol { list-style-type: decimal; }
 
+:host(.ctrl-is-pressed) .ProseMirror a {
+    cursor: pointer;
+}
+
 .tiptap a {
     color: var(--highlighter-primary);
     text-decoration: underline;
