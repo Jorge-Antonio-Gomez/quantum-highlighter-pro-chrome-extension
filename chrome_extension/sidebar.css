@@ -393,7 +393,7 @@ body:not(.locked) #resize-handle {
     to {
         transform: translateX(0);
         opacity: 1;
-        max-height: 200px; /* Adjust to a reasonable max height */
+        max-height: var(--card-height, 200px); /* Use dynamic height for smooth expansion */
         padding-top: 12px;
         padding-bottom: 12px;
         margin-bottom: 12px;
@@ -405,7 +405,7 @@ body:not(.locked) #resize-handle {
     from {
         transform: translateX(0);
         opacity: 1;
-        max-height: 200px; /* Adjust to a reasonable max height */
+        max-height: var(--card-height, 200px); /* Use dynamic height for smooth collapse */
         padding-top: 12px;
         padding-bottom: 12px;
         margin-bottom: 12px;
@@ -542,6 +542,10 @@ body:not(.locked) #resize-handle {
     margin: 0.6em 0 0.6em 0;
     color: #64748b; /* Inspired by --highlighter-text-secondary */
     min-height: calc(1em);
+}
+/* Si el último párrafo de un bloque no tiene texto, se muestra su display como none (esto en el comment) */
+.annotation-card .comment p:last-child:empty {
+    display: none;
 }
 .annotation-card .comment blockquote p {
     margin: 0; /* No extra margin for paragraphs inside a quote */

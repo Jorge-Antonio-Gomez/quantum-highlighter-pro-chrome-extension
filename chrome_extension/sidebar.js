@@ -185,6 +185,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- ANNOTATION RENDERING ---
 
+    // --- ANNOTATION RENDERING ---
+
     function renderAnnotations(annotations) {
         const emptyStateContent = document.getElementById('empty-state-content');
         const hasAnnotations = annotations && annotations.length > 0;
@@ -199,45 +201,62 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const annotationsContainer = annotationsList;
-        const existingIds = new Set(Array.from(annotationsContainer.querySelectorAll('.annotation-card')).map(el => el.dataset.annotationId));
-        const receivedAnnotationsMap = new Map(annotations);
+        const existingNodesMap = new Map();
+        annotationsContainer.querySelectorAll('.annotation-card').forEach(node => {
+            existingNodesMap.set(node.dataset.annotationId, node);
+        });
 
-        for (const id of existingIds) {
-            if (!receivedAnnotationsMap.has(id)) {
-                const cardToRemove = annotationsContainer.querySelector(`[data-annotation-id="${id}"]`);
-                if (cardToRemove && !cardToRemove.classList.contains('deleting')) {
-                    cardToRemove.classList.add('deleting');
-                    cardToRemove.addEventListener('animationend', () => cardToRemove.remove(), { once: true });
-                }
+        const receivedIds = new Set(annotations.map(([id]) => id));
+
+        // 1. Remove nodes that are no longer in the annotations list.
+        // This happens if a deletion was finalized while the sidebar was closed.
+        for (const [id, node] of existingNodesMap.entries()) {
+            if (!receivedIds.has(id)) {
+                node.remove();
+                existingNodesMap.delete(id);
             }
         }
 
-        let lastElement = null;
+        // 2. Iterate through the new sorted list and reconcile with the DOM.
+        let lastNode = null; 
         annotations.forEach(([id, annotation]) => {
-            let card = annotationsContainer.querySelector(`[data-annotation-id="${id}"]`);
+            let node = existingNodesMap.get(id);
 
-            if (card) {
-                const textEl = card.querySelector('.text');
-                const commentEl = card.querySelector('.comment');
-                const colorBar = card.querySelector('.annotation-color-bar');
+            if (node) {
+                // If the node already exists, update its content if necessary.
+                const textEl = node.querySelector('.text');
+                const commentEl = node.querySelector('.comment');
+                const colorBar = node.querySelector('.annotation-color-bar');
 
-                if (textEl.innerHTML !== annotation.text) textEl.innerHTML = annotation.text;
-                const newCommentHtml = annotation.comment || `<span class="no-comment-placeholder">${chrome.i18n.getMessage('noComment')}</span>`;
-                if (commentEl.innerHTML !== newCommentHtml) commentEl.innerHTML = newCommentHtml;
-                if (colorBar.style.backgroundColor !== annotation.color) colorBar.style.backgroundColor = annotation.color;
-                card.dataset.comment = annotation.comment || '';
-            } else {
-                card = createAnnotationCard(id, annotation);
-                card.classList.add('newly-added');
-
-                if (lastElement) {
-                    lastElement.after(card);
-                } else {
-                    annotationsContainer.prepend(card);
+                if (textEl.innerHTML !== annotation.text) {
+                    textEl.innerHTML = annotation.text;
                 }
-                card.addEventListener('animationend', () => card.classList.remove('newly-added'), { once: true });
+                const newCommentHtml = annotation.comment ? annotation.comment : `<span class="no-comment-placeholder">${chrome.i18n.getMessage('noComment')}</span>`;
+                if (commentEl.innerHTML !== newCommentHtml) {
+                    commentEl.innerHTML = newCommentHtml;
+                }
+                if (colorBar.style.backgroundColor !== annotation.color) {
+                    colorBar.style.backgroundColor = annotation.color;
+                }
+                node.dataset.comment = annotation.comment || '';
+            } else {
+                // If the node doesn't exist, create it.
+                node = createAnnotationCard(id, annotation);
+                node.classList.add('newly-added');
+                node.addEventListener('animationend', () => node.classList.remove('newly-added'), { once: true });
             }
-            lastElement = card;
+
+            // 3. Ensure the node is in the correct position.
+            if (!lastNode) {
+                if (annotationsContainer.firstChild !== node) {
+                    annotationsContainer.prepend(node);
+                }
+            } else {
+                if (lastNode.nextSibling !== node) {
+                    lastNode.after(node);
+                }
+            }
+            lastNode = node;
         });
     }
 
@@ -314,37 +333,31 @@ document.addEventListener('DOMContentLoaded', () => {
             renderAnnotations([]);
             return;
         }
-        chrome.tabs.get(myTabId, (currentTab) => {
+
+        refreshButtons.forEach(button => {
+            button.classList.add('refreshing');
+            button.disabled = true;
+        });
+
+        // Ask the content script to send us a fresh, sorted list of annotations.
+        // The response will be handled by the 'annotationsUpdated' message listener.
+        chrome.tabs.sendMessage(myTabId, { action: 'requestRefresh' }, (response) => {
+            setTimeout(() => {
+                refreshButtons.forEach(button => {
+                    button.classList.remove('refreshing');
+                    button.disabled = false;
+                });
+            }, 600);
+
             if (chrome.runtime.lastError) {
-                console.warn(`Highlighter: Could not get tab info. ${chrome.runtime.lastError.message}`);
-                renderAnnotations([]);
+                console.warn(`Highlighter: Could not connect to refresh. ${chrome.runtime.lastError.message}`);
+                annotationsList.innerHTML = `<p>${chrome.i18n.getMessage('errorLoading')}</p>`;
                 return;
             }
-            if (currentTab.url && currentTab.url.startsWith('chrome-extension://')) {
-                annotationsList.innerHTML = `<p>${chrome.i18n.getMessage('noAnnotations')}</p>`;
-                return;
+
+            if (showToastOnComplete) {
+                showToast('annotationsRefreshed');
             }
-            refreshButtons.forEach(button => {
-                button.classList.add('refreshing');
-                button.disabled = true;
-            });
-            chrome.tabs.sendMessage(myTabId, { action: 'getAnnotations' }, (response) => {
-                setTimeout(() => {
-                    refreshButtons.forEach(button => {
-                        button.classList.remove('refreshing');
-                        button.disabled = false;
-                    });
-                }, 600);
-                if (chrome.runtime.lastError) {
-                    console.warn(`Highlighter: Could not connect. ${chrome.runtime.lastError.message}`);
-                    annotationsList.innerHTML = `<p>${chrome.i18n.getMessage('errorLoading')}</p>`;
-                    return;
-                }
-                renderAnnotations(response?.data || []);
-                if (showToastOnComplete) {
-                    showToast('annotationsRefreshed');
-                }
-            });
         });
     }
 
@@ -391,6 +404,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (request.action === 'annotationsUpdated') {
             renderAnnotations(request.data);
+        }
+        if (request.action === 'animateDelete') {
+            const node = document.querySelector(`[data-annotation-id="${request.annotationId}"]`);
+            const canAnimate = !!(node && !node.classList.contains('deleting'));
+            if (canAnimate) {
+                // Set dynamic height for smooth collapse via CSS variable
+                node.style.setProperty('--card-height', `${node.offsetHeight}px`);
+                // Trigger CSS slideOut animation
+                node.classList.add('deleting');
+                // When animation finishes, ask content script to finalize deletion
+                node.addEventListener('animationend', () => {
+                    if (myTabId) {
+                        chrome.tabs.sendMessage(myTabId, {
+                            action: 'finalizeDelete',
+                            annotationId: request.annotationId
+                        });
+                    }
+                }, { once: true });
+            }
+            // Always ACK so the sender knows whether we will animate
+            try { sendResponse({ ok: canAnimate }); } catch (e) { /* no-op */ }
         }
         if (request.action === 'settingsChanged') {
             // Re-initialize to get the latest settings for the switches

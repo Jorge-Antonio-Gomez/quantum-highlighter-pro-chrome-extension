@@ -1939,7 +1939,7 @@
                         { action: 'changeType', value: 'underline', label: chrome.i18n.getMessage('underline'), content: '<span class="underline">A</span>', className: `highlighter-type-selector ${annotation.type === 'underline' ? 'active' : ''}` }
                     ],
                     actions: [
-                        { action: 'delete', label: chrome.i18n.getMessage('delete'), content: `<svg class="delete-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V6H17H19C19.5523 6 20 6.44772 20 7C20 7.55228 19.5523 8 19 8H18V18C18 19.6569 16.6569 21 15 21H9C7.34315 21 6 19.6569 6 18V8H5C4.44772 8 4 7.55228 4 7C4 6.44772 4.44772 6 5 6H7H9V5ZM10 8H8V18C8 18.5523 8.44772 19 9 19H15C15.5523 19 16 18.5523 16 18V8H14H10ZM13 6H11V5H13V6Z"/></svg><span>${chrome.i18n.getMessage('delete')}</span>`, className: 'highlighter-delete-btn' }
+                        { action: 'delete', label: chrome.i18n.getMessage('delete'), content: `<svg class="delete-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V6H17H19C19.5523 6 20  6.44772 20 7C20 7.55228 19.5523 8 19 8H18V18C18 19.6569 16.6569 21 15 21H9C7.34315 21 6 19.6569 6 18V8H5C4.44772 8 4 7.55228 4 7C4 6.44772 4.44772 6 5 6H7H9V5ZM10 8H8V18C8 18.5523 8.44772 19 9 19H15C15.5523 19 16 18.5523 16 18V8H14H10ZM13 6H11V5H13V6Z"/></svg><span>${chrome.i18n.getMessage('delete')}</span>`, className: 'highlighter-delete-btn' }
                     ]
                 },
                 commentBox: {
@@ -2179,10 +2179,40 @@
         }
 
         _notifySidebarOfUpdate() {
+            const annotationsArray = Array.from(this.annotations.values());
+
+            annotationsArray.sort((a, b) => {
+                const elA = document.querySelector(`[data-annotation-id='${a.id}']`);
+                const elB = document.querySelector(`[data-annotation-id='${b.id}']`);
+
+                if (!elA || !elB) {
+                    return 0; 
+                }
+
+                const position = elA.compareDocumentPosition(elB);
+
+                // elB follows elA, so elA is first. To keep a before b, return a negative value.
+                if (position & Node.DOCUMENT_POSITION_FOLLOWING) {
+                    return -1;
+                } else if (position & Node.DOCUMENT_POSITION_PRECEDING) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            });
+            
+            const sortedEntries = annotationsArray.map(annotation => [annotation.id, annotation]);
+
             chrome.runtime.sendMessage({
                 action: 'annotationsUpdated',
                 url: this.currentUrl,
-                data: Array.from(this.annotations.entries())
+                data: sortedEntries
+            }).catch(e => {
+                if (e.message.includes("Could not establish connection. Receiving end does not exist.")) {
+                    // Sidebar is closed, this is expected.
+                } else {
+                    console.warn("Highlighter: Could not send update to sidebar.", e);
+                }
             });
         }
 
@@ -2228,9 +2258,9 @@
         
             // Save the entire annotation whenever it's updated.
             this.storage.saveAnnotation(annotation, () => {
-                if (!isCommentUpdate) { // Avoid spamming sidebar on every keystroke in comment
-                    this._notifySidebarOfUpdate();
-                }
+                // The debounced call from the Tiptap editor handles performance.
+                // Always send an update so the sidebar is in sync.
+                this._notifySidebarOfUpdate();
             });
         
             document.querySelectorAll(`[data-annotation-id="${id}"]`).forEach(el => {
@@ -2259,10 +2289,42 @@
 
             await this._closeOrFinalizeContextMenu();
 
-            this.annotations.delete(annotationIdToDelete);
+            // Unwrap the marks from the main page immediately
             document.querySelectorAll(`[data-annotation-id="${annotationIdToDelete}"]`).forEach(el => DOMManager.unwrap(el));
 
-            this.storage.removeAnnotation(annotationIdToDelete, () => {
+            // Ask the sidebar to animate if available. If it can't or there's no receiver,
+            // finalize immediately so storage stays consistent.
+            try {
+                const response = await new Promise((resolve, reject) => {
+                    try {
+                        chrome.runtime.sendMessage({
+                            action: 'animateDelete',
+                            annotationId: annotationIdToDelete
+                        }, (resp) => {
+                            if (chrome.runtime.lastError) {
+                                reject(chrome.runtime.lastError);
+                            } else {
+                                resolve(resp);
+                            }
+                        });
+                    } catch (err) {
+                        reject(err);
+                    }
+                });
+
+                if (!response || !response.ok) {
+                    // Sidebar didn't animate (no node or not ready). Finalize now.
+                    this.finalizeDelete(annotationIdToDelete);
+                }
+            } catch (e) {
+                // Any send error (no receiver, port closed, etc.) -> finalize now.
+                this.finalizeDelete(annotationIdToDelete);
+            }
+        }
+
+        finalizeDelete(annotationId) {
+            this.annotations.delete(annotationId);
+            this.storage.removeAnnotation(annotationId, () => {
                 this._notifySidebarOfUpdate();
             });
         }
@@ -2386,8 +2448,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // For actions that require the highlighter instance
     if (window.highlighterInstance) {
         switch (request.action) {
-            case 'getAnnotations':
-                sendResponse({ data: Array.from(window.highlighterInstance.annotations.entries()) });
+            case 'requestRefresh':
+                window.highlighterInstance._notifySidebarOfUpdate();
+                sendResponse({ status: 'refresh requested' });
+                return;
+            case 'finalizeDelete':
+                if (window.highlighterInstance) {
+                    window.highlighterInstance.finalizeDelete(request.annotationId);
+                }
+                sendResponse({ status: 'deletion finalized' });
                 return;
             case 'scrollToAnnotation':
                 window.highlighterInstance.scrollToAnnotation(request.annotationId);

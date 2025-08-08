@@ -3,7 +3,7 @@
     "name": "__MSG_extensionName__",
     "description": "__MSG_extensionDescription__",
     "default_locale": "en",
-    "version": "2025.0802.3",
+    "version": "2025.0808.1",
     "permissions": [
         "storage",
         "activeTab"
