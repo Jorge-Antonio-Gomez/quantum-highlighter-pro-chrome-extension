@@ -997,6 +997,7 @@
         constructor() {
             this.annotationKeyPrefix = 'highlighter-annotation-';
             this.paramWhitelist = {};
+            this.MAX_CHUNK_SIZE = 7400; // 7.4KB as a safe buffer for QUOTA_BYTES_PER_ITEM (8,192)
             this._loadWhitelist();
         }
 
@@ -1004,120 +1005,250 @@
             const url = chrome.runtime.getURL('param-whitelist.json');
             fetch(url)
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
+                    if (!response.ok) throw new Error('Network response was not ok');
                     return response.json();
                 })
-                .then(data => {
-                    this.paramWhitelist = data;
-                })
+                .then(data => { this.paramWhitelist = data; })
                 .catch(error => {
                     console.error('Highlighter: Could not load or parse param-whitelist.json. Using empty whitelist.', error);
                     this.paramWhitelist = {};
                 });
         }
-        
-        getPageUrl() { // Renamed from getKey for clarity
+
+        getPageUrl() {
             const url = new URL(window.location.href);
             const hostname = url.hostname;
-            // Normaliza el pathname para eliminar la barra final si no es la raíz
             const pathname = url.pathname.length > 1 && url.pathname.endsWith('/') ? url.pathname.slice(0, -1) : url.pathname;
-            
             let pageUrl = `${hostname}${pathname}`;
 
             if (this.paramWhitelist[hostname]) {
                 const paramsToKeep = this.paramWhitelist[hostname];
                 const searchParams = new URLSearchParams(url.search);
                 const keptParams = [];
-
                 searchParams.forEach((value, key) => {
-                    if (paramsToKeep.includes(key)) {
-                        keptParams.push(`${key}=${value}`);
-                    }
+                    if (paramsToKeep.includes(key)) keptParams.push(`${key}=${value}`);
                 });
-
-                // Ordena los parámetros para asegurar una clave consistente sin importar el orden
-                if (keptParams.length > 0) {
-                    pageUrl += `?${keptParams.sort().join('&')}`;
-                }
+                if (keptParams.length > 0) pageUrl += `?${keptParams.sort().join('&')}`;
             }
-
             return pageUrl;
         }
 
         generateId() { return `h-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`; }
-        
-        saveAnnotation(annotation, callback) {
-            const key = `${this.annotationKeyPrefix}${annotation.id}`;
-            const dataToSave = { [key]: annotation }; // No JSON.stringify needed, storage API handles objects
-            
+
+        async saveAnnotation(annotation, callback) {
+            // First, remove any old chunks that might exist for this annotation ID
+            await this._removeChunks(annotation.id);
+
+            const annotationStr = JSON.stringify(annotation);
+            const annotationSize = new TextEncoder().encode(annotationStr).length;
+
+            if (annotationSize < this.MAX_CHUNK_SIZE) {
+                // Annotation is small enough, save as is.
+                const key = `${this.annotationKeyPrefix}${annotation.id}`;
+                chrome.storage.sync.set({ [key]: annotation }, () => {
+                    if (chrome.runtime.lastError) console.error("Error saving annotation:", chrome.runtime.lastError);
+                    if (callback) callback();
+                });
+                return;
+            }
+
+            // --- Annotation is too large, chunk it ---
+            const chunks = this._createChunks(annotation, annotationStr);
+            const dataToSave = {};
+            chunks.forEach(chunk => {
+                const chunkKey = `${this.annotationKeyPrefix}${chunk.id}`;
+                dataToSave[chunkKey] = chunk;
+            });
+
             chrome.storage.sync.set(dataToSave, () => {
                 if (chrome.runtime.lastError) {
-                    // Use a case-insensitive check for "quota" to make it more robust
-                    if (chrome.runtime.lastError.message.toLowerCase().includes('quota')) {
-                         console.warn(`Highlighter: Annotation ${annotation.id} is too large to sync. Storing locally instead.`, chrome.runtime.lastError.message);
-                         
-                         // Dispatch event for the UI to handle the toast notification
-                         document.body.dispatchEvent(new CustomEvent('annotation-saved-locally', {
-                            detail: { annotationId: annotation.id }
-                         }));
-
-                         // Fallback to local storage for this single item
-                         chrome.storage.local.set(dataToSave, callback);
-                    } else {
-                        console.error("Error saving annotation:", chrome.runtime.lastError);
-                    }
+                    console.error("Error saving annotation chunks:", chrome.runtime.lastError);
+                    // Here you might want to add a fallback to local storage for the whole annotation
                 } else {
-                     if (callback) callback();
+                    if (callback) callback();
                 }
             });
         }
 
-        removeAnnotation(annotationId, callback) {
-            const key = `${this.annotationKeyPrefix}${annotationId}`;
-            // Try removing from both sync and local, in case it was a large annotation
-            chrome.storage.sync.remove(key, () => {
-                 chrome.storage.local.remove(key, () => {
-                    if (chrome.runtime.lastError) {
-                        console.error("Error removing annotation:", chrome.runtime.lastError);
-                    }
-                    if (callback) callback();
-                 });
+        _createChunks(annotation) {
+            const chunks = [];
+            const originalId = annotation.id;
+
+            // Base annotation contains all data except the large text/comment fields
+            const baseAnnotation = { ...annotation };
+            delete baseAnnotation.text;
+            delete baseAnnotation.comment;
+
+            const baseStr = JSON.stringify(baseAnnotation);
+            const baseSize = new TextEncoder().encode(baseStr).length;
+
+            // Calculate the available size for content in each chunk
+            const availableContentSize = this.MAX_CHUNK_SIZE - baseSize - 150; // 150 bytes buffer for chunk metadata & JSON overhead
+
+            let textToChunk = annotation.text || '';
+            let commentToChunk = annotation.comment || '';
+
+            // Create the main chunk (index 0)
+            const mainChunk = { ...baseAnnotation };
+            mainChunk.chunking = {
+                isChunk: true,
+                originalId: originalId,
+                chunkIndex: 0,
+                // totalChunks will be set later
+            };
+
+            let remainingSize = availableContentSize;
+
+            // Fill the main chunk first
+            mainChunk.text = textToChunk.substring(0, remainingSize);
+            textToChunk = textToChunk.substring(mainChunk.text.length);
+            remainingSize -= new TextEncoder().encode(mainChunk.text).length;
+
+            mainChunk.comment = commentToChunk.substring(0, remainingSize);
+            commentToChunk = commentToChunk.substring(mainChunk.comment.length);
+
+            chunks.push(mainChunk);
+
+            // Create secondary chunks if needed
+            let chunkIndex = 1;
+            while (textToChunk.length > 0 || commentToChunk.length > 0) {
+                const contentForThisChunk = {};
+                remainingSize = this.MAX_CHUNK_SIZE - 150; // Secondary chunks have more space
+
+                if (textToChunk.length > 0) {
+                    contentForThisChunk.text = textToChunk.substring(0, remainingSize);
+                    textToChunk = textToChunk.substring(contentForThisChunk.text.length);
+                    remainingSize -= new TextEncoder().encode(contentForThisChunk.text).length;
+                }
+
+                if (commentToChunk.length > 0) {
+                    contentForThisChunk.comment = commentToChunk.substring(0, remainingSize);
+                    commentToChunk = commentToChunk.substring(contentForThisChunk.comment.length);
+                }
+
+                const secondaryChunk = {
+                    id: `${originalId}-chunk-${chunkIndex}`,
+                    pageUrl: annotation.pageUrl,
+                    chunking: {
+                        isChunk: true,
+                        originalId: originalId,
+                        chunkIndex: chunkIndex,
+                    },
+                    content: contentForThisChunk
+                };
+                chunks.push(secondaryChunk);
+                chunkIndex++;
+            }
+
+            // Now that we know the total number of chunks, update all of them
+            const totalChunks = chunks.length;
+            chunks.forEach(chunk => {
+                chunk.chunking.totalChunks = totalChunks;
             });
+
+            return chunks;
+        }
+
+        async removeAnnotation(annotationId, callback) {
+            await this._removeChunks(annotationId, true); // Pass true to also remove from local storage
+            if (callback) callback();
+        }
+
+        async _removeChunks(originalId, includeLocal = false) {
+            const keyPrefix = `${this.annotationKeyPrefix}${originalId}`;
+            const mainKey = keyPrefix;
+
+            // Get the main chunk to find out how many other chunks there are
+            const items = await new Promise(resolve => chrome.storage.sync.get(mainKey, resolve));
+            const mainAnnotation = items[mainKey];
+
+            const keysToRemove = [mainKey];
+            if (mainAnnotation && mainAnnotation.chunking && mainAnnotation.chunking.isChunk) {
+                const totalChunks = mainAnnotation.chunking.totalChunks;
+                for (let i = 1; i < totalChunks; i++) {
+                    keysToRemove.push(`${keyPrefix}-chunk-${i}`);
+                }
+            }
+
+            // Remove from sync
+            await new Promise(resolve => chrome.storage.sync.remove(keysToRemove, resolve));
+            if (chrome.runtime.lastError) console.error("Error removing sync chunks:", chrome.runtime.lastError);
+
+            // Also remove from local storage for cleanup from the old implementation
+            if (includeLocal) {
+                await new Promise(resolve => chrome.storage.local.remove(keysToRemove, resolve));
+                if (chrome.runtime.lastError) console.error("Error removing local chunks:", chrome.runtime.lastError);
+            }
         }
 
         load(callback) {
             const pageUrl = this.getPageUrl();
-            const annotations = new Map();
 
-            const processResults = (items) => {
+            const processAndReassemble = (items) => {
+                const annotations = new Map();
+                const chunkMap = new Map();
+
                 for (const key in items) {
-                    if (key.startsWith(this.annotationKeyPrefix)) {
-                        const annotation = items[key];
-                        if (annotation && annotation.pageUrl === pageUrl) {
-                            annotations.set(annotation.id, annotation);
+                    if (!key.startsWith(this.annotationKeyPrefix)) continue;
+
+                    const item = items[key];
+                    if (!item || item.pageUrl !== pageUrl) continue;
+
+                    if (item.chunking && item.chunking.isChunk) {
+                        const { originalId, chunkIndex, totalChunks } = item.chunking;
+                        if (!chunkMap.has(originalId)) {
+                            chunkMap.set(originalId, new Array(totalChunks));
+                        }
+                        chunkMap.get(originalId)[chunkIndex] = item;
+                    } else {
+                        // It's a normal, non-chunked annotation
+                        annotations.set(item.id, item);
+                    }
+                }
+
+                // Reassemble chunks
+                for (const [originalId, chunks] of chunkMap.entries()) {
+                    if (chunks.some(c => c === undefined)) {
+                        console.warn(`Highlighter: Incomplete chunks for annotation ID ${originalId}. Skipping.`);
+                        continue;
+                    }
+
+                    const mainChunk = chunks[0];
+                    let fullText = mainChunk.text || '';
+                    let fullComment = mainChunk.comment || '';
+
+                    for (let i = 1; i < chunks.length; i++) {
+                        const chunkContent = chunks[i].content;
+                        if (chunkContent) {
+                            if (chunkContent.text) {
+                                fullText += chunkContent.text;
+                            }
+                            if (chunkContent.comment) {
+                                fullComment += chunkContent.comment;
+                            }
                         }
                     }
+
+                    const reassembledAnnotation = { ...mainChunk };
+                    delete reassembledAnnotation.chunking;
+                    reassembledAnnotation.text = fullText;
+                    reassembledAnnotation.comment = fullComment;
+
+                    annotations.set(originalId, reassembledAnnotation);
                 }
+                return annotations;
             };
 
-            // Chain the storage gets to avoid race conditions.
+            // Load from both sync and local, then process.
             chrome.storage.sync.get(null, (syncItems) => {
-                if (chrome.runtime.lastError) {
-                    console.error("Error loading sync annotations:", chrome.runtime.lastError);
-                } else {
-                    processResults(syncItems);
-                }
+                if (chrome.runtime.lastError) console.error("Error loading sync annotations:", chrome.runtime.lastError);
 
                 chrome.storage.local.get(null, (localItems) => {
-                    if (chrome.runtime.lastError) {
-                        console.error("Error loading local annotations:", chrome.runtime.lastError);
-                    } else {
-                        processResults(localItems);
-                    }
-                    
-                    callback(annotations);
+                    if (chrome.runtime.lastError) console.error("Error loading local annotations:", chrome.runtime.lastError);
+
+                    const allItems = { ...(syncItems || {}), ...(localItems || {}) };
+                    const finalAnnotations = processAndReassemble(allItems);
+                    callback(finalAnnotations);
                 });
             });
         }
@@ -1623,12 +1754,46 @@
             this.isCreatingAnnotation = false;
             this.currentUrl = this.storage.getPageUrl();
 
+            this._runMigration();
+
             this.storage.load((loadedAnnotations) => {
                 this.annotations = loadedAnnotations;
                 this._loadAnnotations();
             });
             this._setupEventListeners();
             this._setupMutationObserver();
+        }
+
+        async _runMigration() {
+            const MIGRATION_KEY = 'highlighter-local-data-migrated';
+            const { [MIGRATION_KEY]: alreadyMigrated } = await chrome.storage.sync.get(MIGRATION_KEY);
+
+            if (alreadyMigrated) return;
+
+            console.log('Highlighter: Starting one-time migration of local annotations to sync storage.');
+
+            const localItems = await new Promise(resolve => chrome.storage.local.get(null, resolve));
+            const localAnnotationKeys = Object.keys(localItems).filter(key => key.startsWith(this.storage.annotationKeyPrefix));
+
+            if (localAnnotationKeys.length === 0) {
+                console.log('Highlighter: No local annotations to migrate.');
+                await chrome.storage.sync.set({ [MIGRATION_KEY]: true });
+                return;
+            }
+
+            for (const key of localAnnotationKeys) {
+                const annotation = localItems[key];
+                if (annotation && annotation.id) {
+                    // Save to sync storage (this will handle chunking)
+                    await new Promise(resolve => this.storage.saveAnnotation(annotation, resolve));
+                    // Remove from local storage after successful save
+                    await new Promise(resolve => chrome.storage.local.remove(key, resolve));
+                    console.log(`Highlighter: Migrated annotation ${annotation.id}.`);
+                }
+            }
+
+            await chrome.storage.sync.set({ [MIGRATION_KEY]: true });
+            console.log('Highlighter: Migration complete.');
         }
 
         disableGlobally() {
@@ -1664,8 +1829,7 @@
             window.addEventListener('popstate', this._handleURLChange.bind(this));
             window.addEventListener('urlchange', this._handleURLChange.bind(this));
 
-            // Listen for custom event to show local storage toast
-            document.body.addEventListener('annotation-saved-locally', () => this._showLocalStorageToast());
+            
 
             document.addEventListener('keydown', (event) => {
                 if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'h') {
@@ -2349,40 +2513,7 @@
             }
         }
 
-        _showLocalStorageToast() {
-            const toastId = 'highlighter-local-save-toast';
-            if (document.getElementById(toastId)) return; // Avoid multiple toasts
-
-            const toast = document.createElement('div');
-            toast.id = toastId;
-
-            const message = document.createElement('span');
-            message.textContent = chrome.i18n.getMessage('highlightSavedLocally') || 'Highlight saved locally (exceeds 8KB sync limit)';
-            toast.appendChild(message);
-
-            const closeButton = document.createElement('button');
-            closeButton.innerHTML = '&times;';
-            closeButton.className = 'highlighter-toast-close-btn';
-            closeButton.onclick = () => {
-                toast.classList.remove('show');
-                toast.addEventListener('transitionend', () => toast.remove());
-            };
-            toast.appendChild(closeButton);
-            
-            document.body.appendChild(toast);
-
-            // Fade in by adding the 'show' class
-            setTimeout(() => toast.classList.add('show'), 100);
-
-            // Fade out and remove
-            const timeoutId = setTimeout(() => {
-                toast.classList.remove('show');
-                toast.addEventListener('transitionend', () => toast.remove());
-            }, 10000); // 10 seconds
-
-            // Ensure timeout is cleared if button is clicked
-            closeButton.addEventListener('click', () => clearTimeout(timeoutId));
-        }
+        
     }
 
     function initializeHighlighter() {

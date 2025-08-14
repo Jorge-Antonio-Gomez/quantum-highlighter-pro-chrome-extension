@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const forceBlackSwitch = document.getElementById('force-black-switch');
     const disablePageSwitch = document.getElementById('disable-page-switch');
     const disableDomainSwitch = document.getElementById('disable-domain-switch');
+    const sidebarDarkModeSwitch = document.getElementById('sidebar-dark-mode-switch');
     const configPopup = document.getElementById('config-popup');
     const languageSelectWrapper = document.getElementById('language-select-wrapper');
     const websiteInfoCard = document.getElementById('website-info-card');
@@ -27,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastStoredWidth = 420;
     let settings = {
         useDarkText: false,
+        sidebarDarkMode: false,
     };
 
     // --- FLOATING UI ---
@@ -85,6 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 settings: settings
             });
         }
+    }
+
+    function applyDarkMode() {
+        document.body.classList.toggle('dark-mode', settings.sidebarDarkMode);
     }
 
     function localizeUI() {
@@ -463,6 +469,12 @@ document.addEventListener('DOMContentLoaded', () => {
         saveSettings();
     });
 
+    sidebarDarkModeSwitch.addEventListener('change', () => {
+        settings.sidebarDarkMode = sidebarDarkModeSwitch.checked;
+        applyDarkMode();
+        saveSettings();
+    });
+
     disablePageSwitch.addEventListener('change', (e) => {
         if (myTabId) {
             chrome.tabs.sendMessage(myTabId, { action: 'toggleDisablePage', disable: e.target.checked });
@@ -497,7 +509,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const newSettings = changes['highlighter-settings'].newValue;
             settings = { ...settings, ...newSettings };
             forceBlackSwitch.checked = settings.useDarkText;
+            sidebarDarkModeSwitch.checked = settings.sidebarDarkMode;
             updateAnnotationTextStyles();
+            applyDarkMode();
         }
     });
 
@@ -508,6 +522,7 @@ document.addEventListener('DOMContentLoaded', () => {
         disablePageSwitch.disabled = true;
         disableDomainSwitch.disabled = true;
         forceBlackSwitch.disabled = true;
+        sidebarDarkModeSwitch.disabled = true;
 
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             if (!tabs || tabs.length === 0) {
@@ -527,17 +542,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 lastStoredWidth = Math.max(data.sidebarWidth || 420, 380);
 
                 const defaultSettings = {
-                    useDarkText: false
+                    useDarkText: false,
+                    sidebarDarkMode: false
                 };
                 settings = { ...defaultSettings, ...data['highlighter-settings'] };
                 
                 forceBlackSwitch.checked = settings.useDarkText;
+                sidebarDarkModeSwitch.checked = settings.sidebarDarkMode;
                 updateAnnotationTextStyles();
+                applyDarkMode();
                 
                 updateSwitchStates();
                 
                 configButton.disabled = false;
                 forceBlackSwitch.disabled = false;
+                sidebarDarkModeSwitch.disabled = false;
             });
         });
     };

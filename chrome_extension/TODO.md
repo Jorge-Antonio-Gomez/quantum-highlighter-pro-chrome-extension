@@ -6,7 +6,7 @@
 
 ## Varios
 
-- [ ] Actualizar el readme.md con los idiomas precisos:
+- [X] Actualizar el readme.md con los idiomas precisos:
     - [ ] pt -> pt_BR
     - [ ] zh -> zh_CN
 

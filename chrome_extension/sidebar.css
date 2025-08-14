@@ -888,7 +888,7 @@ input:checked + .slider:before {
     font-weight: 500;
 }
 
-#annotations-list.dark-text .annotation-card .text {
+body:not(.dark-mode) #annotations-list.dark-text .annotation-card .text {
     color: #1a1a1a;
 }
 
@@ -1069,4 +1069,136 @@ input:checked + .slider:before {
     opacity: 1;
     visibility: visible;
     transform: translate(-50%, 0);
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+    --highlighter-background-color: #1a1a1a;
+    --highlighter-surface-color: #2c2c2c;
+    --highlighter-text-color: #f0f0f0;
+    --highlighter-text-color-secondary: #a0a0a0;
+    --highlighter-border-color: #404040;
+}
+
+body.dark-mode .website-info-card {
+    background-color: #333;
+}
+
+body.dark-mode .website-info-content p {
+     color: var(--dark-text-color-secondary);
+}
+
+body.dark-mode .website-domain {
+    color: var(--dark-text-color-secondary);
+}
+
+body.dark-mode .icon-button {
+    color: var(--dark-text-color-secondary);
+}
+
+body.dark-mode .icon-button:hover {
+    color: var(--highlighter-primary-color);
+}
+
+body.dark-mode #annotations-list::-webkit-scrollbar-track {
+    background: #2c2c2c;
+}
+
+body.dark-mode #annotations-list::-webkit-scrollbar-thumb {
+    background-color: #555;
+}
+
+body.dark-mode #annotations-list::-webkit-scrollbar-thumb:hover {
+    background-color: #777;
+}
+
+body.dark-mode .annotation-card:hover {
+    background-color: #3a3a3a;
+    box-shadow: 0 0 0 1px var(--highlighter-primary-color);
+}
+
+body.dark-mode .annotation-card .comment {
+    color: #b0b0b0;
+}
+
+body.dark-mode .annotation-card .comment .no-comment-placeholder {
+   color: #888;
+}
+
+body.dark-mode .annotation-card .comment li::marker {
+    color: #777;
+}
+
+body.dark-mode .annotation-card .comment blockquote {
+    background-color: #333;
+    color: #ccc;
+}
+
+body.dark-mode .annotation-card .comment pre {
+    background-color: #333;
+}
+
+body.dark-mode .comment-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .delete-btn:hover {
+    background-color: rgba(229, 57, 53, 0.2);
+}
+
+body.dark-mode .comment-editor .wysiwyg-editor {
+    background-color: #333;
+    color: var(--dark-text-color);
+}
+
+body.dark-mode .comment-editor .wysiwyg-editor:focus {
+    background-color: var(--dark-surface-color);
+    box-shadow: 0 0 0 1px var(--highlighter-border-color);
+}
+
+body.dark-mode .comment-cancel-btn {
+    border: 1px solid var(--dark-border-color);
+    color: var(--dark-text-color-secondary);
+}
+
+body.dark-mode .comment-cancel-btn:hover {
+    background-color: #444;
+    border-color: #666;
+}
+
+body.dark-mode .config-popup {
+    border: 1px solid var(--dark-border-color);
+}
+
+body.dark-mode .custom-select-trigger {
+    background-color: var(--dark-surface-color);
+    border: 1px solid var(--dark-border-color);
+}
+
+body.dark-mode .custom-select-options {
+    background-color: var(--dark-surface-color);
+    border: 1px solid var(--dark-border-color);
+}
+
+body.dark-mode .custom-select-option:hover {
+    background-color: #444;
+}
+
+body.dark-mode .empty-state-icon {
+    background-color: #333;
+}
+
+body.dark-mode #refresh-container .refresh-button:hover {
+    background-color: #333;
+    color: var(--highlighter-primary-color);
+}
+
+body.dark-mode .empty-state-content .refresh-button {
+    background-color: #333;
+    border: 1px solid var(--dark-border-color);
+}
+
+body.dark-mode .empty-state-content .refresh-button:hover {
+    border-color: var(--highlighter-primary-color);
+    background-color: #444;
 }
