@@ -946,7 +946,7 @@
         }
 
         static getSanitizedHtmlFromRange(range) {
-            const allowedTags = ['B', 'STRONG', 'I', 'EM'];
+            const allowedTags = ['B', 'STRONG', 'I', 'EM', 'P', 'BR'];
             const content = range.cloneContents();
             const tempDiv = document.createElement('div');
             tempDiv.appendChild(content);
@@ -955,7 +955,7 @@
             
             for (let i = allElements.length - 1; i >= 0; i--) {
                 const el = allElements[i];
-                if (allowedTags.includes(el.tagName)) {
+                if (allowedTags.includes(el.tagName.toUpperCase())) {
                     while (el.attributes.length > 0) {
                         el.removeAttribute(el.attributes[0].name);
                     }
@@ -964,10 +964,17 @@
                     while (el.firstChild) {
                         parent.insertBefore(el.firstChild, el);
                     }
-                    parent.removeChild(el);
+                    if (parent) parent.removeChild(el);
                 }
             }
-            return tempDiv.innerHTML;
+            
+            let html = tempDiv.innerHTML;
+            // Replace P tags with double line breaks and clean up
+            html = html.replace(/<p>/gi, '').replace(/<\/p>/gi, '<br><br>');
+            html = html.replace(/(<br\s*\/?>\s*){3,}/gi, '<br><br>');
+            html = html.replace(/^(\s*<br\s*\/?>\s*)+|(\s*<br\s*\/?>\s*)+$/g, '');
+            
+            return html;
         }
 
         static trimRange(range) {

@@ -117,6 +117,7 @@ body:not(.locked) #resize-handle {
     flex-direction: column;
     margin-left: 5px; /* Make space for the handle */
     position: relative;
+    transition: all 0.2s ease;
 }
 
 .header {

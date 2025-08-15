@@ -426,5 +426,9 @@
   "highlightSavedLocally": {
     "message": "高亮已本地保存（超过8KB同步限制）",
     "description": "Toast message when a highlight is too large to sync."
+  },
+  "sidebarDarkModeLabel": {
+    "message": "侧边栏深色模式",
+    "description": "Label for the sidebar dark mode switch."
   }
 }

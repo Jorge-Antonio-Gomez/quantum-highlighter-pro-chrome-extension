@@ -426,5 +426,9 @@
   "highlightSavedLocally": {
     "message": "Resaltado guardado localmente (excede el límite de 8KB para sincronización)",
     "description": "Toast message when a highlight is too large to sync."
+  },
+  "sidebarDarkModeLabel": {
+    "message": "Modo Oscuro de la Barra Lateral",
+    "description": "Label for the sidebar dark mode switch."
   }
 }

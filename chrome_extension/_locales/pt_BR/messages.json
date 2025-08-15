@@ -422,5 +422,9 @@
   "customAmountTextMonthly": {
     "message": "Você pode escolher qualquer valor para doar mensalmente.",
     "description": "Text for the custom amount in the monthly subscription card."
+  },
+  "sidebarDarkModeLabel": {
+    "message": "Modo Escuro da Barra Lateral",
+    "description": "Label for the sidebar dark mode switch."
   }
 }

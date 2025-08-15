@@ -422,5 +422,9 @@
   "customAmountTextMonthly": {
     "message": "Вы можете выбрать любую сумму для ежемесячного пожертвования.",
     "description": "Text for the custom amount in the monthly subscription card."
+  },
+  "sidebarDarkModeLabel": {
+    "message": "Темный режим боковой панели",
+    "description": "Label for the sidebar dark mode switch."
   }
 }

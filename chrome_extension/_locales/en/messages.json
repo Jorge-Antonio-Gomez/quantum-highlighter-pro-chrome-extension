@@ -105,5 +105,6 @@
   "ctaTip": { "message": "<strong>Tip:</strong> You can open the sidebar at any time using the keyboard shortcut (<strong>Ctrl + Shift + H</strong> by default) or from the extension icon.", "description": "Tip for the call to action section." },
   "customAmountText": { "message": "Or choose any other amount. Thank you!", "description": "Text for the custom amount in the donation card." },
   "customAmountTextMonthly": { "message": "You can choose any amount to donate monthly.", "description": "Text for the custom amount in the monthly subscription card." },
-  "highlightSavedLocally": { "message": "Highlight saved locally (exceeds 8KB sync limit)", "description": "Toast message when a highlight is too large to sync." }
+  "highlightSavedLocally": { "message": "Highlight saved locally (exceeds 8KB sync limit)", "description": "Toast message when a highlight is too large to sync." },
+  "sidebarDarkModeLabel": { "message": "Sidebar Dark Mode", "description": "Label for the sidebar dark mode switch." }
 }
