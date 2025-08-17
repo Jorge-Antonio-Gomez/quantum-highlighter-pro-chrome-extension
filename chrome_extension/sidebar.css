@@ -133,9 +133,9 @@ body:not(.locked) #resize-handle {
     flex-direction: column;
     align-items: stretch;
     border-bottom: 1px solid var(--highlighter-border-color);
-    padding-bottom: 24px;
+    padding-bottom: 12px;
     margin-bottom: 12px;
-    gap: 24px; /* Add gap between top row and card */
+    gap: 16px; /* Add gap between top row and card */
 }
 
 .header-top-row {
@@ -169,7 +169,7 @@ body:not(.locked) #resize-handle {
 .header-controls {
     display: flex;
     gap: 8px;
-    height: 100%;
+    /* height: 100%; */
 }
 
 .website-info-card {
