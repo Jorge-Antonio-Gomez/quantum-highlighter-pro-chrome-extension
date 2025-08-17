@@ -426,5 +426,13 @@
   "sidebarDarkModeLabel": {
     "message": "Mode Sombre de la Barre Latérale",
     "description": "Label for the sidebar dark mode switch."
+  },
+  "forceSolidHighlightsLabel": {
+    "message": "Forcer les surlignages solides",
+    "description": "Label for the force solid highlights switch."
+  },
+  "forceSolidHighlightsTooltip": {
+    "message": "Si activé, les surlignages auront toujours une couleur unie, ce qui améliore la visibilité par contraste. Si désactivé, la couleur s'adaptera en fonction de l'arrière-plan de la page.",
+    "description": "Tooltip for the force solid highlights switch."
   }
 }

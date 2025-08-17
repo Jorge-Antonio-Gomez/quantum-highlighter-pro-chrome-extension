@@ -426,5 +426,13 @@
   "sidebarDarkModeLabel": {
     "message": "Modo Escuro da Barra Lateral",
     "description": "Label for the sidebar dark mode switch."
+  },
+  "forceSolidHighlightsLabel": {
+    "message": "Forçar destaques sólidos",
+    "description": "Label for the force solid highlights switch."
+  },
+  "forceSolidHighlightsTooltip": {
+    "message": "Se ativado, os destaques sempre terão uma cor sólida, o que melhora a visibilidade pelo contraste. Se desativado, a cor se adaptará com base no plano de fundo da página.",
+    "description": "Tooltip for the force solid highlights switch."
   }
 }

@@ -426,5 +426,13 @@
   "sidebarDarkModeLabel": {
     "message": "Темный режим боковой панели",
     "description": "Label for the sidebar dark mode switch."
+  },
+  "forceSolidHighlightsLabel": {
+    "message": "Принудительно сплошные выделения",
+    "description": "Label for the force solid highlights switch."
+  },
+  "forceSolidHighlightsTooltip": {
+    "message": "Если включено, выделения всегда будут иметь сплошной цвет, что улучшает видимость за счет контраста. Если отключено, цвет будет адаптироваться в зависимости от фона страницы.",
+    "description": "Tooltip for the force solid highlights switch."
   }
 }

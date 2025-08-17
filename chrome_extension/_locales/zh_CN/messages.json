@@ -430,5 +430,13 @@
   "sidebarDarkModeLabel": {
     "message": "侧边栏深色模式",
     "description": "Label for the sidebar dark mode switch."
+  },
+  "forceSolidHighlightsLabel": {
+    "message": "强制纯色高亮",
+    "description": "Label for the force solid highlights switch."
+  },
+  "forceSolidHighlightsTooltip": {
+    "message": "如果启用，高光将始终具有纯色，从而通过对比度提高可见性。如果禁用，颜色将根据页面的背景进行调整。",
+    "description": "Tooltip for the force solid highlights switch."
   }
 }
