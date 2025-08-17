@@ -728,11 +728,7 @@ body:not(.locked) #resize-handle {
     font-size: 14px;
 }
 
-.label-with-tooltip {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
+
 
 .info-icon {
     display: inline-block;

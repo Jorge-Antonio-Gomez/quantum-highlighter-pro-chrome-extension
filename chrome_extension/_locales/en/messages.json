@@ -106,5 +106,10 @@
   "customAmountText": { "message": "Or choose any other amount. Thank you!", "description": "Text for the custom amount in the donation card." },
   "customAmountTextMonthly": { "message": "You can choose any amount to donate monthly.", "description": "Text for the custom amount in the monthly subscription card." },
   "highlightSavedLocally": { "message": "Highlight saved locally (exceeds 8KB sync limit)", "description": "Toast message when a highlight is too large to sync." },
-  "sidebarDarkModeLabel": { "message": "Sidebar Dark Mode", "description": "Label for the sidebar dark mode switch." }
+  "sidebarDarkModeLabel": { "message": "Sidebar Dark Mode", "description": "Label for the sidebar dark mode switch." },
+  "forceSolidHighlightsLabel": { "message": "Force solid highlights", "description": "Label for the force solid highlights switch." },
+  "forceSolidHighlightsTooltip": {
+    "message": "If enabled, highlights will always have a solid color, which improves visibility by contrast. If disabled, the color will adapt based on the page's background.",
+    "description": "Tooltip for the force solid highlights switch."
+  }
 }

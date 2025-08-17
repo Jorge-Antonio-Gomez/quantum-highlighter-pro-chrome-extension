@@ -9,14 +9,14 @@
     --highlighter-color-orange: #F9C9A1e5;
     --highlighter-color-grey: #D8D8D8e5;
 
-    --highlighter-color-text-yellow: #3b3617;
-    --highlighter-color-text-red: #572a2a;
+    --highlighter-color-text-yellow: #2b260c;
+    --highlighter-color-text-red: #351212;
     --highlighter-color-text-green: #1d2a1f;
-    --highlighter-color-text-blue: #163f5a;
-    --highlighter-color-text-purple: #3b225f;
+    --highlighter-color-text-blue: #0c293b;
+    --highlighter-color-text-purple: #2c1749;
     --highlighter-color-text-pink: #50153c;
-    --highlighter-color-text-orange: #3c2a1d;
-    --highlighter-color-text-grey: #494949;
+    --highlighter-color-text-orange: #362112;
+    --highlighter-color-text-grey: #1b1b1b;
     --highlighter-color-text-link: #023fbb;
 
     --highlighter-color-yellow-solid: #ffd400;
@@ -34,6 +34,7 @@
     cursor: pointer;
     transition: all 0.15s ease-in-out;
     background-color: transparent; /* The actual color is applied inline via JS */
+    font: inherit;
 }
 
 .highlighter-mark:hover {

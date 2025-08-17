@@ -831,11 +831,26 @@
             }
         }
         static applyAnnotationStyle(element, annotation, nodeContext) {
-            const settings = window.highlighterInstance ? window.highlighterInstance.settings : { useDarkText: false };
+            const settings = window.highlighterInstance ? window.highlighterInstance.settings : { useDarkText: false, forceSolidHighlights: false };
 
             if (annotation.type === 'highlight') {
-                const colorWithOpacity = annotation.color.startsWith('#') ? `${annotation.color}80` : annotation.color;
-                element.style.backgroundColor = colorWithOpacity;
+                const bodyBackgroundColor = window.getComputedStyle(document.body).backgroundColor;
+                const isBodyLight = DOMManager.isColorLight(bodyBackgroundColor);
+
+                let highlightColor;
+
+                if (settings.forceSolidHighlights) {
+                    highlightColor = annotation.color.startsWith('#') ? annotation.color : annotation.color.replace(')', '-solid)');
+                } else {
+                    if (isBodyLight) {
+                        // Light background, use normal semi-transparent color
+                        highlightColor = annotation.color.startsWith('#') ? `${annotation.color}80` : annotation.color;
+                    } else {
+                        // Dark background, use solid color
+                        highlightColor = annotation.color.startsWith('#') ? annotation.color : annotation.color.replace(')', '-solid)');
+                    }
+                }
+                element.style.backgroundColor = highlightColor;
                 element.style.borderBottom = 'none';
             } else { // underline
                 const solidColor = annotation.color.replace(')', '-solid)');
@@ -880,7 +895,8 @@
                     element.style.color = 'inherit';
                 } else if (annotation.type === 'highlight') {
                     const bodyColor = window.getComputedStyle(document.body).color;
-                    element.style.color = DOMManager.isColorLight(bodyColor) ? '#1a1a1a' : 'inherit';
+                    // element.style.color = DOMManager.isColorLight(bodyColor) ? '#1a1a1a' : 'inherit';
+                    element.style.color = DOMManager.isColorLight(bodyColor) ? 'inherit' : 'inherit';
                 } else {
                     element.style.color = 'inherit';
                 }
@@ -938,11 +954,20 @@
         }
         static isColorLight(colorString) {
             try {
-                const match = colorString.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
-                if (!match) return false;
+                // Assume light background for transparent or invalid colors
+                if (!colorString || colorString === 'transparent') return true;
+
+                const match = colorString.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+                if (!match) return true;
+
+                // If alpha is 0, it's transparent, so treat as light.
+                if (match[4] && parseFloat(match[4]) === 0) {
+                    return true;
+                }
+
                 const [, r, g, b] = match.map(Number);
                 return ((r * 299) + (g * 587) + (b * 114)) / 1000 > 155;
-            } catch (e) { return false; }
+            } catch (e) { return true; } // Default to light on any error
         }
 
         static getSanitizedHtmlFromRange(range) {
@@ -2273,6 +2298,26 @@
                 });
                 this.titleObserver.observe(titleElement, { childList: true });
             }
+
+            // For detecting theme changes (light/dark mode)
+            this.lastBodyBg = window.getComputedStyle(document.body).backgroundColor;
+            this.themeObserver = new MutationObserver(() => {
+                const newBodyBg = window.getComputedStyle(document.body).backgroundColor;
+                if (newBodyBg !== this.lastBodyBg) {
+                    const wasLight = DOMManager.isColorLight(this.lastBodyBg);
+                    const isLight = DOMManager.isColorLight(newBodyBg);
+            
+                    if (wasLight !== isLight) {
+                        this._reapplyAllAnnotationStyles();
+                    }
+            
+                    this.lastBodyBg = newBodyBg;
+                }
+            });
+            this.themeObserver.observe(document.documentElement, {
+                attributes: true,
+                attributeFilter: ['style', 'class']
+            });
         }
 
         hideTemporarily() {

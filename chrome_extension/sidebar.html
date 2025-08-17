@@ -118,14 +118,24 @@
             </label>
         </div>
         <div class="config-section">
-            <div class="label-with-tooltip">
-                <label data-i18n-key="forceBlackColorLabel">Force black text on highlights</label>
+            <label data-i18n-key="forceBlackColorLabel">Force black text on highlights</label>
+            <div class="switch-container">
                 <span class="info-icon" data-tooltip-key="forceBlackColorTooltip">?</span>
+                <label class="switch">
+                    <input type="checkbox" id="force-black-switch">
+                    <span class="slider"></span>
+                </label>
             </div>
-            <label class="switch">
-                <input type="checkbox" id="force-black-switch">
-                <span class="slider"></span>
-            </label>
+        </div>
+        <div class="config-section">
+            <label data-i18n-key="forceSolidHighlightsLabel">Forzar resaltados sólidos</label>
+            <div class="switch-container">
+                <span class="info-icon" data-tooltip-key="forceSolidHighlightsTooltip">?</span>
+                <label class="switch">
+                    <input type="checkbox" id="force-solid-switch">
+                    <span class="slider"></span>
+                </label>
+            </div>
         </div>
         <div class="config-section">
             <label data-i18n-key="sidebarDarkModeLabel">Sidebar Dark Mode</label>

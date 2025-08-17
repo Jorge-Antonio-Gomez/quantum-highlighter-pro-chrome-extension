@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeButton = document.getElementById('close-button');
     const annotationsList = document.getElementById('annotations-list');
     const forceBlackSwitch = document.getElementById('force-black-switch');
+    const forceSolidSwitch = document.getElementById('force-solid-switch');
     const disablePageSwitch = document.getElementById('disable-page-switch');
     const disableDomainSwitch = document.getElementById('disable-domain-switch');
     const sidebarDarkModeSwitch = document.getElementById('sidebar-dark-mode-switch');
@@ -29,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let settings = {
         useDarkText: false,
         sidebarDarkMode: false,
+        forceSolidHighlights: false,
     };
 
     // --- FLOATING UI ---
@@ -469,6 +471,11 @@ document.addEventListener('DOMContentLoaded', () => {
         saveSettings();
     });
 
+    forceSolidSwitch.addEventListener('change', () => {
+        settings.forceSolidHighlights = forceSolidSwitch.checked;
+        saveSettings();
+    });
+
     sidebarDarkModeSwitch.addEventListener('change', () => {
         settings.sidebarDarkMode = sidebarDarkModeSwitch.checked;
         applyDarkMode();
@@ -522,6 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
         disablePageSwitch.disabled = true;
         disableDomainSwitch.disabled = true;
         forceBlackSwitch.disabled = true;
+        forceSolidSwitch.disabled = true;
         sidebarDarkModeSwitch.disabled = true;
 
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -543,11 +551,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const defaultSettings = {
                     useDarkText: false,
-                    sidebarDarkMode: false
+                    sidebarDarkMode: false,
+                    forceSolidHighlights: false,
                 };
                 settings = { ...defaultSettings, ...data['highlighter-settings'] };
                 
                 forceBlackSwitch.checked = settings.useDarkText;
+                forceSolidSwitch.checked = settings.forceSolidHighlights;
                 sidebarDarkModeSwitch.checked = settings.sidebarDarkMode;
                 updateAnnotationTextStyles();
                 applyDarkMode();
@@ -556,6 +566,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 configButton.disabled = false;
                 forceBlackSwitch.disabled = false;
+                forceSolidSwitch.disabled = false;
                 sidebarDarkModeSwitch.disabled = false;
             });
         });
@@ -565,6 +576,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const infoIcon = document.querySelector('.info-icon[data-tooltip-key="forceBlackColorTooltip"]');
     if (infoIcon) {
         setupTooltip(infoIcon, 'forceBlackColorTooltip');
+    }
+
+    // Tooltip for force solid highlights switch
+    const solidInfoIcon = document.querySelector('.info-icon[data-tooltip-key="forceSolidHighlightsTooltip"]');
+    if (solidInfoIcon) {
+        setupTooltip(solidInfoIcon, 'forceSolidHighlightsTooltip');
     }
 
     initialize();
