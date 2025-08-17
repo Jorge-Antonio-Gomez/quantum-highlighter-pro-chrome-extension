@@ -436,7 +436,7 @@
     "description": "Label for the force solid highlights switch."
   },
   "forceSolidHighlightsTooltip": {
-    "message": "Si se activa, los resaltados siempre tenrán un color sólido, que mejora la visibilidad por contraste. Si se desactiva, el color se adaptará en función del fondo de la página.",
+    "message": "Si se activa, los resaltados siempre tendrán un color sólido, que mejora la visibilidad por contraste. Si se desactiva, el color se adaptará en función del fondo de la página.",
     "description": "Tooltip for the force solid highlights switch."
   }
 }
