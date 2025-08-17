@@ -133,9 +133,9 @@ body:not(.locked) #resize-handle {
     flex-direction: column;
     align-items: stretch;
     border-bottom: 1px solid var(--highlighter-border-color);
-    padding-bottom: 12px;
+    padding-bottom: 24px;
     margin-bottom: 12px;
-    gap: 36px; /* Add gap between top row and card */
+    gap: 24px; /* Add gap between top row and card */
 }
 
 .header-top-row {
@@ -160,6 +160,7 @@ body:not(.locked) #resize-handle {
     font-size: 12px;
     color: var(--highlighter-text-color-secondary);
     margin: 0;
+    margin-top: 4px;
     font-weight: 400;
     opacity: 0.8;
     text-align: left;
@@ -167,8 +168,8 @@ body:not(.locked) #resize-handle {
 
 .header-controls {
     display: flex;
-    align-items: center;
     gap: 8px;
+    height: 100%;
 }
 
 .website-info-card {
@@ -757,6 +758,7 @@ body:not(.locked) #resize-handle {
     font-weight: bold;
     cursor: help;
     margin-right: 5px;
+    transition: background-color 0.2s, color 0.2s;
 }
 
 .tooltip {
@@ -803,6 +805,7 @@ body:not(.locked) #resize-handle {
     background-color: #ccc;
     transition: .4s;
     border-radius: 24px;
+    transition: background-color 0.2s;
 }
 
 .slider:before {
@@ -1215,4 +1218,17 @@ body.dark-mode .empty-state-content .refresh-button {
 body.dark-mode .empty-state-content .refresh-button:hover {
     border-color: var(--highlighter-primary-color);
     background-color: #444;
+}
+
+body.dark-mode .info-icon {
+    background-color: #555;
+    color: #1a1a1a;
+}
+
+body.dark-mode .slider {
+    background-color: #555;
+}
+
+body.dark-mode input:checked + .slider {
+    background-color: var(--highlighter-primary-color);
 }
