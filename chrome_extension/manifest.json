@@ -25,7 +25,7 @@
                 "libs/floating-ui-core.js",
                 "libs/floating-ui-dom.umd.js",
                 "libs/tiptap.js",
-                
+                "storage-backend.js",
                 "script.js"
             ],
             "css": [
@@ -41,6 +41,7 @@
                 "sidebar.html",
                 "sidebar.css",
                 "sidebar.js",
+                "storage-backend.js",
                 "style.css",
                 "highlights.css",
                 "libs/tiptap.js",

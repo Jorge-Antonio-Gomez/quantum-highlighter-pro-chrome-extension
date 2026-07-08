@@ -86,3 +86,6 @@ build/
 *.zip
 chrome_extension.crx
 chrome_extension.zip
+*.pem
+*/.claude/
+.claude/
