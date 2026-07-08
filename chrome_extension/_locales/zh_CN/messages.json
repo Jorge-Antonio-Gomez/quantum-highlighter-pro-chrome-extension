@@ -31,6 +31,10 @@
     "message": "未在此页面找到该高亮",
     "description": "Toast shown when clicking an annotation whose highlight could not be located on the page."
   },
+  "copyAnnotationText": {
+    "message": "复制文本",
+    "description": "Tooltip for the button that copies the annotation text to the clipboard."
+  },
   "deleteAnnotation": {
     "message": "删除注释",
     "description": "Tooltip for the delete annotation button."

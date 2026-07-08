@@ -1029,6 +1029,10 @@
     // `QHP.SyncAnnotationsBackend`. La fachada `QHP.createAnnotationsBackend()`
     // devuelve el backend activo (sync hoy, Drive en Fase 2).
 
+    // Icono de portapapeles (images/toolbar-icons/clipboard.svg) inline para
+    // que el trazo herede `currentColor` del botón.
+    const CLIPBOARD_ICON_SVG = `<svg class="copy-icon" viewBox="0 0 517 650" xmlns="http://www.w3.org/2000/svg"><path d="M509.333 191.667L325 7.33333C320.317 2.64367 313.96 0.006 307.333 0H225C200.69 0 177.373 9.65766 160.182 26.8487C142.991 44.0393 133.333 67.355 133.333 91.6667V133.333H91.6667C67.355 133.333 44.0393 142.991 26.8487 160.182C9.65766 177.373 0 200.688 0 225V558.333C0 582.643 9.65766 605.96 26.8487 623.15C44.0393 640.343 67.355 650 91.6667 650H325C349.31 650 372.627 640.343 389.817 623.15C407.01 605.96 416.667 582.643 416.667 558.333V516.667H425C449.31 516.667 472.627 507.01 489.817 489.817C507.01 472.627 516.667 449.31 516.667 425V208.333C516.403 202.053 513.787 196.103 509.333 191.667ZM333.333 85.3333L431.333 183.333H333.333V85.3333ZM366.667 558.333C366.667 569.383 362.277 579.983 354.463 587.797C346.65 595.61 336.05 600 325 600H91.6667C80.616 600 70.018 595.61 62.204 587.797C54.39 579.983 50 569.383 50 558.333V225C50 213.949 54.39 203.351 62.204 195.537C70.018 187.723 80.616 183.333 91.6667 183.333H133.333V425C133.333 449.31 142.991 472.627 160.182 489.817C177.373 507.01 200.69 516.667 225 516.667H366.667V558.333ZM425 466.667H225C213.95 466.667 203.35 462.277 195.537 454.463C187.723 446.65 183.333 436.05 183.333 425V91.6667C183.333 80.616 187.723 70.018 195.537 62.204C203.35 54.39 213.95 50 225 50H283.333V208.333C283.42 214.937 286.08 221.246 290.75 225.916C295.42 230.585 301.73 233.247 308.333 233.333H466.667V425C466.667 436.05 462.277 446.65 454.463 454.463C446.65 462.277 436.05 466.667 425 466.667Z"/></svg>`;
+
     class HighlightMenu {
         constructor() {
             this.host = document.createElement('div');
@@ -1800,6 +1804,7 @@
                         button.parentElement.querySelectorAll('.highlighter-type-selector').forEach(btn => btn.classList.remove('active'));
                         button.classList.add('active');
                     },
+                    copyText: (value, button) => this._copyAnnotationText(null, button),
                 },
                 buttons: {
                     colors: Object.entries(this.colors).map(([name, color]) => ({
@@ -1807,7 +1812,8 @@
                     })),
                     types: [
                         { action: 'setType', value: 'highlight', label: chrome.i18n.getMessage('highlight'), content: 'A', className: `highlighter-type-selector ${this.currentAnnotationType === 'highlight' ? 'active' : ''}` },
-                        { action: 'setType', value: 'underline', label: chrome.i18n.getMessage('underline'), content: '<span class="underline">A</span>', className: `highlighter-type-selector ${this.currentAnnotationType === 'underline' ? 'active' : ''}` }
+                        { action: 'setType', value: 'underline', label: chrome.i18n.getMessage('underline'), content: '<span class="underline">A</span>', className: `highlighter-type-selector ${this.currentAnnotationType === 'underline' ? 'active' : ''}` },
+                        { action: 'copyText', label: chrome.i18n.getMessage('copyAnnotationText'), content: CLIPBOARD_ICON_SVG, className: 'highlighter-copy-btn' }
                     ]
                 }
             });
@@ -1856,6 +1862,7 @@
                 callbacks: {
                     changeColor: (color) => this.updateAnnotation({ color }),
                     changeType: (type) => this.updateAnnotation({ type }),
+                    copyText: (value, button) => this._copyAnnotationText(this.activeAnnotationId, button),
                     delete: () => this.deleteAnnotation(),
                     onCommentMousedown: () => {
                         this.isDraggingInCommentBox = true;
@@ -1885,7 +1892,8 @@
                     })),
                     types: [
                         { action: 'changeType', value: 'highlight', label: chrome.i18n.getMessage('highlight'), content: 'A', className: `highlighter-type-selector ${annotation.type === 'highlight' ? 'active' : ''}` },
-                        { action: 'changeType', value: 'underline', label: chrome.i18n.getMessage('underline'), content: '<span class="underline">A</span>', className: `highlighter-type-selector ${annotation.type === 'underline' ? 'active' : ''}` }
+                        { action: 'changeType', value: 'underline', label: chrome.i18n.getMessage('underline'), content: '<span class="underline">A</span>', className: `highlighter-type-selector ${annotation.type === 'underline' ? 'active' : ''}` },
+                        { action: 'copyText', label: chrome.i18n.getMessage('copyAnnotationText'), content: CLIPBOARD_ICON_SVG, className: 'highlighter-copy-btn' }
                     ],
                     actions: [
                         { action: 'delete', label: chrome.i18n.getMessage('delete'), content: `<svg class="delete-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V6H17H19C19.5523 6 20  6.44772 20 7C20 7.55228 19.5523 8 19 8H18V18C18 19.6569 16.6569 21 15 21H9C7.34315 21 6 19.6569 6 18V8H5C4.44772 8 4 7.55228 4 7C4 6.44772 4.44772 6 5 6H7H9V5ZM10 8H8V18C8 18.5523 8.44772 19 9 19H15C15.5523 19 16 18.5523 16 18V8H14H10ZM13 6H11V5H13V6Z"/></svg><span>${chrome.i18n.getMessage('delete')}</span>`, className: 'highlighter-delete-btn' }
@@ -2390,6 +2398,65 @@
                     console.warn("Highlighter: Could not send update to sidebar.", e);
                 }
             });
+        }
+
+        /**
+         * Texto plano de la anotación para el portapapeles: en su HTML
+         * sanitizado los límites de bloque ya son <br>, que aquí se vuelven
+         * saltos de línea.
+         */
+        _annotationPlainText(annotation) {
+            const doc = new DOMParser().parseFromString(annotation.text || '', 'text/html');
+            doc.body.querySelectorAll('br').forEach(br => br.replaceWith('\n'));
+            return doc.body.textContent || '';
+        }
+
+        /**
+         * Copia al portapapeles el texto de la anotación (menú contextual) o
+         * de la selección activa (menú de creación, `annotationId` null).
+         */
+        _copyAnnotationText(annotationId, button) {
+            let text = '';
+            if (annotationId) {
+                const annotation = this.annotations.get(annotationId);
+                if (annotation) text = this._annotationPlainText(annotation);
+            } else if (this.activeRange) {
+                text = this.activeRange.toString();
+            }
+            if (!text) return;
+
+            const showFeedback = () => {
+                if (!button) return;
+                button.classList.add('copied');
+                setTimeout(() => button.classList.remove('copied'), 900);
+            };
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text)
+                    .then(showFeedback)
+                    .catch(() => { this._execCommandCopy(text); showFeedback(); });
+            } else {
+                this._execCommandCopy(text);
+                showFeedback();
+            }
+        }
+
+        /** Fallback de copia; preserva la selección actual de la página. */
+        _execCommandCopy(text) {
+            const selection = window.getSelection();
+            const savedRanges = [];
+            for (let i = 0; i < selection.rangeCount; i++) {
+                savedRanges.push(selection.getRangeAt(i).cloneRange());
+            }
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try { document.execCommand('copy'); } catch (e) { /* portapapeles no disponible */ }
+            textarea.remove();
+            selection.removeAllRanges();
+            savedRanges.forEach(range => selection.addRange(range));
         }
 
         async createAnnotation(color, type) {

@@ -31,6 +31,10 @@
     "message": "Surlignage introuvable sur cette page",
     "description": "Toast shown when clicking an annotation whose highlight could not be located on the page."
   },
+  "copyAnnotationText": {
+    "message": "Copier le texte",
+    "description": "Tooltip for the button that copies the annotation text to the clipboard."
+  },
   "deleteAnnotation": {
     "message": "Supprimer l'annotation",
     "description": "Tooltip for the delete annotation button."

@@ -31,6 +31,10 @@
     "message": "Выделение не найдено на этой странице",
     "description": "Toast shown when clicking an annotation whose highlight could not be located on the page."
   },
+  "copyAnnotationText": {
+    "message": "Копировать текст",
+    "description": "Tooltip for the button that copies the annotation text to the clipboard."
+  },
   "deleteAnnotation": {
     "message": "Удалить аннотацию",
     "description": "Tooltip for the delete annotation button."

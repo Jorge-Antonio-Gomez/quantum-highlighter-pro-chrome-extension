@@ -199,6 +199,32 @@
     text-decoration-thickness: 1.5px;
 }
 
+/* Botón de copiar en la fila de tipos: cuadrado (mismo ancho que alto); el
+   resto del espacio queda para los dos selectores de tipo (flex: 1). */
+.highlighter-copy-btn {
+    flex: 0 0 25px;
+    width: 25px;
+    height: 25px;
+    color: #555; /* mismo color que las letras de resaltado/subrayado */
+    background-color: transparent;
+}
+
+.highlighter-copy-btn .copy-icon {
+    width: 12px;
+    height: 15px;
+    flex-shrink: 0;
+}
+
+.highlighter-copy-btn .copy-icon path {
+    fill: currentColor;
+}
+
+.highlighter-copy-btn:hover,
+.highlighter-copy-btn.copied {
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
 .highlighter-menu .menu-row.actions button.highlighter-delete-btn {
     flex: 1;
     height: 25px;
