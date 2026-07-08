@@ -23,6 +23,14 @@
     "message": "Без комментариев",
     "description": "Placeholder for an empty comment."
   },
+  "annotationOrphanTooltip": {
+    "message": "Выделение не найдено на текущей странице (содержимое могло измениться). Привязка повторяется при каждом посещении.",
+    "description": "Tooltip for an annotation whose highlight could not be located on the page."
+  },
+  "annotationOrphanToast": {
+    "message": "Выделение не найдено на этой странице",
+    "description": "Toast shown when clicking an annotation whose highlight could not be located on the page."
+  },
   "deleteAnnotation": {
     "message": "Удалить аннотацию",
     "description": "Tooltip for the delete annotation button."

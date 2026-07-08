@@ -5,6 +5,8 @@
   "noAnnotationsTitle": { "message": "No Annotations Yet", "description": "Title when no annotations are present." },
   "noAnnotations": { "message": "Highlight text on the page to get started!", "description": "Helper text when no annotations are present." },
   "noComment": { "message": "No comment", "description": "Placeholder for an empty comment." },
+  "annotationOrphanTooltip": { "message": "Highlight not found on the current page (the content may have changed). Anchoring is retried on every visit.", "description": "Tooltip for an annotation whose highlight could not be located on the page." },
+  "annotationOrphanToast": { "message": "Highlight not found on this page", "description": "Toast shown when clicking an annotation whose highlight could not be located on the page." },
   "deleteAnnotation": { "message": "Delete Annotation", "description": "Tooltip for the delete annotation button." },
   "lockSidebarWidth": { "message": "Lock Sidebar Width", "description": "Tooltip for the lock sidebar button." },
   "unlockSidebarWidth": { "message": "Unlock Sidebar Width", "description": "Tooltip for the unlock sidebar button." },

@@ -23,6 +23,14 @@
     "message": "Sem comentário",
     "description": "Placeholder for an empty comment."
   },
+  "annotationOrphanTooltip": {
+    "message": "O destaque não foi encontrado na página atual (o conteúdo pode ter mudado). A ancoragem é tentada novamente a cada visita.",
+    "description": "Tooltip for an annotation whose highlight could not be located on the page."
+  },
+  "annotationOrphanToast": {
+    "message": "Destaque não encontrado nesta página",
+    "description": "Toast shown when clicking an annotation whose highlight could not be located on the page."
+  },
   "deleteAnnotation": {
     "message": "Excluir anotação",
     "description": "Tooltip for the delete annotation button."

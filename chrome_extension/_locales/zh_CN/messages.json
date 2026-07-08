@@ -23,6 +23,14 @@
     "message": "无评论",
     "description": "Placeholder for an empty comment."
   },
+  "annotationOrphanTooltip": {
+    "message": "未在当前页面找到该高亮（页面内容可能已更改）。每次访问时都会重新尝试定位。",
+    "description": "Tooltip for an annotation whose highlight could not be located on the page."
+  },
+  "annotationOrphanToast": {
+    "message": "未在此页面找到该高亮",
+    "description": "Toast shown when clicking an annotation whose highlight could not be located on the page."
+  },
   "deleteAnnotation": {
     "message": "删除注释",
     "description": "Tooltip for the delete annotation button."

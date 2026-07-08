@@ -384,6 +384,27 @@ body:not(.locked) #resize-handle {
     box-shadow: 0 0 0 1px var(--highlighter-primary-color);
 }
 
+/* Anotación huérfana: su resaltado no se encontró en la página actual.
+   Se conserva (texto y comentario siguen disponibles) y el anclaje se
+   reintenta automáticamente en cada visita. */
+.annotation-card.orphaned {
+    opacity: 0.55;
+}
+
+.annotation-card.orphaned .main-content {
+    cursor: default;
+}
+
+.annotation-card.orphaned .annotation-color-bar {
+    /* Barra discontinua: los huecos usan el color de superficie, por lo que
+       funciona igual en modo claro y oscuro. */
+    background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0 5px,
+        var(--highlighter-surface-color) 5px 9px
+    );
+}
+
 .annotation-card.newly-added {
     animation: slideIn 0.25s ease forwards;
 }

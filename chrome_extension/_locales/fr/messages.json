@@ -23,6 +23,14 @@
     "message": "Aucun commentaire",
     "description": "Placeholder for an empty comment."
   },
+  "annotationOrphanTooltip": {
+    "message": "Surlignage introuvable sur la page actuelle (le contenu a peut-être changé). L'ancrage est retenté à chaque visite.",
+    "description": "Tooltip for an annotation whose highlight could not be located on the page."
+  },
+  "annotationOrphanToast": {
+    "message": "Surlignage introuvable sur cette page",
+    "description": "Toast shown when clicking an annotation whose highlight could not be located on the page."
+  },
   "deleteAnnotation": {
     "message": "Supprimer l'annotation",
     "description": "Tooltip for the delete annotation button."

@@ -2354,9 +2354,11 @@
                 const elA = document.querySelector(`[data-annotation-id='${a.id}']`);
                 const elB = document.querySelector(`[data-annotation-id='${b.id}']`);
 
-                if (!elA || !elB) {
-                    return 0; 
-                }
+                // Las anotaciones sin mark en la página (huérfanas) van al
+                // final, con orden estable entre ellas.
+                if (!elA && !elB) return 0;
+                if (!elA) return 1;
+                if (!elB) return -1;
 
                 const position = elA.compareDocumentPosition(elB);
 
@@ -2369,8 +2371,13 @@
                     return 0;
                 }
             });
-            
-            const sortedEntries = annotationsArray.map(annotation => [annotation.id, annotation]);
+
+            // `orphaned` es estado de runtime: viaja al sidebar en una copia,
+            // nunca se persiste en la anotación.
+            const sortedEntries = annotationsArray.map(annotation => [
+                annotation.id,
+                { ...annotation, orphaned: this._orphanedIds.has(annotation.id) },
+            ]);
 
             chrome.runtime.sendMessage({
                 action: 'annotationsUpdated',

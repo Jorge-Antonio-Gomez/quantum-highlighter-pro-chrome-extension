@@ -247,6 +247,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     colorBar.style.backgroundColor = annotation.color;
                 }
                 node.dataset.comment = annotation.comment || '';
+                node.classList.toggle('orphaned', !!annotation.orphaned);
+                node.title = annotation.orphaned ? chrome.i18n.getMessage('annotationOrphanTooltip') : '';
             } else {
                 // If the node doesn't exist, create it.
                 node = createAnnotationCard(id, annotation);
@@ -273,6 +275,10 @@ document.addEventListener('DOMContentLoaded', () => {
         card.className = 'annotation-card';
         card.dataset.annotationId = id;
         card.dataset.comment = annotation.comment || '';
+        if (annotation.orphaned) {
+            card.classList.add('orphaned');
+            card.title = chrome.i18n.getMessage('annotationOrphanTooltip');
+        }
 
         const colorBar = document.createElement('div');
         colorBar.className = 'annotation-color-bar';
@@ -306,6 +312,12 @@ document.addEventListener('DOMContentLoaded', () => {
         card.appendChild(actionsContainer);
 
         mainContent.addEventListener('click', () => {
+            // Huérfana: el resaltado no está en la página, no hay a dónde
+            // desplazarse. El anclaje se reintenta solo en cada visita.
+            if (card.classList.contains('orphaned')) {
+                showToast('annotationOrphanToast');
+                return;
+            }
             if (myTabId) {
                 chrome.tabs.sendMessage(myTabId, { action: 'scrollToAnnotation', annotationId: id });
             }
