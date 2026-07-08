@@ -2193,6 +2193,17 @@
                 createdAt: new Date().toISOString()
             };
 
+            // Selectores robustos (cita + posición) para re-anclar aunque la
+            // estructura de la página cambie. Capturados ANTES de wrapRange,
+            // que muta el DOM.
+            const anchoring = globalThis.QHP.anchoring;
+            const selectors = anchoring.rangeToSelectors(range, anchoring.buildTextIndex(document.body));
+            if (selectors) {
+                annotation.schemaVersion = 2;
+                annotation.quote = selectors.quote;
+                annotation.position = selectors.position;
+            }
+
             this.annotations.set(annotation.id, annotation);
             DOMManager.wrapRange(range, annotation);
             window.getSelection()?.removeAllRanges();

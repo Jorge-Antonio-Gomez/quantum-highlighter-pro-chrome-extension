@@ -104,9 +104,32 @@
             const baseAnnotation = { ...annotation };
             delete baseAnnotation.text;
             delete baseAnnotation.comment;
+            delete baseAnnotation.quote;
 
-            const baseStr = JSON.stringify(baseAnnotation);
-            const baseSize = new TextEncoder().encode(baseStr).length;
+            // El contexto de la cita es pequeño y viaja en el chunk principal;
+            // `quote.exact` (potencialmente grande) se derrama como los demás
+            // campos de contenido.
+            let quoteExactToChunk = '';
+            if (annotation.quote && typeof annotation.quote.exact === 'string') {
+                quoteExactToChunk = annotation.quote.exact;
+                baseAnnotation.quote = {
+                    prefix: annotation.quote.prefix || '',
+                    suffix: annotation.quote.suffix || '',
+                };
+            }
+
+            let baseStr = JSON.stringify(baseAnnotation);
+            let baseSize = new TextEncoder().encode(baseStr).length;
+
+            if (baseSize >= this.MAX_CHUNK_SIZE - 300) {
+                // Sin espacio ni para el contenido mínimo: la cita se descarta
+                // (es re-derivable y el anclaje la re-sana en la próxima visita).
+                console.warn(`Highlighter: base annotation too large for chunking (${baseSize}B); dropping quote for ${originalId}.`);
+                delete baseAnnotation.quote;
+                quoteExactToChunk = '';
+                baseStr = JSON.stringify(baseAnnotation);
+                baseSize = new TextEncoder().encode(baseStr).length;
+            }
 
             const availableContentSize = this.MAX_CHUNK_SIZE - baseSize - 150;
 
@@ -128,11 +151,15 @@
 
             mainChunk.comment = commentToChunk.substring(0, remainingSize);
             commentToChunk = commentToChunk.substring(mainChunk.comment.length);
+            remainingSize -= new TextEncoder().encode(mainChunk.comment).length;
+
+            mainChunk.quoteExact = quoteExactToChunk.substring(0, remainingSize);
+            quoteExactToChunk = quoteExactToChunk.substring(mainChunk.quoteExact.length);
 
             chunks.push(mainChunk);
 
             let chunkIndex = 1;
-            while (textToChunk.length > 0 || commentToChunk.length > 0) {
+            while (textToChunk.length > 0 || commentToChunk.length > 0 || quoteExactToChunk.length > 0) {
                 const contentForThisChunk = {};
                 remainingSize = this.MAX_CHUNK_SIZE - 150;
 
@@ -145,6 +172,12 @@
                 if (commentToChunk.length > 0) {
                     contentForThisChunk.comment = commentToChunk.substring(0, remainingSize);
                     commentToChunk = commentToChunk.substring(contentForThisChunk.comment.length);
+                    remainingSize -= new TextEncoder().encode(contentForThisChunk.comment).length;
+                }
+
+                if (quoteExactToChunk.length > 0 && remainingSize > 0) {
+                    contentForThisChunk.quoteExact = quoteExactToChunk.substring(0, remainingSize);
+                    quoteExactToChunk = quoteExactToChunk.substring(contentForThisChunk.quoteExact.length);
                 }
 
                 const secondaryChunk = {
@@ -198,6 +231,21 @@
             }
         }
 
+        /**
+         * Higiene de datos al cargar. Un `quoteExact` suelto en el nivel
+         * superior solo puede venir de un objeto reensamblado y re-guardado
+         * por una versión antigua en otro dispositivo; se descarta junto con
+         * cualquier `quote` sin `exact` utilizable para que la cascada de
+         * anclaje re-derive los selectores y los re-sane.
+         */
+        _sanitizeLoadedAnnotation(annotation) {
+            delete annotation.quoteExact;
+            if (annotation.quote && (typeof annotation.quote.exact !== 'string' || annotation.quote.exact.length === 0)) {
+                delete annotation.quote;
+            }
+            return annotation;
+        }
+
         load(callback) {
             const pageUrl = this.getPageUrl();
 
@@ -218,7 +266,7 @@
                         }
                         chunkMap.get(originalId)[chunkIndex] = item;
                     } else {
-                        annotations.set(item.id, item);
+                        annotations.set(item.id, this._sanitizeLoadedAnnotation(item));
                     }
                 }
 
@@ -231,21 +279,30 @@
                     const mainChunk = chunks[0];
                     let fullText = mainChunk.text || '';
                     let fullComment = mainChunk.comment || '';
+                    let fullQuoteExact = mainChunk.quoteExact || '';
 
                     for (let i = 1; i < chunks.length; i++) {
                         const chunkContent = chunks[i].content;
                         if (chunkContent) {
                             if (chunkContent.text) fullText += chunkContent.text;
                             if (chunkContent.comment) fullComment += chunkContent.comment;
+                            if (chunkContent.quoteExact) fullQuoteExact += chunkContent.quoteExact;
                         }
                     }
 
                     const reassembledAnnotation = { ...mainChunk };
                     delete reassembledAnnotation.chunking;
+                    delete reassembledAnnotation.quoteExact;
                     reassembledAnnotation.text = fullText;
                     reassembledAnnotation.comment = fullComment;
+                    if (fullQuoteExact) {
+                        reassembledAnnotation.quote = {
+                            ...(mainChunk.quote || {}),
+                            exact: fullQuoteExact,
+                        };
+                    }
 
-                    annotations.set(originalId, reassembledAnnotation);
+                    annotations.set(originalId, this._sanitizeLoadedAnnotation(reassembledAnnotation));
                 }
                 return annotations;
             };
