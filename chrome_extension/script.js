@@ -1099,8 +1099,11 @@
         }
 
         configure(config) {
-            const { types, colors, actions } = config.buttons;
-            let typesHTML = types ? `<div class="menu-row types">${this._createButtons(types)}</div>` : '';
+            const { types, colors, actions, copy } = config.buttons;
+            // El grupo de tipos y el botón de copiar comparten línea, pero
+            // cada uno tiene su propio contenedor con fondo gris.
+            const copyHTML = copy ? `<div class="menu-copy-group">${this._createButtons(copy)}</div>` : '';
+            let typesHTML = types ? `<div class="menu-row types-line"><div class="menu-row types">${this._createButtons(types)}</div>${copyHTML}</div>` : '';
             let colorsHTML = colors ? `<div class="menu-row colors">${this._createButtons(colors)}</div>` : '';
             let actionsHTML = actions ? `<div class="menu-row actions">${this._createButtons(actions)}</div>` : '';
             let commentBoxHTML = config.commentBox ? config.commentBox.html : '';
@@ -1812,7 +1815,9 @@
                     })),
                     types: [
                         { action: 'setType', value: 'highlight', label: chrome.i18n.getMessage('highlight'), content: 'A', className: `highlighter-type-selector ${this.currentAnnotationType === 'highlight' ? 'active' : ''}` },
-                        { action: 'setType', value: 'underline', label: chrome.i18n.getMessage('underline'), content: '<span class="underline">A</span>', className: `highlighter-type-selector ${this.currentAnnotationType === 'underline' ? 'active' : ''}` },
+                        { action: 'setType', value: 'underline', label: chrome.i18n.getMessage('underline'), content: '<span class="underline">A</span>', className: `highlighter-type-selector ${this.currentAnnotationType === 'underline' ? 'active' : ''}` }
+                    ],
+                    copy: [
                         { action: 'copyText', label: chrome.i18n.getMessage('copyAnnotationText'), content: CLIPBOARD_ICON_SVG, className: 'highlighter-copy-btn' }
                     ]
                 }
@@ -1892,7 +1897,9 @@
                     })),
                     types: [
                         { action: 'changeType', value: 'highlight', label: chrome.i18n.getMessage('highlight'), content: 'A', className: `highlighter-type-selector ${annotation.type === 'highlight' ? 'active' : ''}` },
-                        { action: 'changeType', value: 'underline', label: chrome.i18n.getMessage('underline'), content: '<span class="underline">A</span>', className: `highlighter-type-selector ${annotation.type === 'underline' ? 'active' : ''}` },
+                        { action: 'changeType', value: 'underline', label: chrome.i18n.getMessage('underline'), content: '<span class="underline">A</span>', className: `highlighter-type-selector ${annotation.type === 'underline' ? 'active' : ''}` }
+                    ],
+                    copy: [
                         { action: 'copyText', label: chrome.i18n.getMessage('copyAnnotationText'), content: CLIPBOARD_ICON_SVG, className: 'highlighter-copy-btn' }
                     ],
                     actions: [

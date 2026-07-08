@@ -145,6 +145,21 @@
 #highlighter-arrow { position: absolute; background: white; width: 8px; height: 8px; transform: rotate(45deg); }
 .highlighter-menu .menu-row { display: flex; gap: 5px; justify-content: center; align-items: center; }
 .highlighter-menu .menu-row.types { background-color: #f0f0f0; padding: 3px; border-radius: 6px; }
+/* Línea que comparte el grupo de tipos (izquierda, ocupa el espacio restante)
+   y el contenedor del botón de copiar (derecha), separados por un hueco. */
+.highlighter-menu .menu-row.types-line { gap: 6px; }
+.highlighter-menu .menu-row.types-line .menu-row.types { flex: 1; }
+.highlighter-menu .menu-copy-group {
+    background-color: #f0f0f0;
+    padding: 3px;
+    border-radius: 6px;
+    flex: 0 0 31px; /* cuadrado: 25px de botón + 3px de padding por lado */
+    width: 31px;
+    height: 31px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 .highlighter-menu button { background: none; border: none; border-radius: 5px; cursor: pointer; transition: var(--highlighter-transition); display: flex; align-items: center; justify-content: center; }
 .highlighter-color-selector {
     width: 22px;
@@ -199,10 +214,8 @@
     text-decoration-thickness: 1.5px;
 }
 
-/* Botón de copiar en la fila de tipos: cuadrado (mismo ancho que alto); el
-   resto del espacio queda para los dos selectores de tipo (flex: 1). */
+/* Botón de copiar, dentro de su propio contenedor gris (.menu-copy-group). */
 .highlighter-copy-btn {
-    flex: 0 0 25px;
     width: 25px;
     height: 25px;
     color: #555; /* mismo color que las letras de resaltado/subrayado */
