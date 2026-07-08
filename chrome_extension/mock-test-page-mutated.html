@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Source Card - Minimalist Adjusted</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Rubik -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Aplicamos la fuente Rubik a todo el cuerpo del documento */
+        body {
+            font-family: 'Rubik', sans-serif;
+        }
+        body > div {
+            background-color: #f1f1f1; /* Fondo gris claro */
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <!--
+        VARIANTE MUTADA de mock-test-page.html para probar el re-anclaje.
+        Servir AMBOS archivos bajo la MISMA URL (p. ej. con un servidor local,
+        intercambiando el contenido) para que `pageUrl` coincida.
+
+        Mutaciones respecto al original:
+        1. Banner nuevo insertado ANTES de la tarjeta (desplaza todo el DOM
+           y los offsets globales) → debe re-anclar por cita/posición.
+        2. Wrapper <section> extra alrededor de la tarjeta (rompe los XPath
+           posicionales) → debe re-anclar por cita.
+        3. El párrafo 2 ahora va ANTES del párrafo 1 (reordenado).
+        4. El párrafo 1 tiene ~10% de palabras editadas → target del
+           re-anclaje DIFUSO.
+        5. La lista pierde el item "Flexibility and Freedom" → un resaltado
+           ahí debe quedar HUÉRFANO (visible en el sidebar, atenuado).
+        6. El item "Rapid Innovation" está duplicado con distinto contexto →
+           prueba de desambiguación por prefix/suffix.
+    -->
+
+    <!-- (1) Banner nuevo que desplaza toda la estructura -->
+    <div class="max-w-3xl w-full mb-4 p-4 bg-amber-100 border border-amber-300 rounded-xl text-amber-800 text-sm">
+        NOTICE: This article was updated. New sections were added and some content was revised by the editorial team.
+    </div>
+
+    <!-- (2) Wrapper extra que rompe los XPath -->
+    <section class="w-full flex justify-center">
+        <div class="max-w-3xl w-full border border-gray-200 rounded-xl shadow-md overflow-hidden">
+            <div class="p-8 md:p-10">
+
+                <!-- Título sobrio -->
+                <h2 class="text-3xl font-bold text-gray-800 mb-1">
+                    The Power of Open Source
+                </h2>
+
+                <!-- Subtítulo -->
+                <p class="text-sm text-gray-500 font-medium">
+                    Collaboration, Transparency, Innovation
+                </p>
+
+                <!-- Separador simple -->
+                <div class="my-6 h-px bg-gray-200"></div>
+
+                <!-- (3) El antiguo párrafo 2 ahora va primero -->
+                <p class="text-gray-600 leading-relaxed">
+                    Furthermore, the open-source model fuels economic growth by lowering barriers to entry for startups and individual developers. It creates a vibrant ecosystem where companies can build upon shared foundations, leading to faster development cycles and a more competitive market. The community aspect also provides invaluable support, mentorship, and a sense of shared purpose for millions of developers worldwide.
+                </p>
+
+                <!-- (4) El antiguo párrafo 1, con ~10% de palabras editadas (target difuso) -->
+                <p class="text-gray-600 leading-relaxed mt-4">
+                    Open source remains the bedrock of contemporary software engineering, fostering a global community driven by cooperation and shared knowledge. It champions transparency, allowing anyone to inspect, modify, and learn from the code. This collective effort not only speeds up innovation and produces more robust, secure software, but it also democratizes technology, making powerful tools accessible to everybody, everywhere, regardless of their background.
+                </p>
+
+                <!-- Lista con viñetas -->
+                <div class="mt-6">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Key Benefits:</h3>
+                    <ul class="list-disc list-inside space-y-2 text-gray-600">
+                        <li><span class="font-medium text-gray-700">Cost-Effective Solutions:</span> Reduces development costs and licensing fees.</li>
+                        <li><span class="font-medium text-gray-700">Enhanced Security &amp; Reliability:</span> Peer-reviewed code leads to more robust software.</li>
+                        <!-- (5) "Flexibility and Freedom" ELIMINADO → huérfana -->
+                        <li><span class="font-medium text-gray-700">Rapid Innovation:</span> Community collaboration accelerates development and feature implementation.</li>
+                    </ul>
+                </div>
+
+                <!-- (6) Frase duplicada con contexto distinto (desambiguación) -->
+                <div class="mt-6">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Editor's note:</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        As we said before about <span class="font-medium text-gray-700">Rapid Innovation:</span> Community collaboration accelerates development and feature implementation. That claim still holds today.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</body>
+</html>
