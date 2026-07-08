@@ -97,6 +97,37 @@
             });
         }
 
+        /**
+         * Bytes UTF-8 de la representación JSON de `str` sin las comillas
+         * envolventes. La cuota por item de chrome.storage.sync se mide sobre
+         * el JSON serializado, así que contar caracteres (o incluso bytes del
+         * texto crudo) subestima strings multibyte o con escapes.
+         */
+        _jsonByteLength(str) {
+            return new TextEncoder().encode(JSON.stringify(str)).length - 2;
+        }
+
+        /**
+         * Divide `str` en { head, rest } de forma que el JSON de `head` no
+         * supere `budgetBytes`. Búsqueda binaria (el tamaño es monótono en la
+         * longitud del prefijo); evita cortar un par sustituto por la mitad.
+         */
+        _splitByJsonBytes(str, budgetBytes) {
+            if (!str) return { head: '', rest: '' };
+            if (budgetBytes <= 0) return { head: '', rest: str };
+            if (this._jsonByteLength(str) <= budgetBytes) return { head: str, rest: '' };
+            let lo = 0;
+            let hi = str.length; // invariante: el prefijo `lo` cabe, `hi` no
+            while (hi - lo > 1) {
+                const mid = (lo + hi) >> 1;
+                if (this._jsonByteLength(str.slice(0, mid)) <= budgetBytes) lo = mid;
+                else hi = mid;
+            }
+            const lastCode = lo > 0 ? str.charCodeAt(lo - 1) : 0;
+            if (lastCode >= 0xD800 && lastCode <= 0xDBFF) lo--;
+            return { head: str.slice(0, lo), rest: str.slice(lo) };
+        }
+
         _createChunks(annotation) {
             const chunks = [];
             const originalId = annotation.id;
@@ -144,17 +175,21 @@
             };
 
             let remainingSize = availableContentSize;
+            let split;
 
-            mainChunk.text = textToChunk.substring(0, remainingSize);
-            textToChunk = textToChunk.substring(mainChunk.text.length);
-            remainingSize -= new TextEncoder().encode(mainChunk.text).length;
+            split = this._splitByJsonBytes(textToChunk, remainingSize);
+            mainChunk.text = split.head;
+            textToChunk = split.rest;
+            remainingSize -= this._jsonByteLength(mainChunk.text);
 
-            mainChunk.comment = commentToChunk.substring(0, remainingSize);
-            commentToChunk = commentToChunk.substring(mainChunk.comment.length);
-            remainingSize -= new TextEncoder().encode(mainChunk.comment).length;
+            split = this._splitByJsonBytes(commentToChunk, remainingSize);
+            mainChunk.comment = split.head;
+            commentToChunk = split.rest;
+            remainingSize -= this._jsonByteLength(mainChunk.comment);
 
-            mainChunk.quoteExact = quoteExactToChunk.substring(0, remainingSize);
-            quoteExactToChunk = quoteExactToChunk.substring(mainChunk.quoteExact.length);
+            split = this._splitByJsonBytes(quoteExactToChunk, remainingSize);
+            mainChunk.quoteExact = split.head;
+            quoteExactToChunk = split.rest;
 
             chunks.push(mainChunk);
 
@@ -164,20 +199,23 @@
                 remainingSize = this.MAX_CHUNK_SIZE - 150;
 
                 if (textToChunk.length > 0) {
-                    contentForThisChunk.text = textToChunk.substring(0, remainingSize);
-                    textToChunk = textToChunk.substring(contentForThisChunk.text.length);
-                    remainingSize -= new TextEncoder().encode(contentForThisChunk.text).length;
+                    split = this._splitByJsonBytes(textToChunk, remainingSize);
+                    contentForThisChunk.text = split.head;
+                    textToChunk = split.rest;
+                    remainingSize -= this._jsonByteLength(contentForThisChunk.text);
                 }
 
-                if (commentToChunk.length > 0) {
-                    contentForThisChunk.comment = commentToChunk.substring(0, remainingSize);
-                    commentToChunk = commentToChunk.substring(contentForThisChunk.comment.length);
-                    remainingSize -= new TextEncoder().encode(contentForThisChunk.comment).length;
+                if (commentToChunk.length > 0 && remainingSize > 0) {
+                    split = this._splitByJsonBytes(commentToChunk, remainingSize);
+                    contentForThisChunk.comment = split.head;
+                    commentToChunk = split.rest;
+                    remainingSize -= this._jsonByteLength(contentForThisChunk.comment);
                 }
 
                 if (quoteExactToChunk.length > 0 && remainingSize > 0) {
-                    contentForThisChunk.quoteExact = quoteExactToChunk.substring(0, remainingSize);
-                    quoteExactToChunk = quoteExactToChunk.substring(contentForThisChunk.quoteExact.length);
+                    split = this._splitByJsonBytes(quoteExactToChunk, remainingSize);
+                    contentForThisChunk.quoteExact = split.head;
+                    quoteExactToChunk = split.rest;
                 }
 
                 const secondaryChunk = {
