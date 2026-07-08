@@ -1041,13 +1041,19 @@
 
             this.shadowRoot = this.host.attachShadow({ mode: 'open' });
 
-            fetch(chrome.runtime.getURL('style.css'))
-                .then(response => response.text())
-                .then(css => {
-                    const style = document.createElement('style');
-                    style.textContent = css;
-                    this.shadowRoot.appendChild(style);
-                }).catch(err => console.error("Highlighter: Failed to load styles.", err));
+            // Cargar los estilos con un <link> dentro del shadow root en vez
+            // de fetch(): cuando la extensión se recarga o actualiza con la
+            // página abierta, el content script huérfano hacía fallar el
+            // fetch con "TypeError: Failed to fetch" en el panel de errores.
+            try {
+                const styleLink = document.createElement('link');
+                styleLink.rel = 'stylesheet';
+                styleLink.href = chrome.runtime.getURL('style.css');
+                this.shadowRoot.appendChild(styleLink);
+            } catch (e) {
+                // Contexto de extensión invalidado (recarga/actualización):
+                // no hay estilos que cargar ni nada que reportar.
+            }
 
             this.element = document.createElement('div');
             this.element.className = 'highlighter-menu';
@@ -1807,7 +1813,7 @@
                         button.parentElement.querySelectorAll('.highlighter-type-selector').forEach(btn => btn.classList.remove('active'));
                         button.classList.add('active');
                     },
-                    copyText: (value, button) => this._copyAnnotationText(null, button),
+                    copyText: () => this._copyAnnotationText(null),
                 },
                 buttons: {
                     colors: Object.entries(this.colors).map(([name, color]) => ({
@@ -1867,7 +1873,7 @@
                 callbacks: {
                     changeColor: (color) => this.updateAnnotation({ color }),
                     changeType: (type) => this.updateAnnotation({ type }),
-                    copyText: (value, button) => this._copyAnnotationText(this.activeAnnotationId, button),
+                    copyText: () => this._copyAnnotationText(this.activeAnnotationId),
                     delete: () => this.deleteAnnotation(),
                     onCommentMousedown: () => {
                         this.isDraggingInCommentBox = true;
@@ -2420,9 +2426,10 @@
 
         /**
          * Copia al portapapeles el texto de la anotación (menú contextual) o
-         * de la selección activa (menú de creación, `annotationId` null).
+         * de la selección activa (menú de creación, `annotationId` null) y
+         * cierra el menú, igual que un clic fuera de él.
          */
-        _copyAnnotationText(annotationId, button) {
+        async _copyAnnotationText(annotationId) {
             let text = '';
             if (annotationId) {
                 const annotation = this.annotations.get(annotationId);
@@ -2430,21 +2437,21 @@
             } else if (this.activeRange) {
                 text = this.activeRange.toString();
             }
-            if (!text) return;
 
-            const showFeedback = () => {
-                if (!button) return;
-                button.classList.add('copied');
-                setTimeout(() => button.classList.remove('copied'), 900);
-            };
+            if (text) {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).catch(() => this._execCommandCopy(text));
+                } else {
+                    this._execCommandCopy(text);
+                }
+            }
 
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text)
-                    .then(showFeedback)
-                    .catch(() => { this._execCommandCopy(text); showFeedback(); });
+            if (this.activeAnnotationId) {
+                await this._closeOrFinalizeContextMenu();
             } else {
-                this._execCommandCopy(text);
-                showFeedback();
+                await this.menu.hide();
+                this.activeRange = null;
+                window.getSelection()?.removeAllRanges();
             }
         }
 
