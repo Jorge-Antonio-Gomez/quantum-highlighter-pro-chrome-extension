@@ -35,6 +35,10 @@
     "message": "复制文本",
     "description": "Tooltip for the button that copies the annotation text to the clipboard."
   },
+  "textCopiedToClipboard": {
+    "message": "文本已复制到剪贴板",
+    "description": "Toast shown after copying annotation text to the clipboard."
+  },
   "deleteAnnotation": {
     "message": "删除注释",
     "description": "Tooltip for the delete annotation button."

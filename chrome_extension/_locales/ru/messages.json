@@ -35,6 +35,10 @@
     "message": "Копировать текст",
     "description": "Tooltip for the button that copies the annotation text to the clipboard."
   },
+  "textCopiedToClipboard": {
+    "message": "Текст скопирован в буфер обмена",
+    "description": "Toast shown after copying annotation text to the clipboard."
+  },
   "deleteAnnotation": {
     "message": "Удалить аннотацию",
     "description": "Tooltip for the delete annotation button."

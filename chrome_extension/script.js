@@ -832,6 +832,7 @@
         }
         static applyAnnotationStyle(element, annotation, nodeContext) {
             const settings = window.highlighterInstance ? window.highlighterInstance.settings : { useDarkText: false, forceSolidHighlights: false };
+            const solidColor = annotation.color.startsWith('#') ? annotation.color : annotation.color.replace(')', '-solid)');
 
             if (annotation.type === 'highlight') {
                 const bodyBackgroundColor = window.getComputedStyle(document.body).backgroundColor;
@@ -840,20 +841,24 @@
                 let highlightColor;
 
                 if (settings.forceSolidHighlights) {
-                    highlightColor = annotation.color.startsWith('#') ? annotation.color : annotation.color.replace(')', '-solid)');
+                    highlightColor = solidColor;
                 } else {
                     if (isBodyLight) {
                         // Light background, use normal semi-transparent color
                         highlightColor = annotation.color.startsWith('#') ? `${annotation.color}80` : annotation.color;
                     } else {
                         // Dark background, use solid color
-                        highlightColor = annotation.color.startsWith('#') ? annotation.color : annotation.color.replace(')', '-solid)');
+                        highlightColor = solidColor;
                     }
                 }
                 element.style.backgroundColor = highlightColor;
-                element.style.borderBottom = 'none';
+                // Ancho 0 pero con el color de la anotación: al pasar a
+                // subrayado, `transition: all` solo anima el ancho del borde.
+                // Con 'none' el color computado era currentColor (el negro de
+                // la tipografía) y el subrayado nacía oscuro y transicionaba
+                // hacia su color.
+                element.style.borderBottom = `0px solid ${solidColor}`;
             } else { // underline
-                const solidColor = annotation.color.replace(')', '-solid)');
                 element.style.backgroundColor = 'transparent';
                 element.style.borderBottom = `2px solid ${solidColor}`;
             }
@@ -1244,6 +1249,24 @@
                     }
                 }, { once: true });
             });
+        }
+
+        /**
+         * Aviso breve y discreto en la parte inferior de la página. Vive en
+         * el shadow root como hermano del menú, así que sobrevive a hide().
+         */
+        showToast(message) {
+            if (!this.toastElement) {
+                this.toastElement = document.createElement('div');
+                this.toastElement.className = 'highlighter-toast';
+                this.shadowRoot.appendChild(this.toastElement);
+            }
+            this.toastElement.textContent = message;
+            clearTimeout(this._toastTimer);
+            this.toastElement.classList.remove('show');
+            void this.toastElement.offsetWidth; // reinicia la transición si ya estaba visible
+            this.toastElement.classList.add('show');
+            this._toastTimer = setTimeout(() => this.toastElement.classList.remove('show'), 2000);
         }
 
         showContextMenu(callbacks) {
@@ -2439,10 +2462,14 @@
             }
 
             if (text) {
+                const notify = () => this.menu.showToast(chrome.i18n.getMessage('textCopiedToClipboard'));
                 if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(text).catch(() => this._execCommandCopy(text));
+                    navigator.clipboard.writeText(text)
+                        .then(notify)
+                        .catch(() => { this._execCommandCopy(text); notify(); });
                 } else {
                     this._execCommandCopy(text);
+                    notify();
                 }
             }
 

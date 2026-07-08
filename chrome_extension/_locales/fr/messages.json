@@ -35,6 +35,10 @@
     "message": "Copier le texte",
     "description": "Tooltip for the button that copies the annotation text to the clipboard."
   },
+  "textCopiedToClipboard": {
+    "message": "Texte copié dans le presse-papiers",
+    "description": "Toast shown after copying annotation text to the clipboard."
+  },
   "deleteAnnotation": {
     "message": "Supprimer l'annotation",
     "description": "Tooltip for the delete annotation button."
