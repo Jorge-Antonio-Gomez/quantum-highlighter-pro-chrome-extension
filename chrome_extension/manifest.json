@@ -25,7 +25,9 @@
                 "libs/floating-ui-core.js",
                 "libs/floating-ui-dom.umd.js",
                 "libs/tiptap.js",
+                "libs/approx-string-match.js",
                 "storage-backend.js",
+                "anchoring.js",
                 "script.js"
             ],
             "css": [
