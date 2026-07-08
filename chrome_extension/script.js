@@ -1528,6 +1528,16 @@
             this.debouncedReapply = null;
             this.isCreatingAnnotation = false;
             this.currentUrl = this.storage.getPageUrl();
+            // Anclaje robusto: ids de anotaciones no encontradas en la página
+            // (estado solo de runtime, nunca persistido), caché del texto
+            // derivado de anotaciones legacy y cola de write-back para
+            // selectores re-sanados.
+            this._orphanedIds = new Set();
+            this._derivedExactCache = new WeakMap();
+            this._writeBackQueue = [];
+            this._writeBackQueued = new Set();
+            this._writeBackCount = 0;
+            this._writeBackTimer = null;
 
             this._runMigration();
 
@@ -1992,18 +2002,9 @@
         _reapplyAnnotations() {
             if (this.isGloballyDisabled) return;
             if (this.bodyObserver) this.bodyObserver.disconnect();
-        
-            this.annotations.forEach(annotation => {
-                if (document.querySelector(`[data-annotation-id="${annotation.id}"]`)) {
-                    return;
-                }
-        
-                const range = DOMManager.getRangeFromPointers(annotation.pointers);
-                if (range) {
-                    DOMManager.wrapRange(range, annotation);
-                }
-            });
-        
+
+            this._anchorAll();
+
             if (this.bodyObserver) {
                 this.bodyObserver.observe(document.body, {
                     childList: true,
@@ -2130,11 +2131,220 @@
         }
 
         _loadAnnotations() {
+            this._anchorAll();
+        }
+
+        // ——— Anclaje robusto (cascada verificada + auto-reparación) ———
+
+        /**
+         * Texto que debe contener el resaltado: la cita v2 si existe; para
+         * anotaciones legacy (v1), texto plano derivado de su HTML sanitizado.
+         */
+        _expectedTextFor(annotation) {
+            if (annotation.quote && typeof annotation.quote.exact === 'string' && annotation.quote.exact.length > 0) {
+                return { text: annotation.quote.exact, derived: false };
+            }
+            let derived = this._derivedExactCache.get(annotation);
+            if (derived === undefined) {
+                derived = globalThis.QHP.anchoring.htmlToText(annotation.text || '');
+                this._derivedExactCache.set(annotation, derived);
+            }
+            return { text: derived, derived: true };
+        }
+
+        /** El rango resuelto solo vale si su texto coincide con el esperado. */
+        _rangeMatchesExpected(range, expected) {
+            if (!range || range.collapsed) return false;
+            const anchoring = globalThis.QHP.anchoring;
+            // Para el texto derivado de legacy la igualdad normalizada estricta
+            // es imposible (los bordes de bloque <p>/<br> añaden espacios);
+            // se usa comparación laxa con tolerancia baja.
+            return expected.derived
+                ? anchoring.looseEquals(range.toString(), expected.text)
+                : anchoring.verifyRange(range, expected.text);
+        }
+
+        /**
+         * Cascada de anclaje: pointers (rápido) → position → cita
+         * (exacta/normalizada/difusa). Cada paso se VERIFICA contra el texto
+         * esperado; sin verificación un pointer desalineado pintaría texto
+         * equivocado. No muta el DOM. Devuelve { range, method } o null.
+         */
+        _anchorAnnotation(annotation, index) {
+            const anchoring = globalThis.QHP.anchoring;
+            const expected = this._expectedTextFor(annotation);
+            if (!expected.text) return null;
+
+            const fromPointers = annotation.pointers ? DOMManager.getRangeFromPointers(annotation.pointers) : null;
+            if (fromPointers && this._rangeMatchesExpected(fromPointers, expected)) {
+                return { range: fromPointers, method: 'pointers' };
+            }
+
+            if (annotation.position) {
+                const fromPosition = anchoring.positionToRange(annotation.position, index);
+                if (fromPosition && this._rangeMatchesExpected(fromPosition, expected)) {
+                    return { range: fromPosition, method: 'position' };
+                }
+            }
+
+            // Citas capadas (v2) o legacy muy largas: buscar la cabeza y
+            // extender el final por la longitud real conocida.
+            let exact = expected.text;
+            let fullLength;
+            if (exact.length >= anchoring.QUOTE_CAP) {
+                fullLength = annotation.position
+                    ? annotation.position.end - annotation.position.start
+                    : expected.text.length;
+                exact = exact.slice(0, anchoring.QUOTE_CAP);
+            }
+            const hit = anchoring.quoteToRange(
+                {
+                    exact,
+                    prefix: annotation.quote ? annotation.quote.prefix : '',
+                    suffix: annotation.quote ? annotation.quote.suffix : '',
+                },
+                index,
+                {
+                    hintPosition: annotation.position ? annotation.position.start : undefined,
+                    fullLength,
+                }
+            );
+            if (hit) return { range: hit.range, method: hit.method === 'fuzzy' ? 'fuzzy' : 'quote' };
+            return null;
+        }
+
+        /**
+         * Pasada única de anclaje para todas las anotaciones sin mark en el
+         * DOM. Fase A: resolver rangos y capturar selectores frescos sobre el
+         * DOM intacto. Fase B: envolver en orden de documento (wrapRange muta
+         * nodos de texto; los Range vivos se auto-ajustan y hay una guardia
+         * anti-deriva). Lo que no se encuentra queda como huérfano: permanece
+         * en `this.annotations` y en el sidebar, nunca se borra.
+         */
+        _anchorAll() {
             if (this.isTemporarilyHidden || this.isGloballyDisabled) return;
+            const anchoring = globalThis.QHP.anchoring;
+
+            const pending = [];
             this.annotations.forEach(annotation => {
-                const range = DOMManager.getRangeFromPointers(annotation.pointers);
-                if (range) DOMManager.wrapRange(range, annotation);
+                if (!document.querySelector(`[data-annotation-id="${annotation.id}"]`)) {
+                    pending.push(annotation);
+                }
             });
+
+            const previousOrphans = this._orphanedIds;
+            const orphans = new Set();
+
+            if (pending.length === 0) {
+                // Nada que anclar: no construir el índice (camino caliente del
+                // MutationObserver).
+                this._orphanedIds = orphans;
+                if (previousOrphans.size > 0) this._notifySidebarOfUpdate();
+                return;
+            }
+
+            const index = anchoring.buildTextIndex(document.body);
+
+            // Fase A: resolver todo sobre el DOM prístino. Los selectores de
+            // reparación se capturan aquí porque este DOM (sin marks) es el
+            // mismo que verá la próxima carga de la página.
+            const resolved = [];
+            pending.forEach(annotation => {
+                const hit = this._anchorAnnotation(annotation, index);
+                if (!hit) {
+                    orphans.add(annotation.id);
+                    return;
+                }
+                let heal = null;
+                if (hit.method !== 'pointers' || annotation.schemaVersion !== 2 || !annotation.quote) {
+                    heal = {
+                        pointers: DOMManager.getRangePointers(hit.range),
+                        selectors: anchoring.rangeToSelectors(hit.range, index),
+                    };
+                }
+                resolved.push({ annotation, range: hit.range, heal });
+            });
+
+            // Fase B: envolver en orden de documento.
+            resolved.sort((a, b) => a.range.compareBoundaryPoints(Range.START_TO_START, b.range));
+            resolved.forEach(({ annotation, range, heal }) => {
+                const expected = this._expectedTextFor(annotation);
+                let finalRange = range;
+                let finalHeal = heal;
+                if (!this._rangeMatchesExpected(range, expected)) {
+                    // El wrapping de una anotación anterior desplazó este
+                    // rango: re-resolver contra un índice fresco (el texto del
+                    // índice no cambia al envolver, los marks se indexan).
+                    const freshIndex = anchoring.buildTextIndex(document.body);
+                    const retry = this._anchorAnnotation(annotation, freshIndex);
+                    if (!retry) {
+                        orphans.add(annotation.id);
+                        return;
+                    }
+                    finalRange = retry.range;
+                    finalHeal = {
+                        pointers: DOMManager.getRangePointers(retry.range),
+                        selectors: anchoring.rangeToSelectors(retry.range, freshIndex),
+                    };
+                }
+                const marks = DOMManager.wrapRange(finalRange, annotation);
+                if (!marks || marks.length === 0) {
+                    orphans.add(annotation.id);
+                    return;
+                }
+                if (finalHeal) this._applyHeal(annotation, finalRange, finalHeal);
+            });
+
+            this._orphanedIds = orphans;
+            const orphansChanged = orphans.size !== previousOrphans.size ||
+                [...orphans].some(id => !previousOrphans.has(id));
+            if (orphansChanged) this._notifySidebarOfUpdate();
+        }
+
+        /**
+         * Auto-reparación (y migración perezosa de anotaciones v1): actualiza
+         * los selectores en memoria y encola la persistencia.
+         */
+        _applyHeal(annotation, range, heal) {
+            if (!heal.selectors) return;
+            // No persistir anclajes dentro de editores: su contenido es
+            // inestable y generaría escrituras constantes.
+            const container = range.commonAncestorContainer;
+            const element = container.nodeType === Node.TEXT_NODE ? container.parentElement : container;
+            if (element && element.isContentEditable) return;
+
+            annotation.schemaVersion = 2;
+            annotation.pointers = heal.pointers;
+            annotation.quote = heal.selectors.quote;
+            annotation.position = heal.selectors.position;
+            this._derivedExactCache.delete(annotation);
+            this._enqueueWriteBack(annotation.id);
+        }
+
+        _enqueueWriteBack(annotationId) {
+            // Cap por sesión de página: lo pendiente se re-sana en la próxima
+            // visita (la migración es idempotente). Protege la cuota de
+            // escrituras de chrome.storage.sync.
+            if (this._writeBackCount >= 20) return;
+            if (this._writeBackQueued.has(annotationId)) return;
+            this._writeBackQueued.add(annotationId);
+            this._writeBackQueue.push(annotationId);
+            this._writeBackCount++;
+            if (this._writeBackTimer === null) this._flushWriteBack();
+        }
+
+        _flushWriteBack() {
+            const id = this._writeBackQueue.shift();
+            if (id === undefined) {
+                this._writeBackTimer = null;
+                return;
+            }
+            this._writeBackQueued.delete(id);
+            const annotation = this.annotations.get(id);
+            if (annotation) {
+                this.storage.saveAnnotation(annotation, () => {});
+            }
+            this._writeBackTimer = setTimeout(() => this._flushWriteBack(), 500);
         }
 
         _notifySidebarOfUpdate() {
