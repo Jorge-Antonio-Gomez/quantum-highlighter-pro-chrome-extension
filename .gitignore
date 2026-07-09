@@ -89,3 +89,6 @@ chrome_extension.zip
 *.pem
 */.claude/
 .claude/
+
+# Docs de trabajo (no versionados)
+DRIVE-SYNC-PLAN.md

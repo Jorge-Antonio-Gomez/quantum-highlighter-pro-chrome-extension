@@ -4,9 +4,19 @@
     "description": "__MSG_extensionDescription__",
     "default_locale": "en",
     "version": "2026.7.8.1",
+    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5E4ZojNwJ3Q8T8a8sIm9LpJ6wbAlmLUZwRLy5tRMtnMZ2mPPaVxkXsYF0ohbz78/+6zJhtVbbKc2Vojo6s5aTrdDghz5ffJeJ6uhBlsVICuABeDt3jmkRgyHJYVKiwqolTObSaZgaHs0rmngFtDqm8zh9iy5CMayV0QCC6kpn25jC2afjjE2a1fxJG+EmKyi0lLD/taC+kNlcXyVC/iOXh1Vd9iMqgs2NV6J2OEuuU/rVNUVmyDRI/ufF0L3T/zHV3QJZAQvXj+Tv7IBRxP+Us/+dwNK2OJRQa/8jl+bdrovWB+muLppWioIzbGTiwG9qqMNqpchgO7rOGti5vN3TQIDAQAB",
+    "oauth2": {
+        "client_id": "75539336160-8h8cd5hqmbjmvucgjs76nsp1el9t9jmc.apps.googleusercontent.com",
+        "scopes": ["https://www.googleapis.com/auth/drive.appdata"]
+    },
     "permissions": [
         "storage",
-        "activeTab"
+        "activeTab",
+        "identity",
+        "alarms"
+    ],
+    "host_permissions": [
+        "https://www.googleapis.com/*"
     ],
     "background": {
         "service_worker": "background.js"
