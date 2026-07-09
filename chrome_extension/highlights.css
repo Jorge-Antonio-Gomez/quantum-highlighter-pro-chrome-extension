@@ -35,6 +35,19 @@
     transition: all 0.15s ease-in-out;
     background-color: transparent; /* The actual color is applied inline via JS */
     font: inherit;
+    /* Neutralize site styles on <mark> (e.g. Bootstrap's `mark { padding: .2em }` on gob.mx)
+       that add box spacing and shift the surrounding text. A text wrapper must never
+       contribute to layout, so these are safe to force. */
+    display: inline !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    letter-spacing: inherit !important;
+    word-spacing: inherit !important;
+    /* No !important here: the underline type sets an inline border-bottom and the
+       sidebar's focus flash sets an inline box-shadow, and inline styles must win.
+       Class specificity is still enough to beat the sites' `mark { ... }` rules. */
+    border: none;
+    box-shadow: none;
 }
 
 .highlighter-mark:hover {
