@@ -2,11 +2,16 @@
  * Quantum Highlighter PRO — Storage Backend
  *
  * Fachada única para la persistencia de anotaciones. Expone una API estable a
- * `script.js` (content script) y, más adelante, a `sidebar.js` y al service
- * worker. Hoy existe un único backend (`SyncAnnotationsBackend`) que escribe
- * en `chrome.storage.sync` con la misma lógica de chunking que existía en
- * `HighlightStorage`. En Fase 2 añadiremos `DriveAnnotationsBackend` y una
- * fachada que elija el backend activo según la sesión del usuario.
+ * `script.js` (content script) y helpers puros compartidos con el service
+ * worker (`QHP.shared`, cargado allí vía importScripts). Backends:
+ *
+ *  - `SyncAnnotationsBackend`: chrome.storage.sync con chunking. Es el
+ *    backend activo cuando el usuario no tiene sesión de Google Drive.
+ *  - `DriveAnnotationsBackend`: proxy fino que delega en el service worker
+ *    por mensajes `drive:*` (el SW es el único dueño del token OAuth).
+ *  - `SwitchingAnnotationsBackend`: el backend público que devuelve la
+ *    factoría; conmuta en vivo entre los dos anteriores según el flag de
+ *    sesión `qhp-drive-session`.
  *
  * Este archivo se carga ANTES de `script.js` (ver `manifest.json`).
  */
@@ -15,6 +20,202 @@
 
     const ANNOTATION_KEY_PREFIX = 'highlighter-annotation-';
     const MAX_CHUNK_SIZE = 7400; // 7.4KB — buffer seguro frente a QUOTA_BYTES_PER_ITEM (8192)
+    // Flag de sesión de Drive en chrome.storage.local:
+    // { signedIn, account?, since, needsReauth? }. Lo escribe SOLO el SW.
+    const SESSION_KEY = 'qhp-drive-session';
+    const TOMBSTONE_TTL_MS = 90 * 24 * 60 * 60 * 1000;
+
+    // ------------------------------------------------------------------
+    // Helpers puros compartidos entre el content script y el service
+    // worker (QHP.shared). Nada de DOM ni de chrome.* aquí.
+    // ------------------------------------------------------------------
+
+    /**
+     * Higiene de datos al cargar. Un `quoteExact` suelto en el nivel
+     * superior solo puede venir de un objeto reensamblado y re-guardado
+     * por una versión antigua en otro dispositivo; se descarta junto con
+     * cualquier `quote` sin `exact` utilizable para que la cascada de
+     * anclaje re-derive los selectores y los re-sane.
+     */
+    function sanitizeLoadedAnnotation(annotation) {
+        delete annotation.quoteExact;
+        if (annotation.quote && (typeof annotation.quote.exact !== 'string' || annotation.quote.exact.length === 0)) {
+            delete annotation.quote;
+        }
+        return annotation;
+    }
+
+    /**
+     * Reensambla anotaciones (chunked o no) a partir de un volcado de
+     * storage. Con `pageUrl` filtra a esa página (uso de `load()`); con
+     * `null` reensambla todo (migración global sync+local → Drive, F2.4).
+     */
+    function reassembleAll(items, pageUrl = null) {
+        const annotations = new Map();
+        const chunkMap = new Map();
+
+        for (const key in items) {
+            if (!key.startsWith(ANNOTATION_KEY_PREFIX)) continue;
+
+            const item = items[key];
+            if (!item || (pageUrl !== null && item.pageUrl !== pageUrl)) continue;
+
+            if (item.chunking && item.chunking.isChunk) {
+                const { originalId, chunkIndex, totalChunks } = item.chunking;
+                if (!chunkMap.has(originalId)) {
+                    chunkMap.set(originalId, new Array(totalChunks));
+                }
+                chunkMap.get(originalId)[chunkIndex] = item;
+            } else {
+                annotations.set(item.id, sanitizeLoadedAnnotation(item));
+            }
+        }
+
+        for (const [originalId, chunks] of chunkMap.entries()) {
+            if (chunks.some(c => c === undefined)) {
+                console.warn(`Highlighter: Incomplete chunks for annotation ID ${originalId}. Skipping.`);
+                continue;
+            }
+
+            const mainChunk = chunks[0];
+            let fullText = mainChunk.text || '';
+            let fullComment = mainChunk.comment || '';
+            let fullQuoteExact = mainChunk.quoteExact || '';
+
+            for (let i = 1; i < chunks.length; i++) {
+                const chunkContent = chunks[i].content;
+                if (chunkContent) {
+                    if (chunkContent.text) fullText += chunkContent.text;
+                    if (chunkContent.comment) fullComment += chunkContent.comment;
+                    if (chunkContent.quoteExact) fullQuoteExact += chunkContent.quoteExact;
+                }
+            }
+
+            const reassembledAnnotation = { ...mainChunk };
+            delete reassembledAnnotation.chunking;
+            delete reassembledAnnotation.quoteExact;
+            reassembledAnnotation.text = fullText;
+            reassembledAnnotation.comment = fullComment;
+            if (fullQuoteExact) {
+                reassembledAnnotation.quote = {
+                    ...(mainChunk.quote || {}),
+                    exact: fullQuoteExact,
+                };
+            }
+
+            annotations.set(originalId, sanitizeLoadedAnnotation(reassembledAnnotation));
+        }
+        return annotations;
+    }
+
+    // --- Merge doble-LWW por grupos de campos (§5 del plan de Drive) ---
+    //
+    // El write-back del anclaje robusto re-guarda la anotación completa con
+    // solo los anclajes refrescados; un LWW de anotación entera dejaría que
+    // ese guardado de fondo pisara una edición real hecha en otro
+    // dispositivo. Por eso cada copia lleva dos marcas (contentUpdatedAt /
+    // anchorsUpdatedAt) y el merge decide cada grupo por separado.
+
+    const ANCHOR_FIELDS = ['pointers', 'quote', 'position', 'schemaVersion', 'anchorsUpdatedAt'];
+
+    /** Marca efectiva de contenido; sin estampar, vale la fecha de creación. */
+    function effectiveContentTs(annotation) {
+        if (!annotation) return 0;
+        if (typeof annotation.contentUpdatedAt === 'number') return annotation.contentUpdatedAt;
+        const created = Date.parse(annotation.createdAt || '');
+        return Number.isNaN(created) ? 0 : created;
+    }
+
+    /** Marca efectiva de anclajes; sin estampar, vale la fecha de creación. */
+    function effectiveAnchorsTs(annotation) {
+        if (!annotation) return 0;
+        if (typeof annotation.anchorsUpdatedAt === 'number') return annotation.anchorsUpdatedAt;
+        const created = Date.parse(annotation.createdAt || '');
+        return Number.isNaN(created) ? 0 : created;
+    }
+
+    /**
+     * Fusiona dos copias de la misma anotación. Los campos de contenido
+     * (text/comment/color/type/createdAt y cualquier campo futuro) los
+     * aporta la copia con `contentUpdatedAt` mayor; el grupo de anclaje
+     * (ANCHOR_FIELDS) la copia con `anchorsUpdatedAt` mayor. En empate gana
+     * `incoming`. No muta sus argumentos.
+     */
+    function mergeAnnotationCopies(current, incoming) {
+        if (!current) return incoming;
+        if (!incoming) return current;
+        const contentWinner = effectiveContentTs(incoming) >= effectiveContentTs(current) ? incoming : current;
+        const anchorsWinner = effectiveAnchorsTs(incoming) >= effectiveAnchorsTs(current) ? incoming : current;
+        const merged = { ...contentWinner };
+        for (const field of ANCHOR_FIELDS) {
+            if (field in anchorsWinner) merged[field] = anchorsWinner[field];
+            else delete merged[field];
+        }
+        return merged;
+    }
+
+    /** Cuerpo vacío de archivo de página en Drive (§4 del plan). */
+    function emptyPageBody(pageUrl) {
+        return { version: 1, pageUrl, updatedAt: 0, annotations: {}, tombstones: {} };
+    }
+
+    /**
+     * Aplica una lista de ops `{ type: 'upsert'|'delete', annotation?,
+     * annotationId?, ts }` sobre un cuerpo de página y devuelve el cuerpo
+     * resultante (no muta `body`). Reglas de conflicto:
+     *  - upsert contra copia existente → mergeAnnotationCopies (LWW doble);
+     *  - delete escribe tombstone salvo que la copia existente tenga
+     *    contenido más nuevo que el borrado;
+     *  - upsert contra tombstone solo resucita si su contenido es más nuevo
+     *    que `deletedAt` (no resucitar borrados).
+     * Invariante: un id vive en `annotations` o en `tombstones`, nunca en
+     * ambos.
+     */
+    function applyOpsToPageBody(body, ops) {
+        const out = {
+            version: 1,
+            pageUrl: body.pageUrl,
+            updatedAt: body.updatedAt || 0,
+            annotations: { ...(body.annotations || {}) },
+            tombstones: { ...(body.tombstones || {}) },
+        };
+        const ordered = [...ops].sort((a, b) => (a.ts || 0) - (b.ts || 0));
+        for (const op of ordered) {
+            if (op.type === 'delete' && op.annotationId) {
+                const id = op.annotationId;
+                const deletedAt = op.ts || 0;
+                const existing = out.annotations[id];
+                if (existing && effectiveContentTs(existing) > deletedAt) continue;
+                delete out.annotations[id];
+                out.tombstones[id] = Math.max(out.tombstones[id] || 0, deletedAt);
+            } else if (op.type === 'upsert' && op.annotation && op.annotation.id) {
+                const incoming = sanitizeLoadedAnnotation({ ...op.annotation });
+                const id = incoming.id;
+                const tombstoneAt = out.tombstones[id] || 0;
+                if (tombstoneAt && effectiveContentTs(incoming) <= tombstoneAt) continue;
+                delete out.tombstones[id];
+                out.annotations[id] = mergeAnnotationCopies(out.annotations[id], incoming);
+            }
+        }
+        return out;
+    }
+
+    /** Poda in situ los tombstones con más de 90 días (§5 del plan). */
+    function pruneTombstones(body, now = Date.now()) {
+        for (const id of Object.keys(body.tombstones || {})) {
+            if (now - body.tombstones[id] > TOMBSTONE_TTL_MS) delete body.tombstones[id];
+        }
+        return body;
+    }
+
+    /** Anotaciones vivas de un cuerpo de página, saneadas, como objeto id→anotación. */
+    function liveAnnotations(body) {
+        const result = {};
+        for (const id of Object.keys(body.annotations || {})) {
+            result[id] = sanitizeLoadedAnnotation({ ...body.annotations[id] });
+        }
+        return result;
+    }
 
     /**
      * Backend de anotaciones contra chrome.storage.sync.
@@ -67,7 +268,11 @@
         }
 
         async saveAnnotation(annotation, callback) {
-            await this._removeChunks(annotation.id);
+            // includeLocal=true: si existe una copia local del mismo id
+            // (descargada al cerrar sesión de Drive, §6-bis del plan), hay
+            // que borrarla o taparía esta edición en load(), donde local
+            // pisa a sync.
+            await this._removeChunks(annotation.id, true);
 
             const annotationStr = JSON.stringify(annotation);
             const annotationSize = new TextEncoder().encode(annotationStr).length;
@@ -269,81 +474,8 @@
             }
         }
 
-        /**
-         * Higiene de datos al cargar. Un `quoteExact` suelto en el nivel
-         * superior solo puede venir de un objeto reensamblado y re-guardado
-         * por una versión antigua en otro dispositivo; se descarta junto con
-         * cualquier `quote` sin `exact` utilizable para que la cascada de
-         * anclaje re-derive los selectores y los re-sane.
-         */
-        _sanitizeLoadedAnnotation(annotation) {
-            delete annotation.quoteExact;
-            if (annotation.quote && (typeof annotation.quote.exact !== 'string' || annotation.quote.exact.length === 0)) {
-                delete annotation.quote;
-            }
-            return annotation;
-        }
-
         load(callback) {
             const pageUrl = this.getPageUrl();
-
-            const processAndReassemble = (items) => {
-                const annotations = new Map();
-                const chunkMap = new Map();
-
-                for (const key in items) {
-                    if (!key.startsWith(this.annotationKeyPrefix)) continue;
-
-                    const item = items[key];
-                    if (!item || item.pageUrl !== pageUrl) continue;
-
-                    if (item.chunking && item.chunking.isChunk) {
-                        const { originalId, chunkIndex, totalChunks } = item.chunking;
-                        if (!chunkMap.has(originalId)) {
-                            chunkMap.set(originalId, new Array(totalChunks));
-                        }
-                        chunkMap.get(originalId)[chunkIndex] = item;
-                    } else {
-                        annotations.set(item.id, this._sanitizeLoadedAnnotation(item));
-                    }
-                }
-
-                for (const [originalId, chunks] of chunkMap.entries()) {
-                    if (chunks.some(c => c === undefined)) {
-                        console.warn(`Highlighter: Incomplete chunks for annotation ID ${originalId}. Skipping.`);
-                        continue;
-                    }
-
-                    const mainChunk = chunks[0];
-                    let fullText = mainChunk.text || '';
-                    let fullComment = mainChunk.comment || '';
-                    let fullQuoteExact = mainChunk.quoteExact || '';
-
-                    for (let i = 1; i < chunks.length; i++) {
-                        const chunkContent = chunks[i].content;
-                        if (chunkContent) {
-                            if (chunkContent.text) fullText += chunkContent.text;
-                            if (chunkContent.comment) fullComment += chunkContent.comment;
-                            if (chunkContent.quoteExact) fullQuoteExact += chunkContent.quoteExact;
-                        }
-                    }
-
-                    const reassembledAnnotation = { ...mainChunk };
-                    delete reassembledAnnotation.chunking;
-                    delete reassembledAnnotation.quoteExact;
-                    reassembledAnnotation.text = fullText;
-                    reassembledAnnotation.comment = fullComment;
-                    if (fullQuoteExact) {
-                        reassembledAnnotation.quote = {
-                            ...(mainChunk.quote || {}),
-                            exact: fullQuoteExact,
-                        };
-                    }
-
-                    annotations.set(originalId, this._sanitizeLoadedAnnotation(reassembledAnnotation));
-                }
-                return annotations;
-            };
 
             chrome.storage.sync.get(null, (syncItems) => {
                 if (chrome.runtime.lastError) console.error('Error loading sync annotations:', chrome.runtime.lastError);
@@ -352,8 +484,7 @@
                     if (chrome.runtime.lastError) console.error('Error loading local annotations:', chrome.runtime.lastError);
 
                     const allItems = { ...(syncItems || {}), ...(localItems || {}) };
-                    const finalAnnotations = processAndReassemble(allItems);
-                    callback(finalAnnotations);
+                    callback(reassembleAll(allItems, pageUrl));
                 });
             });
         }
@@ -395,16 +526,181 @@
         }
     }
 
-    // Exponemos el backend en el contexto global del documento. Se usa así
-    // dentro del IIFE de script.js: `new QHP.SyncAnnotationsBackend()`.
-    globalThis.QHP = globalThis.QHP || {};
-    globalThis.QHP.SyncAnnotationsBackend = SyncAnnotationsBackend;
+    /**
+     * Backend de anotaciones contra Google Drive. Es un proxy fino: cada
+     * método manda un mensaje `drive:*` al service worker (único dueño del
+     * token OAuth y del cliente REST) con el `pageUrl` ya resuelto, porque
+     * la normalización depende de `window.location` y del param-whitelist
+     * del content script. Solo debe usarse a través de
+     * `SwitchingAnnotationsBackend`.
+     */
+    class DriveAnnotationsBackend {
+        constructor(resolvePageUrl) {
+            this.annotationKeyPrefix = ANNOTATION_KEY_PREFIX;
+            this._resolvePageUrl = resolvePageUrl;
+        }
+
+        _send(message, callback) {
+            try {
+                chrome.runtime.sendMessage(message, (response) => {
+                    if (chrome.runtime.lastError) {
+                        console.error(`Highlighter: ${message.action} failed:`, chrome.runtime.lastError.message);
+                        callback(null);
+                        return;
+                    }
+                    if (!response || response.ok === false) {
+                        console.error(`Highlighter: ${message.action} rejected:`, response && response.error);
+                        callback(null);
+                        return;
+                    }
+                    callback(response);
+                });
+            } catch (e) {
+                console.error(`Highlighter: ${message.action} threw:`, e);
+                callback(null);
+            }
+        }
+
+        load(callback) {
+            this._send({ action: 'drive:loadPage', pageUrl: this._resolvePageUrl() }, (response) => {
+                const annotations = new Map();
+                if (response && response.annotations) {
+                    for (const id of Object.keys(response.annotations)) {
+                        annotations.set(id, response.annotations[id]);
+                    }
+                }
+                callback(annotations);
+            });
+        }
+
+        saveAnnotation(annotation, callback) {
+            this._send({
+                action: 'drive:saveAnnotation',
+                pageUrl: annotation.pageUrl || this._resolvePageUrl(),
+                annotation,
+            }, () => { if (callback) callback(); });
+        }
+
+        removeAnnotation(annotationId, callback) {
+            this._send({
+                action: 'drive:removeAnnotation',
+                pageUrl: this._resolvePageUrl(),
+                annotationId,
+            }, () => { if (callback) callback(); });
+        }
+
+        getStorageStats() {
+            return new Promise((resolve) => {
+                this._send({ action: 'drive:stats' }, (response) => {
+                    resolve(response && response.backend
+                        ? response
+                        : { backend: 'drive', used: 0, total: null, percentUsed: null, itemCount: 0, pageCount: 0 });
+                });
+            });
+        }
+    }
 
     /**
-     * Factoría que devuelve el backend activo. Hoy siempre `SyncAnnotationsBackend`.
-     * En Fase 2, si el usuario está autenticado con Drive, devolverá `DriveAnnotationsBackend`.
+     * Backend público: delega llamada a llamada en sync o Drive según el
+     * flag de sesión. La construcción es síncrona (script.js:1540) pero la
+     * primera lectura del flag no: las llamadas que lleguen antes se
+     * difieren tras `_ready` para no servir sync a un usuario con sesión.
+     * `getPageUrl()`/`generateId()` no dependen del backend activo y
+     * delegan siempre en sync (que posee el param-whitelist).
+     */
+    class SwitchingAnnotationsBackend {
+        constructor() {
+            this._sync = new SyncAnnotationsBackend();
+            this._drive = new DriveAnnotationsBackend(() => this._sync.getPageUrl());
+            this.annotationKeyPrefix = ANNOTATION_KEY_PREFIX;
+            this._signedIn = false;
+            this._sessionListeners = [];
+
+            this._ready = new Promise((resolve) => {
+                try {
+                    chrome.storage.local.get(SESSION_KEY, (items) => {
+                        this._signedIn = !!(items && items[SESSION_KEY] && items[SESSION_KEY].signedIn);
+                        resolve();
+                    });
+                } catch (e) {
+                    resolve();
+                }
+            });
+
+            chrome.storage.onChanged.addListener((changes, namespace) => {
+                if (namespace !== 'local' || !changes[SESSION_KEY]) return;
+                const value = changes[SESSION_KEY].newValue;
+                const signedIn = !!(value && value.signedIn);
+                // Encadenado tras _ready: si el cambio llega mientras la
+                // lectura inicial sigue en vuelo, se aplica después y en orden.
+                this._ready.then(() => {
+                    if (signedIn === this._signedIn) return;
+                    this._signedIn = signedIn;
+                    for (const listener of this._sessionListeners) {
+                        try { listener(signedIn); } catch (e) {
+                            console.error('Highlighter: session-change listener failed:', e);
+                        }
+                    }
+                });
+            });
+        }
+
+        /** Registra un callback (signedIn) => void para el cambio de backend en vivo. */
+        onSessionChange(listener) {
+            this._sessionListeners.push(listener);
+        }
+
+        getPageUrl() { return this._sync.getPageUrl(); }
+        generateId() { return this._sync.generateId(); }
+
+        _active() {
+            return this._ready.then(() => (this._signedIn ? this._drive : this._sync));
+        }
+
+        load(callback) {
+            this._active().then(backend => backend.load(callback));
+        }
+
+        saveAnnotation(annotation, callback) {
+            this._active().then(backend => backend.saveAnnotation(annotation, callback));
+        }
+
+        removeAnnotation(annotationId, callback) {
+            this._active().then(backend => backend.removeAnnotation(annotationId, callback));
+        }
+
+        getStorageStats() {
+            return this._active().then(backend => backend.getStorageStats());
+        }
+    }
+
+    // Exponemos backends y helpers en el contexto global (documento en el
+    // content script, worker global en el SW vía importScripts).
+    globalThis.QHP = globalThis.QHP || {};
+    globalThis.QHP.SyncAnnotationsBackend = SyncAnnotationsBackend;
+    globalThis.QHP.DriveAnnotationsBackend = DriveAnnotationsBackend;
+    globalThis.QHP.SwitchingAnnotationsBackend = SwitchingAnnotationsBackend;
+    globalThis.QHP.shared = {
+        SESSION_KEY,
+        ANNOTATION_KEY_PREFIX,
+        TOMBSTONE_TTL_MS,
+        sanitizeLoadedAnnotation,
+        reassembleAll,
+        effectiveContentTs,
+        effectiveAnchorsTs,
+        mergeAnnotationCopies,
+        emptyPageBody,
+        applyOpsToPageBody,
+        pruneTombstones,
+        liveAnnotations,
+    };
+
+    /**
+     * Factoría que devuelve el backend activo: un
+     * `SwitchingAnnotationsBackend` que conmuta en vivo entre sync y Drive
+     * según el flag de sesión escrito por el service worker.
      */
     globalThis.QHP.createAnnotationsBackend = function createAnnotationsBackend() {
-        return new SyncAnnotationsBackend();
+        return new SwitchingAnnotationsBackend();
     };
 })();

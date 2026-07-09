@@ -1538,6 +1538,11 @@
         constructor(initialSettings) {
             this.settings = initialSettings || { useDarkText: false };
             this.storage = globalThis.QHP.createAnnotationsBackend();
+            if (typeof this.storage.onSessionChange === 'function') {
+                // Iniciar/cerrar sesión de Drive conmuta el backend en vivo:
+                // recargar desde la nueva fuente y refrescar el sidebar.
+                this.storage.onSessionChange(() => this._reloadFromBackend());
+            }
             this.menu = new HighlightMenu();
             this.donationManager = new DonationManager(this.menu.shadowRoot);
             this.annotations = new Map();
@@ -1575,8 +1580,6 @@
             this._writeBackCount = 0;
             this._writeBackTimer = null;
 
-            this._runMigration();
-
             this.storage.load((loadedAnnotations) => {
                 this.annotations = loadedAnnotations;
                 this._loadAnnotations();
@@ -1585,37 +1588,12 @@
             this._setupMutationObserver();
         }
 
-        async _runMigration() {
-            const MIGRATION_KEY = 'highlighter-local-data-migrated';
-            const { [MIGRATION_KEY]: alreadyMigrated } = await chrome.storage.sync.get(MIGRATION_KEY);
-
-            if (alreadyMigrated) return;
-
-            console.log('Highlighter: Starting one-time migration of local annotations to sync storage.');
-
-            const localItems = await new Promise(resolve => chrome.storage.local.get(null, resolve));
-            const localAnnotationKeys = Object.keys(localItems).filter(key => key.startsWith(this.storage.annotationKeyPrefix));
-
-            if (localAnnotationKeys.length === 0) {
-                console.log('Highlighter: No local annotations to migrate.');
-                await chrome.storage.sync.set({ [MIGRATION_KEY]: true });
-                return;
-            }
-
-            for (const key of localAnnotationKeys) {
-                const annotation = localItems[key];
-                if (annotation && annotation.id) {
-                    // Save to sync storage (this will handle chunking)
-                    await new Promise(resolve => this.storage.saveAnnotation(annotation, resolve));
-                    // Remove from local storage after successful save
-                    await new Promise(resolve => chrome.storage.local.remove(key, resolve));
-                    console.log(`Highlighter: Migrated annotation ${annotation.id}.`);
-                }
-            }
-
-            await chrome.storage.sync.set({ [MIGRATION_KEY]: true });
-            console.log('Highlighter: Migration complete.');
-        }
+        // La migración legacy local→sync (era pre-chunking, gateada por
+        // 'highlighter-local-data-migrated') se retiró en F2.4: habría
+        // absorbido hacia sync la copia local descargada al cerrar sesión
+        // de Drive (§6-bis). Las anotaciones locales antiguas siguen
+        // visibles (load() fusiona local+sync) y migran orgánicamente al
+        // editarse (saveAnnotation escribe en sync y limpia la copia local).
 
         disableGlobally() {
             this.isGloballyDisabled = true;
@@ -1715,6 +1693,36 @@
                     });
                 }
             }, 100); // 100ms delay as a safeguard
+        }
+
+        /**
+         * Recarga completa desde el backend activo. Se dispara al conmutar
+         * la sesión de Drive (sync ⇄ Drive): misma secuencia que el cambio
+         * de URL, pero sin tocar `currentUrl`.
+         */
+        async _reloadFromBackend() {
+            if (this.bodyObserver) this.bodyObserver.disconnect();
+
+            await this._closeOrFinalizeContextMenu();
+
+            document.querySelectorAll('.highlighter-mark').forEach(el => DOMManager.unwrap(el));
+
+            this.annotations = new Map();
+            this._orphanedIds = new Set();
+            this._notifySidebarOfUpdate();
+
+            this.storage.load((loadedAnnotations) => {
+                this.annotations = loadedAnnotations;
+                this._loadAnnotations();
+                this._notifySidebarOfUpdate();
+            });
+
+            if (this.bodyObserver) {
+                this.bodyObserver.observe(document.body, {
+                    childList: true,
+                    subtree: true
+                });
+            }
         }
 
         async _onKeyDown(event) {
@@ -1973,6 +1981,7 @@
         
                 if (annotation.comment !== sanitizedComment) {
                     annotation.comment = sanitizedComment;
+                    annotation.contentUpdatedAt = Date.now();
                     this.annotations.set(this.activeAnnotationId, annotation);
                     this.storage.saveAnnotation(annotation, () => {
                         this._notifySidebarOfUpdate();
@@ -2361,6 +2370,10 @@
             annotation.pointers = heal.pointers;
             annotation.quote = heal.selectors.quote;
             annotation.position = heal.selectors.position;
+            // Solo se refrescan anclajes: estampar anchorsUpdatedAt (nunca
+            // contentUpdatedAt) para que este guardado de fondo no pueda
+            // pisar contenido editado en otro dispositivo (merge LWW doble).
+            annotation.anchorsUpdatedAt = Date.now();
             this._derivedExactCache.delete(annotation);
             this._enqueueWriteBack(annotation.id);
         }
@@ -2507,6 +2520,10 @@
             this.activeRange = null;
             await this.menu.hide();
 
+            // Doble marca de tiempo (ms epoch) para el merge por grupos de
+            // campos de Drive: contenido y anclajes viajan por separado. En
+            // el backend sync son campos pasajeros e inofensivos.
+            const now = Date.now();
             const annotation = {
                 id: this.storage.generateId(),
                 pageUrl: this.storage.getPageUrl(),
@@ -2515,7 +2532,9 @@
                 color: color,
                 type: type,
                 comment: '',
-                createdAt: new Date().toISOString()
+                createdAt: new Date().toISOString(),
+                contentUpdatedAt: now,
+                anchorsUpdatedAt: now
             };
 
             // Selectores robustos (cita + posición) para re-anclar aunque la
@@ -2549,6 +2568,7 @@
             if (!hasChanged && !isCommentUpdate) return;
         
             Object.assign(annotation, updates);
+            annotation.contentUpdatedAt = Date.now();
             this.annotations.set(id, annotation);
         
             // Save the entire annotation whenever it's updated.
