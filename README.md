@@ -38,9 +38,10 @@ A powerful, open-source web annotation extension for Chrome, inspired by Zotero'
 *   **Force Dark Text:** An option to force black text on highlights to ensure readability on any background.
 
 ### ☁️ Cross-Device Sync
-*   **Automatic Synchronization:** Your annotations and settings are automatically saved to your Google account via `chrome.storage.sync`.
-*   **Seamless Experience:** Access your notes on any device where you're logged into Chrome with the same Google account. If you make changes while offline, they will sync as soon as you reconnect.
-*   **Privacy-Focused:** This feature uses Chrome's built-in storage, which is subject to Google's privacy policy. Your data is not sent to any third-party servers.
+*   **Automatic Synchronization:** Out of the box, your annotations and settings are saved to your Google account via `chrome.storage.sync` — no sign-in required.
+*   **Optional Google Drive Sync:** Connect your Google account from the sidebar settings to sync annotations through a hidden, extension-private folder in **your own Google Drive**, removing the ~100 KB limit of Chrome's built-in sync. The extension only requests the `drive.appdata` scope: it can never see the rest of your Drive files. Disconnecting keeps a full local copy on your device.
+*   **Seamless Experience:** Access your notes on any device where you're signed in. If you make changes while offline, they are queued and uploaded automatically as soon as you reconnect.
+*   **Privacy-Focused:** Both mechanisms store data in *your* Google account, governed by Google's privacy policy. Your data is never sent to any developer-operated or third-party server.
 
 ### 🌍 Full Internationalization (i18n)
 *   **Multi-Language Support:** The entire interface is professionally translated into 6 languages:
@@ -120,7 +121,7 @@ If you prefer to install manually or want to test the latest development version
 
 ## Privacy and Security
 
-The extension is designed with your privacy in mind. All your data is stored locally on your device. For more details, please see the following documents:
+The extension is designed with your privacy in mind. Your data lives in your browser's storage and — only if you opt in — in a hidden, extension-private folder of your own Google Drive; it is never sent to any server operated by the developer. For more details, please see the following documents:
 
 *   **[Privacy Policy](PRIVACY_POLICY.md):** Understand how your data is handled.
 *   **[Permissions and Data Usage](PERSMISSIONS_AND_DATA_USAGE.md):** A detailed explanation of the permissions requested by the extension.
