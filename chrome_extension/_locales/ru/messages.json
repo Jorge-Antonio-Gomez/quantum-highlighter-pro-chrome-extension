@@ -450,5 +450,32 @@
   "forceSolidHighlightsTooltip": {
     "message": "Если включено, выделения всегда будут иметь сплошной цвет, что улучшает видимость за счет контраста. Если отключено, цвет будет адаптироваться в зависимости от фона страницы.",
     "description": "Tooltip for the force solid highlights switch."
-  }
+  },
+  "syncSectionTitle": {"message":"Синхронизация с Google Диском","description":"Title of the Google Drive sync section in the settings popup."},
+  "syncDisconnectedText": {"message":"Сейчас ваши аннотации сохраняются через синхронизацию Chrome, у которой лимит около 100 КБ. Подключите свой Google Диск, чтобы синхронизировать их между устройствами без этого ограничения. Обратите внимание: синхронизация с Диском работает, только пока выполнен вход.","description":"Explains Chrome sync limits and that Drive sync only works while signed in."},
+  "syncConnectButton": {"message":"Подключить Google Диск","description":"Button to start the Google Drive sign-in flow."},
+  "syncConnectedLabel": {"message":"Подключено","description":"Fallback label when the account email is unavailable."},
+  "syncLastSyncLabel": {"message":"Последняя синхронизация: $TIME$","description":"Shows the time of the last successful sync.","placeholders":{"TIME":{"content":"$1"}}},
+  "syncStatsLine": {"message":"Страниц: $PAGES$ · аннотаций: $COUNT$","description":"Pages and annotations stored in Drive.","placeholders":{"PAGES":{"content":"$1"},"COUNT":{"content":"$2"}}},
+  "syncPendingLine": {"message":"Изменений в очереди на отправку: $COUNT$","description":"Number of queued changes not yet uploaded.","placeholders":{"COUNT":{"content":"$1"}}},
+  "syncDisconnectButton": {"message":"Отключить","description":"Button to disconnect Google Drive."},
+  "syncDisconnectTitle": {"message":"Отключить Google Диск?","description":"Title of the disconnect confirmation dialog."},
+  "syncDisconnectWarning": {"message":"На этом устройстве будет сохранена копия ваших аннотаций из Диска. Пока вы не подключитесь снова, они не будут синхронизироваться между устройствами: изменения и новые аннотации останутся на этом компьютере. Ваши данные останутся нетронутыми в вашем Google Диске.","description":"Warning shown before disconnecting Google Drive."},
+  "syncDisconnectPendingTitle": {"message":"Несинхронизированные изменения","description":"Title of the unsynced-changes confirmation dialog."},
+  "syncDisconnectPendingWarning": {"message":"Есть изменения, не отправленные на Диск: $COUNT$. Они сохранятся в локальной копии этого устройства (и будут отправлены при повторном подключении), но их ещё нет в вашем Google Диске. Продолжить?","description":"Warning when disconnecting with changes not yet uploaded.","placeholders":{"COUNT":{"content":"$1"}}},
+  "syncDisconnectDoneTitle": {"message":"Google Диск отключён","description":"Title of the dialog confirming the disconnection."},
+  "syncDisconnectDoneText": {"message":"Локальная копия создана: аннотаций — $COUNT$, страниц — $PAGES$.","description":"Result of the local copy created on sign-out.","placeholders":{"COUNT":{"content":"$1"},"PAGES":{"content":"$2"}}},
+  "syncCopyFromCacheNote": {"message":"Нет подключения: копия создана из кэшированных данных этого устройства и может не включать недавние изменения с других устройств.","description":"Note when the local copy was built offline from cached data."},
+  "syncQuotaErrorTitle": {"message":"Недостаточно места на устройстве","description":"Title when the local copy does not fit in local storage."},
+  "syncQuotaErrorText": {"message":"Локальная копия не помещается в хранилище этого устройства, поэтому выход не был выполнен. Ваши данные остаются нетронутыми в Google Диске.","description":"Explains the sign-out was aborted because the copy does not fit."},
+  "syncNeedsReauthText": {"message":"Доступ к Google Диску истёк или был отозван. Подключитесь снова, чтобы возобновить синхронизацию.","description":"Shown when Drive access expired or was revoked."},
+  "syncReconnectButton": {"message":"Подключить снова","description":"Button to re-run the sign-in flow after a revocation."},
+  "syncPromoTitle": {"message":"Синхронизируйте свои аннотации с Google Диском","description":"Title of the one-time promo modal."},
+  "syncModalConnect": {"message":"Подключить","description":"Primary button of the promo modal."},
+  "syncModalNotNow": {"message":"Не сейчас","description":"Secondary button of the promo modal."},
+  "syncModalContinue": {"message":"Продолжить","description":"Primary button to proceed despite a warning."},
+  "syncConnecting": {"message":"Подключение…","description":"Button label while the sign-in flow is running."},
+  "syncConnectedToast": {"message":"Google Диск подключён","description":"Toast after a successful connection."},
+  "syncConnectFailedToast": {"message":"Не удалось подключиться к Google Диску","description":"Toast when the sign-in flow fails or is cancelled."},
+  "syncGenericErrorToast": {"message":"Операция с Google Диском не удалась","description":"Toast for an unexpected Drive error."}
 }

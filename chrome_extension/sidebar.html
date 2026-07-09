@@ -144,6 +144,42 @@
                 <span class="slider"></span>
             </label>
         </div>
+        <div class="sync-section" id="sync-section">
+            <label class="sync-title" data-i18n-key="syncSectionTitle">Google Drive sync</label>
+            <div id="sync-disconnected" class="sync-state" style="display: none;">
+                <p class="sync-text" data-i18n-key="syncDisconnectedText"></p>
+                <button id="sync-connect-button" class="sync-button primary">
+                    <span data-i18n-key="syncConnectButton">Connect Google Drive</span>
+                </button>
+            </div>
+            <div id="sync-connected" class="sync-state" style="display: none;">
+                <p class="sync-status-line"><span class="sync-dot"></span><span id="sync-account"></span></p>
+                <p class="sync-meta" id="sync-last-sync" style="display: none;"></p>
+                <p class="sync-meta" id="sync-stats" style="display: none;"></p>
+                <p class="sync-meta sync-warning" id="sync-pending" style="display: none;"></p>
+                <button id="sync-disconnect-button" class="sync-button">
+                    <span data-i18n-key="syncDisconnectButton">Disconnect</span>
+                </button>
+            </div>
+            <div id="sync-reauth" class="sync-state" style="display: none;">
+                <p class="sync-text sync-warning" data-i18n-key="syncNeedsReauthText"></p>
+                <button id="sync-reconnect-button" class="sync-button primary">
+                    <span data-i18n-key="syncReconnectButton">Reconnect</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="sync-modal-overlay" class="sync-modal-overlay" style="display: none;">
+        <div class="sync-modal" role="dialog" aria-modal="true">
+            <h3 id="sync-modal-title"></h3>
+            <p id="sync-modal-text"></p>
+            <p id="sync-modal-note" class="sync-meta" style="display: none;"></p>
+            <div class="sync-modal-buttons">
+                <button id="sync-modal-secondary" class="sync-button"><span></span></button>
+                <button id="sync-modal-primary" class="sync-button primary"><span></span></button>
+            </div>
+        </div>
     </div>
 
     <div id="tooltip" class="tooltip"></div>

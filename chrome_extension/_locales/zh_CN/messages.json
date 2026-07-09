@@ -439,10 +439,6 @@
     "message": "您可以选择任何金额进行按月捐赠。",
     "description": "Text for the custom amount in the monthly subscription card."
   },
-  "highlightSavedLocally": {
-    "message": "高亮已本地保存（超过8KB同步限制）",
-    "description": "Toast message when a highlight is too large to sync."
-  },
   "sidebarDarkModeLabel": {
     "message": "侧边栏深色模式",
     "description": "Label for the sidebar dark mode switch."
@@ -454,5 +450,32 @@
   "forceSolidHighlightsTooltip": {
     "message": "如果启用，高光将始终具有纯色，从而通过对比度提高可见性。如果禁用，颜色将根据页面的背景进行调整。",
     "description": "Tooltip for the force solid highlights switch."
-  }
+  },
+  "syncSectionTitle": {"message":"Google 云端硬盘同步","description":"Title of the Google Drive sync section in the settings popup."},
+  "syncDisconnectedText": {"message":"目前，您的批注通过 Chrome 同步保存，其上限约为 100 KB。连接您的 Google 云端硬盘，即可在各设备间不受此限制地同步批注。请注意：云端硬盘同步仅在保持登录状态时有效。","description":"Explains Chrome sync limits and that Drive sync only works while signed in."},
+  "syncConnectButton": {"message":"连接 Google 云端硬盘","description":"Button to start the Google Drive sign-in flow."},
+  "syncConnectedLabel": {"message":"已连接","description":"Fallback label when the account email is unavailable."},
+  "syncLastSyncLabel": {"message":"上次同步：$TIME$","description":"Shows the time of the last successful sync.","placeholders":{"TIME":{"content":"$1"}}},
+  "syncStatsLine": {"message":"$PAGES$ 个页面 · $COUNT$ 条批注","description":"Pages and annotations stored in Drive.","placeholders":{"PAGES":{"content":"$1"},"COUNT":{"content":"$2"}}},
+  "syncPendingLine": {"message":"$COUNT$ 项更改待上传","description":"Number of queued changes not yet uploaded.","placeholders":{"COUNT":{"content":"$1"}}},
+  "syncDisconnectButton": {"message":"断开连接","description":"Button to disconnect Google Drive."},
+  "syncDisconnectTitle": {"message":"断开 Google 云端硬盘？","description":"Title of the disconnect confirmation dialog."},
+  "syncDisconnectWarning": {"message":"系统将在此设备上保存一份您云端硬盘批注的副本。在您重新连接之前，批注不会在设备间同步：新的批注和更改将仅保留在这台电脑上。您的数据在 Google 云端硬盘中保持完好。","description":"Warning shown before disconnecting Google Drive."},
+  "syncDisconnectPendingTitle": {"message":"有未同步的更改","description":"Title of the unsynced-changes confirmation dialog."},
+  "syncDisconnectPendingWarning": {"message":"有 $COUNT$ 项更改尚未上传到云端硬盘。它们将保留在此设备的本地副本中（重新连接后会上传），但目前还不在您的 Google 云端硬盘中。要继续吗？","description":"Warning when disconnecting with changes not yet uploaded.","placeholders":{"COUNT":{"content":"$1"}}},
+  "syncDisconnectDoneTitle": {"message":"已断开 Google 云端硬盘","description":"Title of the dialog confirming the disconnection."},
+  "syncDisconnectDoneText": {"message":"已创建本地副本：$COUNT$ 条批注，来自 $PAGES$ 个页面。","description":"Result of the local copy created on sign-out.","placeholders":{"COUNT":{"content":"$1"},"PAGES":{"content":"$2"}}},
+  "syncCopyFromCacheNote": {"message":"无网络连接：副本基于此设备的缓存数据创建，可能不包含其他设备的最新更改。","description":"Note when the local copy was built offline from cached data."},
+  "syncQuotaErrorTitle": {"message":"本地空间不足","description":"Title when the local copy does not fit in local storage."},
+  "syncQuotaErrorText": {"message":"本地副本无法放入此设备的存储空间，因此未退出登录。您的数据在 Google 云端硬盘中保持完好。","description":"Explains the sign-out was aborted because the copy does not fit."},
+  "syncNeedsReauthText": {"message":"Google 云端硬盘的访问权限已过期或被撤销。请重新连接以恢复同步。","description":"Shown when Drive access expired or was revoked."},
+  "syncReconnectButton": {"message":"重新连接","description":"Button to re-run the sign-in flow after a revocation."},
+  "syncPromoTitle": {"message":"使用 Google 云端硬盘同步您的批注","description":"Title of the one-time promo modal."},
+  "syncModalConnect": {"message":"连接","description":"Primary button of the promo modal."},
+  "syncModalNotNow": {"message":"暂不","description":"Secondary button of the promo modal."},
+  "syncModalContinue": {"message":"继续","description":"Primary button to proceed despite a warning."},
+  "syncConnecting": {"message":"正在连接…","description":"Button label while the sign-in flow is running."},
+  "syncConnectedToast": {"message":"已连接 Google 云端硬盘","description":"Toast after a successful connection."},
+  "syncConnectFailedToast": {"message":"无法连接 Google 云端硬盘","description":"Toast when the sign-in flow fails or is cancelled."},
+  "syncGenericErrorToast": {"message":"Google 云端硬盘操作失败","description":"Toast for an unexpected Drive error."}
 }

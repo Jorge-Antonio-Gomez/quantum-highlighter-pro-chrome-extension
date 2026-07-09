@@ -450,5 +450,32 @@
   "forceSolidHighlightsTooltip": {
     "message": "Se ativado, os destaques sempre terão uma cor sólida, o que melhora a visibilidade pelo contraste. Se desativado, a cor se adaptará com base no plano de fundo da página.",
     "description": "Tooltip for the force solid highlights switch."
-  }
+  },
+  "syncSectionTitle": {"message":"Sincronização com o Google Drive","description":"Title of the Google Drive sync section in the settings popup."},
+  "syncDisconnectedText": {"message":"No momento, suas anotações são salvas pela sincronização do Chrome, que tem um limite de cerca de 100 KB. Conecte seu Google Drive para sincronizá-las entre seus dispositivos sem esse limite. Lembre-se de que a sincronização com o Drive só funciona enquanto a sessão estiver ativa.","description":"Explains Chrome sync limits and that Drive sync only works while signed in."},
+  "syncConnectButton": {"message":"Conectar ao Google Drive","description":"Button to start the Google Drive sign-in flow."},
+  "syncConnectedLabel": {"message":"Conectado","description":"Fallback label when the account email is unavailable."},
+  "syncLastSyncLabel": {"message":"Última sincronização: $TIME$","description":"Shows the time of the last successful sync.","placeholders":{"TIME":{"content":"$1"}}},
+  "syncStatsLine": {"message":"$PAGES$ páginas · $COUNT$ anotações","description":"Pages and annotations stored in Drive.","placeholders":{"PAGES":{"content":"$1"},"COUNT":{"content":"$2"}}},
+  "syncPendingLine": {"message":"$COUNT$ alterações pendentes de envio","description":"Number of queued changes not yet uploaded.","placeholders":{"COUNT":{"content":"$1"}}},
+  "syncDisconnectButton": {"message":"Desconectar","description":"Button to disconnect Google Drive."},
+  "syncDisconnectTitle": {"message":"Desconectar o Google Drive?","description":"Title of the disconnect confirmation dialog."},
+  "syncDisconnectWarning": {"message":"Uma cópia das suas anotações do Drive será salva neste dispositivo. Até você reconectar, elas não serão sincronizadas entre dispositivos: as alterações e novas anotações ficarão neste computador. Seus dados permanecem intactos no seu Google Drive.","description":"Warning shown before disconnecting Google Drive."},
+  "syncDisconnectPendingTitle": {"message":"Alterações não sincronizadas","description":"Title of the unsynced-changes confirmation dialog."},
+  "syncDisconnectPendingWarning": {"message":"Há $COUNT$ alterações que não foram enviadas ao Drive. Elas serão mantidas na cópia local deste dispositivo (e enviadas se você reconectar), mas ainda não estão no seu Google Drive. Continuar?","description":"Warning when disconnecting with changes not yet uploaded.","placeholders":{"COUNT":{"content":"$1"}}},
+  "syncDisconnectDoneTitle": {"message":"Google Drive desconectado","description":"Title of the dialog confirming the disconnection."},
+  "syncDisconnectDoneText": {"message":"Cópia local criada: $COUNT$ anotações de $PAGES$ páginas.","description":"Result of the local copy created on sign-out.","placeholders":{"COUNT":{"content":"$1"},"PAGES":{"content":"$2"}}},
+  "syncCopyFromCacheNote": {"message":"Sem conexão: a cópia foi criada a partir dos dados em cache deste dispositivo e pode não incluir alterações recentes de outros dispositivos.","description":"Note when the local copy was built offline from cached data."},
+  "syncQuotaErrorTitle": {"message":"Espaço local insuficiente","description":"Title when the local copy does not fit in local storage."},
+  "syncQuotaErrorText": {"message":"A cópia local não cabe no armazenamento deste dispositivo, então a sessão não foi encerrada. Seus dados permanecem intactos no Google Drive.","description":"Explains the sign-out was aborted because the copy does not fit."},
+  "syncNeedsReauthText": {"message":"O acesso ao Google Drive expirou ou foi revogado. Reconecte para retomar a sincronização.","description":"Shown when Drive access expired or was revoked."},
+  "syncReconnectButton": {"message":"Reconectar","description":"Button to re-run the sign-in flow after a revocation."},
+  "syncPromoTitle": {"message":"Sincronize suas anotações com o Google Drive","description":"Title of the one-time promo modal."},
+  "syncModalConnect": {"message":"Conectar","description":"Primary button of the promo modal."},
+  "syncModalNotNow": {"message":"Agora não","description":"Secondary button of the promo modal."},
+  "syncModalContinue": {"message":"Continuar","description":"Primary button to proceed despite a warning."},
+  "syncConnecting": {"message":"Conectando…","description":"Button label while the sign-in flow is running."},
+  "syncConnectedToast": {"message":"Google Drive conectado","description":"Toast after a successful connection."},
+  "syncConnectFailedToast": {"message":"Não foi possível conectar ao Google Drive","description":"Toast when the sign-in flow fails or is cancelled."},
+  "syncGenericErrorToast": {"message":"A operação com o Google Drive falhou","description":"Toast for an unexpected Drive error."}
 }

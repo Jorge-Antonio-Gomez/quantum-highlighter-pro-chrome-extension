@@ -22,6 +22,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const refreshToast = document.getElementById('refresh-toast');
     const refreshToastText = document.getElementById('refresh-toast-text');
     const tooltip = document.getElementById('tooltip');
+    const syncDisconnectedState = document.getElementById('sync-disconnected');
+    const syncConnectedState = document.getElementById('sync-connected');
+    const syncReauthState = document.getElementById('sync-reauth');
+    const syncAccount = document.getElementById('sync-account');
+    const syncLastSync = document.getElementById('sync-last-sync');
+    const syncStats = document.getElementById('sync-stats');
+    const syncPending = document.getElementById('sync-pending');
+    const syncConnectButton = document.getElementById('sync-connect-button');
+    const syncDisconnectButton = document.getElementById('sync-disconnect-button');
+    const syncReconnectButton = document.getElementById('sync-reconnect-button');
+    const syncModalOverlay = document.getElementById('sync-modal-overlay');
+    const syncModalTitle = document.getElementById('sync-modal-title');
+    const syncModalText = document.getElementById('sync-modal-text');
+    const syncModalNote = document.getElementById('sync-modal-note');
+    const syncModalPrimary = document.getElementById('sync-modal-primary');
+    const syncModalSecondary = document.getElementById('sync-modal-secondary');
 
     // --- STATE ---
     let myTabId = null;
@@ -178,6 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const showPopup = () => {
         configPopup.style.display = 'block';
+        refreshSyncSection(true); // estado de Drive + stats frescos al abrir
         computePosition(configButton, configPopup, {
             placement: 'bottom-end',
             middleware: [offset(5), flip(), shift({ padding: 5 })],
@@ -190,6 +207,206 @@ document.addEventListener('DOMContentLoaded', () => {
     const hidePopup = () => {
         configPopup.style.display = 'none';
     };
+
+    // --- GOOGLE DRIVE SYNC (F2.5) ---
+    // El service worker es quien habla con Drive; el sidebar solo manda
+    // mensajes drive:* y pinta el estado (sección de ajustes + modal).
+
+    const DRIVE_SESSION_KEY = 'qhp-drive-session';
+    const DRIVE_PROMO_SHOWN_KEY = 'qhp-drive-promo-shown';
+    const msg = (key, subs) => chrome.i18n.getMessage(key, subs);
+
+    function sendDrive(message) {
+        return new Promise((resolve) => {
+            try {
+                chrome.runtime.sendMessage(message, (response) => {
+                    if (chrome.runtime.lastError) {
+                        resolve({ ok: false, error: chrome.runtime.lastError.message });
+                        return;
+                    }
+                    resolve(response || { ok: false, error: 'no-response' });
+                });
+            } catch (e) {
+                resolve({ ok: false, error: String(e) });
+            }
+        });
+    }
+
+    let syncModalHandlers = { primary: null, secondary: null };
+
+    function showSyncModal({ title, text, note, primaryLabel, secondaryLabel, onPrimary, onSecondary }) {
+        syncModalTitle.textContent = title || '';
+        syncModalText.textContent = text || '';
+        if (note) {
+            syncModalNote.textContent = note;
+            syncModalNote.style.display = 'block';
+        } else {
+            syncModalNote.style.display = 'none';
+        }
+        syncModalPrimary.querySelector('span').textContent = primaryLabel || msg('close');
+        syncModalPrimary.disabled = false;
+        if (secondaryLabel) {
+            syncModalSecondary.querySelector('span').textContent = secondaryLabel;
+            syncModalSecondary.style.display = 'block';
+        } else {
+            syncModalSecondary.style.display = 'none';
+        }
+        syncModalHandlers = { primary: onPrimary || hideSyncModal, secondary: onSecondary || hideSyncModal };
+        syncModalOverlay.style.display = 'flex';
+    }
+
+    function hideSyncModal() {
+        syncModalOverlay.style.display = 'none';
+        syncModalHandlers = { primary: null, secondary: null };
+    }
+
+    let syncRefreshSeq = 0;
+
+    async function refreshSyncSection(includeStats = false) {
+        const seq = ++syncRefreshSeq;
+        const status = await sendDrive({ action: 'drive:status' });
+        if (seq !== syncRefreshSeq) return; // llegó una actualización más nueva
+
+        const ok = status && status.ok !== false;
+        const signedIn = ok && !!status.signedIn;
+        const needsReauth = signedIn && !!status.needsReauth;
+
+        syncDisconnectedState.style.display = !signedIn ? 'block' : 'none';
+        syncReauthState.style.display = needsReauth ? 'block' : 'none';
+        syncConnectedState.style.display = signedIn && !needsReauth ? 'block' : 'none';
+        if (!signedIn || needsReauth) return;
+
+        syncAccount.textContent = status.account || msg('syncConnectedLabel');
+
+        if (status.lastSyncAt) {
+            syncLastSync.textContent = msg('syncLastSyncLabel', [new Date(status.lastSyncAt).toLocaleString()]);
+            syncLastSync.style.display = 'block';
+        } else {
+            syncLastSync.style.display = 'none';
+        }
+
+        if (status.queueLength > 0) {
+            syncPending.textContent = msg('syncPendingLine', [String(status.queueLength)]);
+            syncPending.style.display = 'block';
+        } else {
+            syncPending.style.display = 'none';
+        }
+
+        if (includeStats) {
+            syncStats.textContent = '…';
+            syncStats.style.display = 'block';
+            const stats = await sendDrive({ action: 'drive:stats' });
+            if (seq !== syncRefreshSeq) return;
+            if (stats && stats.backend === 'drive') {
+                syncStats.textContent = msg('syncStatsLine', [String(stats.pageCount || 0), String(stats.itemCount || 0)]);
+            } else {
+                syncStats.style.display = 'none';
+            }
+        }
+    }
+
+    async function connectDrive(button) {
+        const label = button.querySelector('span');
+        const originalText = label.textContent;
+        button.disabled = true;
+        label.textContent = msg('syncConnecting');
+        const response = await sendDrive({ action: 'drive:signIn' });
+        button.disabled = false;
+        label.textContent = originalText;
+        if (response && response.ok) {
+            hideSyncModal();
+            showToast('syncConnectedToast');
+            refreshSyncSection(true);
+        } else {
+            showToast('syncConnectFailedToast');
+        }
+    }
+
+    function requestDisconnect() {
+        showSyncModal({
+            title: msg('syncDisconnectTitle'),
+            text: msg('syncDisconnectWarning'),
+            primaryLabel: msg('syncDisconnectButton'),
+            secondaryLabel: msg('cancel'),
+            onPrimary: () => performSignOut(false),
+            onSecondary: hideSyncModal,
+        });
+    }
+
+    async function performSignOut(force) {
+        syncModalPrimary.disabled = true;
+        const response = await sendDrive({ action: 'drive:signOut', force });
+        syncModalPrimary.disabled = false;
+
+        if (response && response.ok) {
+            const copied = response.copied || { annotations: 0, pages: 0 };
+            showSyncModal({
+                title: msg('syncDisconnectDoneTitle'),
+                text: msg('syncDisconnectDoneText', [String(copied.annotations), String(copied.pages)]),
+                note: response.fromCache ? msg('syncCopyFromCacheNote') : null,
+                primaryLabel: msg('close'),
+                onPrimary: hideSyncModal,
+            });
+            refreshSyncSection(false);
+        } else if (response && response.error === 'pending-ops') {
+            showSyncModal({
+                title: msg('syncDisconnectPendingTitle'),
+                text: msg('syncDisconnectPendingWarning', [String(response.pendingOps)]),
+                primaryLabel: msg('syncModalContinue'),
+                secondaryLabel: msg('cancel'),
+                onPrimary: () => performSignOut(true),
+                onSecondary: hideSyncModal,
+            });
+        } else if (response && response.error === 'local-quota') {
+            showSyncModal({
+                title: msg('syncQuotaErrorTitle'),
+                text: msg('syncQuotaErrorText'),
+                primaryLabel: msg('close'),
+                onPrimary: hideSyncModal,
+            });
+        } else {
+            hideSyncModal();
+            showToast('syncGenericErrorToast');
+        }
+    }
+
+    // Modal de primera vez (una sola: flag qhp-drive-promo-shown en local).
+    async function maybeShowSyncPromo() {
+        try {
+            const status = await sendDrive({ action: 'drive:status' });
+            if (!status || status.ok === false || status.signedIn) return;
+            const stored = await new Promise(resolve => chrome.storage.local.get(DRIVE_PROMO_SHOWN_KEY, resolve));
+            if (stored && stored[DRIVE_PROMO_SHOWN_KEY]) return;
+            await new Promise(resolve => chrome.storage.local.set({ [DRIVE_PROMO_SHOWN_KEY]: true }, resolve));
+            showSyncModal({
+                title: msg('syncPromoTitle'),
+                text: msg('syncDisconnectedText'),
+                primaryLabel: msg('syncModalConnect'),
+                secondaryLabel: msg('syncModalNotNow'),
+                onPrimary: () => connectDrive(syncModalPrimary),
+                onSecondary: hideSyncModal,
+            });
+        } catch (e) {
+            // sin promo si algo falla; no es crítico
+        }
+    }
+
+    syncConnectButton.addEventListener('click', () => connectDrive(syncConnectButton));
+    syncReconnectButton.addEventListener('click', () => connectDrive(syncReconnectButton));
+    syncDisconnectButton.addEventListener('click', requestDisconnect);
+    syncModalPrimary.addEventListener('click', () => { if (syncModalHandlers.primary) syncModalHandlers.primary(); });
+    syncModalSecondary.addEventListener('click', () => { if (syncModalHandlers.secondary) syncModalHandlers.secondary(); });
+    syncModalOverlay.addEventListener('click', (e) => {
+        if (e.target !== syncModalOverlay) return;
+        const dismiss = syncModalHandlers.secondary || syncModalHandlers.primary;
+        if (dismiss) dismiss();
+    });
+
+    // El flag de sesión lo escribe solo el service worker; reflejarlo en vivo.
+    chrome.storage.onChanged.addListener((changes, namespace) => {
+        if (namespace !== 'local' || !changes[DRIVE_SESSION_KEY]) return;
+        refreshSyncSection(configPopup.style.display === 'block');
+    });
 
     // --- ANNOTATION RENDERING ---
 
@@ -508,6 +725,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
+            if (syncModalOverlay.style.display === 'flex') {
+                const dismiss = syncModalHandlers.secondary || syncModalHandlers.primary;
+                if (dismiss) dismiss();
+                return;
+            }
             if (configPopup.style.display === 'block') hidePopup();
         }
     });
@@ -537,6 +759,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- INITIALIZATION ---
     const initialize = () => {
         localizeUI();
+        refreshSyncSection(false);
+        maybeShowSyncPromo();
         configButton.disabled = true;
         disablePageSwitch.disabled = true;
         disableDomainSwitch.disabled = true;
