@@ -66,9 +66,8 @@ body {
 .donate-button svg {
     width: 16px;
     height: 16px;
-    /* margin-left: 10px; */
-    margin-right: 10px;
-    fill: white;
+    margin-right: 8px;
+    flex-shrink: 0;
 }
 
 .github-link {
@@ -290,7 +289,7 @@ h2 {
     color: var(--highlighter-primary-color);
 }
 
-/* Donations Section */
+/* Support Section ("Buy me a coffee") */
 #donations {
     text-align: center;
     background-color: #f8fafc; /* Light gray background for the section */
@@ -305,7 +304,6 @@ h2 {
 }
 
 #donations p {
-    /* font-size: 1.1em; */
     color: #64748b;
     max-width: 600px;
     margin: 0 auto 20px auto;
@@ -313,18 +311,17 @@ h2 {
 
 .donations-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: 1fr;
     gap: 30px;
     margin-top: 30px;
-    justify-content: center;
-    max-width: 700px;
+    max-width: 440px;
     margin-left: auto;
     margin-right: auto;
 }
 
 .donation-card {
     background-color: #ffffff; /* White background for cards */
-    padding: 25px 30px;
+    padding: 28px 30px 22px;
     border-radius: 12px; /* Softer corners */
     border: 1px solid #e2e8f0;
     text-align: center;
@@ -344,7 +341,23 @@ h2 {
 
 .donation-card-content {
     flex-grow: 1; /* Allows this to fill space */
-    /* margin-bottom: 20px; */
+}
+
+.coffee-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #fff4e8; /* Soft tint of the primary orange */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    color: var(--highlighter-primary-color);
+}
+
+.coffee-icon-wrapper svg {
+    width: 30px;
+    height: 30px;
 }
 
 .donation-card h3 {
@@ -358,12 +371,12 @@ h2 {
 .donation-description {
     color: #64748b;
     margin-bottom: 15px;
-    min-height: 55px;
 }
 
 .suggested-amounts {
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
     gap: 10px;
     margin-bottom: 15px;
 }
@@ -371,11 +384,12 @@ h2 {
 .amount-chip {
     background-color: #f1f5f9;
     border-radius: 16px;
-    padding: 3px 18px;
+    padding: 3px 14px;
     font-size: 0.9em;
     font-weight: 500;
-    color: #8d939c;
+    color: #64748b;
     cursor: default;
+    white-space: nowrap;
 }
 
 .custom-amount-text {
@@ -384,28 +398,15 @@ h2 {
     margin-top: 10px;
 }
 
-.subscription-price {
-    margin-bottom: 20px;
-}
-
-.subscription-price strong {
-    font-size: 1.8em;
-    font-weight: 700;
-    color: #334155;
-}
-
-.subscription-price span {
-    color: #64748b;
-}
-
 .donation-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 10px;
     width: 100%;
     padding: 12px 24px;
-    background-color: #ffc439; /* PayPal Gold */
-    color: #111;
+    background-color: var(--highlighter-primary-color);
+    color: #ffffff;
     text-decoration: none;
     border-radius: 8px;
     font-weight: bold;
@@ -415,25 +416,20 @@ h2 {
     margin-top: auto; /* Pushes button to the bottom */
 }
 
-.donation-button .paypal-logo {
+.donation-button svg {
     width: 20px;
     height: 20px;
-    margin-right: 10px;
+    flex-shrink: 0;
 }
 
 .donation-button:hover {
-    background-color: #f2b930;
-}
-
-.donation-card-subscription .donation-button {
-    background-color: var(--highlighter-primary-color);
-    border: 1px solid var(--highlighter-primary-color);
-    color: white;
-}
-
-.donation-card-subscription .donation-button:hover {
     background-color: #d97706; /* Darker orange on hover */
-    border-color: #d97706;
+}
+
+#donations .secure-payment-note {
+    font-size: 0.8em;
+    color: #94a3b8;
+    margin: 12px 0 0 0;
 }
 
 

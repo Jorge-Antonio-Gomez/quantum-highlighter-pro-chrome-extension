@@ -264,28 +264,16 @@
     "description": "Text for the donation modal."
   },
   "oneTimeDonationTitle": {
-    "message": "Faça uma Doação Única",
-    "description": "Title for one-time donation."
+    "message": "Me pague um café",
+    "description": "Title for the 'buy me a coffee' card."
   },
   "oneTimeDonationDescription": {
-    "message": "Apoie o desenvolvimento do Marca-texto Quantum PRO com um único gesto. Cada doação nos aproxima da nossa próxima grande atualização.",
-    "description": "Description for one-time donation."
+    "message": "Cada café custa 5 USD e me dá energia para continuar melhorando o Marca-texto Quantum PRO. Quer pagar mais de um? Você pode escolher a quantidade na hora do pagamento.",
+    "description": "Description for the 'buy me a coffee' card (5 USD per coffee, quantity chosen at checkout)."
   },
   "oneTimeDonationButton": {
     "message": "Claro, eu te pago um café!",
     "description": "Button for one-time donation."
-  },
-  "monthlySubscriptionTitle": {
-    "message": "Torne-se um Patrocinador Mensal",
-    "description": "Title for monthly subscription."
-  },
-  "monthlySubscriptionDescription": {
-    "message": "Garanta o futuro do projeto com apoio recorrente. Nossos patrocinadores são a base para um crescimento sustentável.",
-    "description": "Description for monthly subscription."
-  },
-  "subscribeButton": {
-    "message": "Tornar-se patrocinador",
-    "description": "Button for monthly subscription."
   },
   "remindMeLater": {
     "message": "Talvez mais tarde, obrigado!",
@@ -304,8 +292,12 @@
     "description": "Title for the donation thank you message."
   },
   "donationThanksText": {
-    "message": "Sua contribuição é essencial para continuar melhorando e oferecendo uma ferramenta de qualidade. Vamos continuar trabalhando juntos para criar a ferramenta mais útil e impressionante do mercado.",
-    "description": "Text for the donation thank you message."
+    "message": "Esse café vira diretamente melhorias para o Marca-texto Quantum PRO e ajuda a mantê-lo gratuito para todos. Vamos continuar construindo juntos a ferramenta de marca-texto mais útil!",
+    "description": "Text for the thank you message shown after clicking the support button."
+  },
+  "securePaymentNote": {
+    "message": "Pagamento seguro via Stripe. Abre em uma nova aba.",
+    "description": "Small note under the support button: payment handled by Stripe, opens in a new tab."
   },
   "pageTitle": {
     "message": "Bem-vindo ao Marca-texto Quantum",
@@ -316,8 +308,8 @@
     "description": "Link to the GitHub repository."
   },
   "donateButton": {
-    "message": "Doar",
-    "description": "Button to open the donation section."
+    "message": "Me pague um café",
+    "description": "Header button that scrolls to the support section."
   },
   "heroTitle": {
     "message": "Bem-vindo ao Marca-texto Quantum PRO!",
@@ -432,12 +424,8 @@
     "description": "Tip for the call to action section."
   },
   "customAmountText": {
-    "message": "Ou escolha qualquer outro valor. Obrigado!",
-    "description": "Text for the custom amount in the donation card."
-  },
-  "customAmountTextMonthly": {
-    "message": "Você pode escolher qualquer valor para doar mensalmente.",
-    "description": "Text for the custom amount in the monthly subscription card."
+    "message": "Escolha quantos cafés na hora do pagamento. Obrigado!",
+    "description": "Hint under the amount chips: the number of coffees is chosen at checkout."
   },
   "sidebarDarkModeLabel": {
     "message": "Modo Escuro da Barra Lateral",

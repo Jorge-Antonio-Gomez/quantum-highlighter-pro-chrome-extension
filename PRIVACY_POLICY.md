@@ -57,7 +57,7 @@ Quantum Highlighter PRO does not use any third-party service for data processing
 
 **Google Drive API (optional, opt-in):** if you enable the Google Drive sync, the extension uses the official Google Drive API to store your annotations in your own Google account, acting solely on your behalf. That storage is governed by Google's Privacy Policy and Terms of Service. Quantum Highlighter PRO's use of information received from Google APIs adheres to the [Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy), including its **Limited Use** requirements: the data is used only to provide the sync feature you requested, is never transferred to third parties, and is never used for advertising.
 
-The extension also includes optional, user-initiated links for donations (e.g., to PayPal) on its welcome page and within a modal. These are standard hyperlinks. Clicking them navigates you away from the extension to the third-party website in a new tab. This Privacy Policy does not cover the data practices of those external sites. No data from the extension is shared with these sites.
+The extension also includes optional, user-initiated "buy me a coffee" links on its welcome page and within a modal. These are standard hyperlinks to a payment page hosted by Stripe. Clicking them navigates you away from the extension to that third-party website in a new tab. This Privacy Policy does not cover the data practices of those external sites. The only information the extension appends to the link is your browser interface language, so that the payment page is displayed in your language. No other data from the extension is shared with these sites.
 
 ### 5. Children's Privacy
 

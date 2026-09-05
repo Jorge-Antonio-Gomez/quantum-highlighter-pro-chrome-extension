@@ -16,8 +16,8 @@
                 <span></span>
             </a>
             <a href="#donations" class="donate-button" data-i18n="donateButton">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/><path d="M6 2v2"/>
                 </svg>
                 <span></span>
             </a>
@@ -113,50 +113,41 @@
             </footer>
 
             <section id="donations">
-                <h2 data-i18n="donationsTitle">Resaltador Quantum PRO will ALWAYS be free</h2>
-                <p data-i18n="donationsText">Resaltador Quantum is an open-source project built with dedication. Your donation helps keep it alive and allows for the development of new features. Every contribution, no matter the size, makes a huge difference. Thank you so much for your support!</p>
+                <h2 data-i18n="donationsTitle">You keep Quantum Highlighter PRO free and alive</h2>
+                <p data-i18n="donationsText">Hi! I'm George, the creator and sole developer behind Quantum Highlighter. My promise is and always will be that this tool is free and of the highest quality. There's no big company behind it, just countless hours of work and the dream of creating something truly useful for you. To keep innovating, I need your help.</p>
 
                 <div class="donations-grid">
-                    <!-- One-Time Donation Card -->
+                    <!-- "Buy me a coffee" card: Stripe Payment Link, 5 USD per coffee. The href is localized at runtime in welcome.js -->
                     <div class="donation-card donation-card-onetime">
                         <div class="donation-card-content">
-                            <h3 data-i18n="oneTimeDonationTitle">One-Time Donation</h3>
-                            <p class="donation-description" data-i18n="oneTimeDonationDescription">Support the project with a single contribution. Every little bit helps!</p>
-                            <div class="suggested-amounts">
-                                <div class="amount-chip">$5</div>
-                                <div class="amount-chip">$10</div>
-                                <div class="amount-chip">$20</div>
+                            <div class="coffee-icon-wrapper" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/><path d="M6 2v2"/>
+                                </svg>
                             </div>
-                            <p class="custom-amount-text" data-i18n="customAmountText">Or choose any other amount. Thank you!</p>
+                            <h3 data-i18n="oneTimeDonationTitle">Buy me a coffee</h3>
+                            <p class="donation-description" data-i18n="oneTimeDonationDescription">Each coffee is 5 USD and fuels the next improvements of Quantum Highlighter PRO. Feeling generous? You can pick how many at checkout.</p>
+                            <div class="suggested-amounts">
+                                <div class="amount-chip">☕ $5</div>
+                                <div class="amount-chip">☕☕ $10</div>
+                                <div class="amount-chip">☕☕☕ $15</div>
+                            </div>
+                            <p class="custom-amount-text" data-i18n="customAmountText">Choose how many coffees at checkout. Thank you!</p>
                         </div>
-                        <a href="https://www.paypal.com/ncp/payment/P8GZGDP6GQBB2" target="_blank" rel="noopener noreferrer" class="donation-button" data-i18n="oneTimeDonationButton">
-                            <img src="images/paypal-logo.svg" alt="PayPal Logo" class="paypal-logo">
+                        <a href="https://buy.stripe.com/3cI6oI8ZpcHbgwTfYf2go01" target="_blank" rel="noopener noreferrer" class="donation-button" data-support-link data-i18n="oneTimeDonationButton">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/><path d="M6 2v2"/>
+                            </svg>
                             <span></span>
                         </a>
-                    </div>
-
-                    <!-- Subscription Donation Card -->
-                    <div class="donation-card donation-card-subscription">
-                        <div class="donation-card-content">
-                            <h3 data-i18n="monthlySubscriptionTitle">Monthly Subscription</h3>
-                            <p class="donation-description" data-i18n="monthlySubscriptionDescription">Become a regular supporter and help ensure the project's future.</p>
-                            <div class="suggested-amounts">
-                                <div class="amount-chip">$2</div>
-                                <div class="amount-chip">$5</div>
-                                <div class="amount-chip">$10</div>
-                            </div>
-                            <p class="custom-amount-text" data-i18n="customAmountTextMonthly">You can choose any amount to donate monthly.</p>
-                        </div>
-                        <a href="https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-2CW39197CN079424VNCCCAAQ" target="_blank" rel="noopener noreferrer" class="donation-button" data-i18n="subscribeButton">
-                            <img src="images/paypal-logo.svg" alt="PayPal Logo" class="paypal-logo">
-                            <span></span>
-                        </a>
+                        <p class="secure-payment-note" data-i18n="securePaymentNote">Secure payment via Stripe. Opens in a new tab.</p>
                     </div>
                 </div>
             </section>
         </div>
     </div>
 
+    <script src="support-link.js"></script>
     <script src="welcome.js"></script>
 </body>
 </html>

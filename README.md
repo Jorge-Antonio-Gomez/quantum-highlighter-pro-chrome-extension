@@ -13,7 +13,6 @@ A powerful, open-source web annotation extension for Chrome, inspired by Zotero'
 *   **Two Annotation Types:** Choose between highlighting text with a background color or underlining it.
 *   **Eight Colors:** A palette of 8 colors to organize your notes (yellow, red, green, blue, purple, pink, orange, gray).
 
-    
 *   **Robust & Dynamic:** Annotations persist reliably, even on dynamic websites like YouTube, thanks to a `MutationObserver`-based re-application system.
 *   **SPA Compatibility:** Advanced support for Single Page Applications (SPAs) with intelligent URL change detection and annotation management.
 *   **Smart URL Handling:** Intelligent parameter filtering for consistent annotation storage across different URL variations.
@@ -145,9 +144,9 @@ Contributions are welcome! Please:
 *   ⚡ **Performance optimizations** and code refactoring.
 
 ### Support the Project
-Quantum Highlighter PRO is a free, open-source project developed with love in my spare time. If you find the extension useful, please consider making a donation to support its continued development and maintenance.
+Quantum Highlighter PRO is a free, open-source project developed with love in my spare time. If you find the extension useful, you can buy me a coffee: each one is 5 USD and you can pick how many at checkout. Payments are processed securely by Stripe.
 
-[**❤️ Donate via PayPal**](https://www.paypal.com/ncp/payment/P8GZGDP6GQBB2)
+[**☕ Buy me a coffee**](https://buy.stripe.com/3cI6oI8ZpcHbgwTfYf2go01)
 
 ## License
 

@@ -38,6 +38,7 @@
                 "libs/approx-string-match.js",
                 "storage-backend.js",
                 "anchoring.js",
+                "support-link.js",
                 "script.js"
             ],
             "css": [

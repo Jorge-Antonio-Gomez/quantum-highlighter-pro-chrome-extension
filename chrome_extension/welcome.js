@@ -21,6 +21,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
+    // --- SUPPORT LINK (Stripe Payment Link in the UI language) ---
+    function localizeSupportLinks() {
+        if (!globalThis.QHP || typeof globalThis.QHP.buildSupportLink !== 'function') return;
+        const url = globalThis.QHP.buildSupportLink();
+        document.querySelectorAll('a[data-support-link]').forEach(link => {
+            link.href = url;
+        });
+    }
+
     // --- ELEMENTS ---
     const colorIcon = document.getElementById('color-cycle-icon');
 
@@ -39,5 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     localizeHtmlPage();
+    localizeSupportLinks();
     initialize();
 });

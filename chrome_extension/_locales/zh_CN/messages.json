@@ -264,28 +264,16 @@
     "description": "Text for the donation modal."
   },
   "oneTimeDonationTitle": {
-    "message": "一次性捐赠",
-    "description": "Title for one-time donation."
+    "message": "请我喝杯咖啡",
+    "description": "Title for the 'buy me a coffee' card."
   },
   "oneTimeDonationDescription": {
-    "message": "只需一个简单的举动，即可支持 量子荧光笔 PRO 的发展。每一次捐赠都让我们离下一次重大更新更近一步。",
-    "description": "Description for one-time donation."
+    "message": "每杯咖啡 5 美元，为我继续改进 量子荧光笔 PRO 加油。想多请几杯？结账时可以选择数量。",
+    "description": "Description for the 'buy me a coffee' card (5 USD per coffee, quantity chosen at checkout)."
   },
   "oneTimeDonationButton": {
     "message": "当然，我请你喝杯咖啡！",
     "description": "Button for one-time donation."
-  },
-  "monthlySubscriptionTitle": {
-    "message": "成为月度赞助商",
-    "description": "Title for monthly subscription."
-  },
-  "monthlySubscriptionDescription": {
-    "message": "通过定期支持来确保项目的未来。我们的赞助商是可持续增长的基础。",
-    "description": "Description for monthly subscription."
-  },
-  "subscribeButton": {
-    "message": "成为赞助商",
-    "description": "Button for monthly subscription."
   },
   "remindMeLater": {
     "message": "稍后再说，谢谢！",
@@ -304,8 +292,12 @@
     "description": "Title for the donation thank you message."
   },
   "donationThanksText": {
-    "message": "您的贡献对于不断改进和提供高质量的工具至关重要。让我们继续共同努力，打造市场上最有用、最令人印象深刻的工具。",
-    "description": "Text for the donation thank you message."
+    "message": "这杯咖啡会直接化为 量子荧光笔 PRO 的改进，并帮助它对所有人保持免费。让我们一起继续打造最好用的高亮工具！",
+    "description": "Text for the thank you message shown after clicking the support button."
+  },
+  "securePaymentNote": {
+    "message": "通过 Stripe 安全支付。将在新标签页中打开。",
+    "description": "Small note under the support button: payment handled by Stripe, opens in a new tab."
   },
   "pageTitle": {
     "message": "欢迎使用 量子荧光笔",
@@ -316,8 +308,8 @@
     "description": "Link to the GitHub repository."
   },
   "donateButton": {
-    "message": "捐赠",
-    "description": "Button to open the donation section."
+    "message": "请我喝杯咖啡",
+    "description": "Header button that scrolls to the support section."
   },
   "heroTitle": {
     "message": "欢迎使用 量子荧光笔 PRO！",
@@ -432,12 +424,8 @@
     "description": "Tip for the call to action section."
   },
   "customAmountText": {
-    "message": "或选择任何其他金额。谢谢！",
-    "description": "Text for the custom amount in the donation card."
-  },
-  "customAmountTextMonthly": {
-    "message": "您可以选择任何金额进行按月捐赠。",
-    "description": "Text for the custom amount in the monthly subscription card."
+    "message": "结账时选择咖啡杯数。谢谢！",
+    "description": "Hint under the amount chips: the number of coffees is chosen at checkout."
   },
   "sidebarDarkModeLabel": {
     "message": "侧边栏深色模式",

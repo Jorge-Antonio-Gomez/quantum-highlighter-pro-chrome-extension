@@ -264,28 +264,16 @@
     "description": "Text for the donation modal."
   },
   "oneTimeDonationTitle": {
-    "message": "Faire un don unique",
-    "description": "Title for one-time donation."
+    "message": "Offrez-moi un café",
+    "description": "Title for the 'buy me a coffee' card."
   },
   "oneTimeDonationDescription": {
-    "message": "Soutenez le développement de Surligneur Quantum PRO d'un simple geste. Chaque don nous rapproche de notre prochaine grande mise à jour.",
-    "description": "Description for one-time donation."
+    "message": "Chaque café coûte 5 USD et me donne l'énergie de continuer à améliorer Surligneur Quantum PRO. Envie d'en offrir plusieurs ? Vous pouvez choisir la quantité au moment du paiement.",
+    "description": "Description for the 'buy me a coffee' card (5 USD per coffee, quantity chosen at checkout)."
   },
   "oneTimeDonationButton": {
     "message": "Bien sûr, je vous offre un café !",
     "description": "Button for one-time donation."
-  },
-  "monthlySubscriptionTitle": {
-    "message": "Devenir un mécène mensuel",
-    "description": "Title for monthly subscription."
-  },
-  "monthlySubscriptionDescription": {
-    "message": "Assurez l'avenir du projet avec un soutien récurrent. Nos mécènes sont la base d'une croissance durable.",
-    "description": "Description for monthly subscription."
-  },
-  "subscribeButton": {
-    "message": "Devenir mécène",
-    "description": "Button for monthly subscription."
   },
   "remindMeLater": {
     "message": "Peut-être plus tard, merci !",
@@ -304,8 +292,12 @@
     "description": "Title for the donation thank you message."
   },
   "donationThanksText": {
-    "message": "Votre contribution est essentielle pour continuer à nous améliorer et à offrir un outil de qualité. Continuons à travailler ensemble pour créer l'outil le plus utile et le plus impressionnant du marché.",
-    "description": "Text for the donation thank you message."
+    "message": "Ce café se transforme directement en améliorations pour Surligneur Quantum PRO, qui reste ainsi gratuit pour tous. Continuons à construire ensemble l'outil de surlignage le plus utile !",
+    "description": "Text for the thank you message shown after clicking the support button."
+  },
+  "securePaymentNote": {
+    "message": "Paiement sécurisé via Stripe. S'ouvre dans un nouvel onglet.",
+    "description": "Small note under the support button: payment handled by Stripe, opens in a new tab."
   },
   "pageTitle": {
     "message": "Bienvenue chez Surligneur Quantum",
@@ -316,8 +308,8 @@
     "description": "Link to the GitHub repository."
   },
   "donateButton": {
-    "message": "Faire un don",
-    "description": "Button to open the donation section."
+    "message": "Offrez-moi un café",
+    "description": "Header button that scrolls to the support section."
   },
   "heroTitle": {
     "message": "Bienvenue chez Surligneur Quantum PRO !",
@@ -432,12 +424,8 @@
     "description": "Tip for the call to action section."
   },
   "customAmountText": {
-    "message": "Ou choisissez un autre montant. Merci !",
-    "description": "Text for the custom amount in the donation card."
-  },
-  "customAmountTextMonthly": {
-    "message": "Vous pouvez choisir n'importe quel montant à donner mensuellement.",
-    "description": "Text for the custom amount in the monthly subscription card."
+    "message": "Choisissez le nombre de cafés au moment du paiement. Merci !",
+    "description": "Hint under the amount chips: the number of coffees is chosen at checkout."
   },
   "sidebarDarkModeLabel": {
     "message": "Mode Sombre de la Barre Latérale",

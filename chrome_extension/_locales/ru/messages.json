@@ -264,28 +264,16 @@
     "description": "Text for the donation modal."
   },
   "oneTimeDonationTitle": {
-    "message": "Сделать разовое пожертвование",
-    "description": "Title for one-time donation."
+    "message": "Угостите меня кофе",
+    "description": "Title for the 'buy me a coffee' card."
   },
   "oneTimeDonationDescription": {
-    "message": "Поддержите разработку Квантовый выделитель PRO одним жестом. Каждое пожертвование приближает нас к следующему большому обновлению.",
-    "description": "Description for one-time donation."
+    "message": "Одна чашка кофе стоит 5 USD и даёт мне силы дальше улучшать Квантовый выделитель PRO. Хотите угостить не одной? Количество можно выбрать при оплате.",
+    "description": "Description for the 'buy me a coffee' card (5 USD per coffee, quantity chosen at checkout)."
   },
   "oneTimeDonationButton": {
     "message": "Конечно, я куплю вам кофе!",
     "description": "Button for one-time donation."
-  },
-  "monthlySubscriptionTitle": {
-    "message": "Стать ежемесячным спонсором",
-    "description": "Title for monthly subscription."
-  },
-  "monthlySubscriptionDescription": {
-    "message": "Обеспечьте будущее проекта с помощью регулярной поддержки. Наши спонсоры — это основа устойчивого роста.",
-    "description": "Description for monthly subscription."
-  },
-  "subscribeButton": {
-    "message": "Стать спонсором",
-    "description": "Button for monthly subscription."
   },
   "remindMeLater": {
     "message": "Может быть, позже, спасибо!",
@@ -304,8 +292,12 @@
     "description": "Title for the donation thank you message."
   },
   "donationThanksText": {
-    "message": "Ваш вклад необходим для дальнейшего улучшения и предоставления качественного инструмента. Продолжим работать вместе, чтобы создать самый полезный и впечатляющий инструмент на рынке.",
-    "description": "Text for the donation thank you message."
+    "message": "Этот кофе напрямую превращается в улучшения Квантового выделителя PRO и помогает ему оставаться бесплатным для всех. Продолжим вместе создавать самый полезный инструмент для выделения!",
+    "description": "Text for the thank you message shown after clicking the support button."
+  },
+  "securePaymentNote": {
+    "message": "Безопасная оплата через Stripe. Откроется в новой вкладке.",
+    "description": "Small note under the support button: payment handled by Stripe, opens in a new tab."
   },
   "pageTitle": {
     "message": "Добро пожаловать в Квантовый выделитель",
@@ -316,8 +308,8 @@
     "description": "Link to the GitHub repository."
   },
   "donateButton": {
-    "message": "Пожертвовать",
-    "description": "Button to open the donation section."
+    "message": "Угостить кофе",
+    "description": "Header button that scrolls to the support section."
   },
   "heroTitle": {
     "message": "Добро пожаловать в Квантовый выделитель PRO!",
@@ -432,12 +424,8 @@
     "description": "Tip for the call to action section."
   },
   "customAmountText": {
-    "message": "Или выберите любую другую сумму. Спасибо!",
-    "description": "Text for the custom amount in the donation card."
-  },
-  "customAmountTextMonthly": {
-    "message": "Вы можете выбрать любую сумму для ежемесячного пожертвования.",
-    "description": "Text for the custom amount in the monthly subscription card."
+    "message": "Выберите количество чашек при оплате. Спасибо!",
+    "description": "Hint under the amount chips: the number of coffees is chosen at checkout."
   },
   "sidebarDarkModeLabel": {
     "message": "Темный режим боковой панели",

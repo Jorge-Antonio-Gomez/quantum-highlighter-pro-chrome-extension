@@ -1367,6 +1367,9 @@
 
             const modal = document.createElement('div');
             modal.className = 'highlighter-donation-modal';
+            // Payment Link de Stripe en el idioma de la UI (ver support-link.js).
+            const supportUrl = globalThis.QHP.buildSupportLink();
+            const coffeeIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/><path d="M6 2v2"/></svg>';
             modal.innerHTML = `
                 <div class="heading-wrapper">
                     <img src="${chrome.runtime.getURL('images/icon128.png')}" alt="Highlighter Icon">
@@ -1379,21 +1382,17 @@
                         <div class="donation-card-content">
                             <h4>${chrome.i18n.getMessage('oneTimeDonationTitle')}</h4>
                             <p>${chrome.i18n.getMessage('oneTimeDonationDescription')}</p>
+                            <div class="suggested-amounts">
+                                <span class="amount-chip">☕ $5</span>
+                                <span class="amount-chip">☕☕ $10</span>
+                                <span class="amount-chip">☕☕☕ $15</span>
+                            </div>
                         </div>
-                        <a href="https://www.paypal.com/ncp/payment/P8GZGDP6GQBB2" target="_blank" class="donation-button">
-                            <img src="${chrome.runtime.getURL('images/paypal-logo.svg')}" alt="PayPal" class="paypal-logo">
+                        <a href="${supportUrl}" target="_blank" rel="noopener noreferrer" class="donation-button">
+                            ${coffeeIcon}
                             <span>${chrome.i18n.getMessage('oneTimeDonationButton')}</span>
                         </a>
-                    </div>
-                    <div class="donation-card donation-card-subscription">
-                        <div class="donation-card-content">
-                            <h4>${chrome.i18n.getMessage('monthlySubscriptionTitle')}</h4>
-                            <p>${chrome.i18n.getMessage('monthlySubscriptionDescription')}</p>
-                        </div>
-                        <a href="https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-2CW39197CN079424VNCCCAAQ" target="_blank" class="donation-button">
-                            <img src="${chrome.runtime.getURL('images/paypal-logo.svg')}" alt="PayPal" class="paypal-logo">
-                            <span>${chrome.i18n.getMessage('subscribeButton')}</span>
-                        </a>
+                        <p class="secure-payment-note">${chrome.i18n.getMessage('securePaymentNote')}</p>
                     </div>
                 </div>
                 <div class="modal-actions">

@@ -264,28 +264,16 @@
     "description": "Text for the donation modal."
   },
   "oneTimeDonationTitle": {
-    "message": "Realiza una Aportación Única",
-    "description": "Title for one-time donation."
+    "message": "Invítame un café",
+    "description": "Title for the 'buy me a coffee' card."
   },
   "oneTimeDonationDescription": {
-    "message": "Apoya el desarrollo de Resaltador Quantum PRO con un único gesto. Cada contribución nos acerca a nuestra próxima gran actualización.",
-    "description": "Description for one-time donation."
+    "message": "Cada café cuesta 5 USD y me da energía para seguir mejorando Resaltador Quantum PRO. ¿Te animas con más de uno? Puedes elegir la cantidad al pagar.",
+    "description": "Description for the 'buy me a coffee' card (5 USD per coffee, quantity chosen at checkout)."
   },
   "oneTimeDonationButton": {
     "message": "¡Claro, te invito un café!",
     "description": "Button for one-time donation."
-  },
-  "monthlySubscriptionTitle": {
-    "message": "Conviértete en Patrocinador Mensual",
-    "description": "Title for monthly subscription."
-  },
-  "monthlySubscriptionDescription": {
-    "message": "Asegura el futuro del proyecto con un apoyo recurrente. Nuestros patrocinadores son la base de un crecimiento sostenible.",
-    "description": "Description for monthly subscription."
-  },
-  "subscribeButton": {
-    "message": "Unirme como patrocinador",
-    "description": "Button for monthly subscription."
   },
   "remindMeLater": {
     "message": "En otro ratito, ¡gracias!",
@@ -304,8 +292,12 @@
     "description": "Title for the donation thank you message."
   },
   "donationThanksText": {
-    "message": "Tu contribución es esencial para seguir mejorando y ofreciendo una herramienta de calidad. Sigamos trabajando juntos para lograr la herramienta más útil e impresionante del mercado.",
-    "description": "Text for the donation thank you message."
+    "message": "Ese café se convierte directamente en mejoras para Resaltador Quantum PRO y en que siga siendo gratis para todos. ¡Sigamos construyendo juntos la herramienta de resaltado más útil!",
+    "description": "Text for the thank you message shown after clicking the support button."
+  },
+  "securePaymentNote": {
+    "message": "Pago seguro a través de Stripe. Se abre en una pestaña nueva.",
+    "description": "Small note under the support button: payment handled by Stripe, opens in a new tab."
   },
   "pageTitle": {
     "message": "Bienvenido a Resaltador Quantum PRO",
@@ -316,8 +308,8 @@
     "description": "Link to the GitHub repository."
   },
   "donateButton": {
-    "message": "Donar",
-    "description": "Button to open the donation section."
+    "message": "Invítame un café",
+    "description": "Header button that scrolls to the support section."
   },
   "heroTitle": {
     "message": "¡Bienvenido a Resaltador Quantum PRO!",
@@ -432,12 +424,8 @@
     "description": "Tip for the call to action section."
   },
   "customAmountText": {
-    "message": "O elige cualquier otro monto. ¡Gracias!",
-    "description": "Text for the custom amount in the donation card."
-  },
-  "customAmountTextMonthly": {
-    "message": "Puedes elegir cualquier monto para donar mensualmente.",
-    "description": "Text for the custom amount in the monthly subscription card."
+    "message": "Elige cuántos cafés al momento de pagar. ¡Gracias!",
+    "description": "Hint under the amount chips: the number of coffees is chosen at checkout."
   },
   "sidebarDarkModeLabel": {
     "message": "Modo Oscuro de la Barra Lateral",
