@@ -13,7 +13,9 @@
         "storage",
         "activeTab",
         "identity",
-        "alarms"
+        "alarms",
+        "contextMenus",
+        "favicon"
     ],
     "host_permissions": [
         "https://www.googleapis.com/*"

@@ -32,6 +32,14 @@ A powerful, open-source web annotation extension for Chrome, inspired by Zotero'
 *   **Click-to-Scroll:** Instantly navigate to any annotation on the page by clicking its card in the sidebar.
 *   **Resizable & Lockable:** Drag the edge to resize the sidebar and lock its width to your preference.
 
+### 🗂️ Global Annotations Panel
+*   **Everything in One Place:** A full-page panel lists every annotation from every website, grouped by page with its title and favicon, without opening any of those pages.
+*   **Search & Filters:** Full-text search across quotes and comments, plus filters by color, type, site and date, and several sort orders.
+*   **Edit from the Panel:** Change colors, switch between highlight and underline, edit rich-text comments, add page notes and delete annotations directly.
+*   **Jump Back to the Source:** Open the original page scrolled to the highlighted passage.
+*   **Export:** Download the visible annotations as Markdown or JSON, or copy a page's annotations as Markdown.
+*   **Always Reachable:** Open it from the sidebar, from the toolbar icon's right-click menu, or by clicking the icon on pages where the sidebar cannot load (for example Chrome's internal pages).
+
 ### ⚙️ Advanced Configuration
 *   **Granular Control:** Disable the extension on a specific page or an entire website.
 *   **Force Dark Text:** An option to force black text on highlights to ensure readability on any background.
@@ -109,6 +117,12 @@ If you prefer to install manually or want to test the latest development version
 2.  **Navigate Annotations:** See all annotations organized in a list.
 3.  **Scroll to, Edit, or Delete:** Click any annotation card to scroll to its position on the page. Use the buttons on the card to edit or delete it.
 4.  **Adjust Width:** Drag the left edge to resize the sidebar and use the lock icon to fix its size.
+
+### Managing Everything from the Annotations Panel
+1.  **Open the Panel:** Click the grid icon in the sidebar header, or right-click the extension icon and choose *View all my annotations*.
+2.  **Find Anything:** Search by text, or filter by color, type, site or date. Groups are collapsible per page.
+3.  **Edit in Place:** Change the color or type, edit the comment with the rich-text editor, add page notes, or delete annotations. Open tabs showing that page refresh automatically.
+4.  **Export:** Use the *Export* menu to download the visible annotations as Markdown or JSON.
 
 ## Technology Stack
 

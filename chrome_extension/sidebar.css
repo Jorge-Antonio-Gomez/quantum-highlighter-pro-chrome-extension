@@ -305,6 +305,14 @@ body:not(.locked) #resize-handle {
     margin-right: 2px;
 }
 
+/* El icono del panel global (cuadrícula) llena todo su viewBox, así que a
+   20px parece mayor que el engranaje: se dibuja al 90 % (18px). */
+#panel-button svg {
+    width: 18px;
+    height: 18px;
+    max-width: 18px;
+}
+
 #main-content {
     flex-grow: 1;
     position: relative;
@@ -1380,4 +1388,22 @@ body.dark-mode .slider {
 
 body.dark-mode input:checked + .slider {
     background-color: var(--highlighter-primary-color);
+}
+/* Nota de página (creada desde el panel global): no tiene resaltado en la
+   página, así que la tarjeta muestra una etiqueta en lugar de la cita. */
+.annotation-card.page-note .main-content {
+    cursor: default;
+}
+
+.annotation-card.page-note .text {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--highlighter-text-color-secondary);
+    padding: 2px 8px;
+    border-radius: 999px;
+    box-shadow: 0 0 0 1px var(--highlighter-border-color);
+    margin-bottom: 4px;
 }

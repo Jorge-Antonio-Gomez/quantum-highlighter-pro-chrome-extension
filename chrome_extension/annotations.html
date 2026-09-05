@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="images/icon128.png" type="image/png">
+    <title>All annotations · Quantum Highlighter PRO</title>
+    <link rel="stylesheet" href="libs/fonts.css">
+    <link rel="stylesheet" href="annotations.css">
+</head>
+<body>
+    <header class="topbar">
+        <div class="brand">
+            <img src="images/icon48.png" alt="" class="brand-icon">
+            <div class="brand-text">
+                <h1 data-i18n="panelTitle">All annotations</h1>
+                <span class="brand-sub" data-i18n="extensionName">Quantum Highlighter PRO</span>
+            </div>
+        </div>
+        <div class="topbar-actions">
+            <span id="backend-badge" class="badge" data-i18n-title="panelBackendTooltip"></span>
+            <button id="refresh-button" class="tb-button" type="button" data-i18n-title="panelRefresh">
+                <span class="icon" data-icon="refresh"></span>
+                <span data-i18n="panelRefresh">Refresh</span>
+            </button>
+            <div class="menu-wrapper">
+                <button id="export-button" class="tb-button" type="button" aria-haspopup="true" aria-expanded="false">
+                    <span class="icon" data-icon="download"></span>
+                    <span data-i18n="panelExport">Export</span>
+                    <span class="icon icon-sm" data-icon="chevron"></span>
+                </button>
+                <div id="export-menu" class="menu" hidden>
+                    <p class="menu-hint" data-i18n="panelExportHint">Exports the annotations currently shown.</p>
+                    <button class="menu-item" type="button" data-export="markdown" data-i18n="panelExportMarkdown">Markdown (.md)</button>
+                    <button class="menu-item" type="button" data-export="json" data-i18n="panelExportJson">JSON (.json)</button>
+                </div>
+            </div>
+            <button id="dark-toggle" class="tb-button icon-only" type="button" data-i18n-title="panelDarkMode" aria-pressed="false">
+                <span class="icon" data-icon="moon"></span>
+            </button>
+        </div>
+    </header>
+
+    <div id="cache-banner" class="banner" hidden>
+        <span class="icon" data-icon="cloud-off"></span>
+        <span data-i18n="panelCacheBanner"></span>
+    </div>
+
+    <div class="layout">
+        <aside class="filters">
+            <div class="search-wrapper">
+                <span class="icon" data-icon="search"></span>
+                <input id="search" type="search" data-i18n-placeholder="panelSearchPlaceholder" autocomplete="off" spellcheck="false">
+            </div>
+
+            <section class="filter-section">
+                <h3 data-i18n="panelFilterColors">Colors</h3>
+                <div id="color-filters" class="color-filters"></div>
+            </section>
+
+            <section class="filter-section">
+                <h3 data-i18n="panelFilterType">Type</h3>
+                <div class="segmented" id="type-filters">
+                    <button type="button" data-type="all" class="active" data-i18n="panelTypeAll">All</button>
+                    <button type="button" data-type="highlight" data-i18n="panelTypeHighlight">Highlights</button>
+                    <button type="button" data-type="underline" data-i18n="panelTypeUnderline">Underlines</button>
+                    <button type="button" data-type="note" data-i18n="panelTypeNote">Page notes</button>
+                </div>
+            </section>
+
+            <section class="filter-section">
+                <h3 data-i18n="panelFilterDate">Date</h3>
+                <select id="date-filter">
+                    <option value="all" data-i18n="panelDateAll">Any time</option>
+                    <option value="today" data-i18n="panelDateToday">Today</option>
+                    <option value="week" data-i18n="panelDateWeek">Last 7 days</option>
+                    <option value="month" data-i18n="panelDateMonth">Last 30 days</option>
+                    <option value="year" data-i18n="panelDateYear">This year</option>
+                </select>
+                <label class="check">
+                    <input type="checkbox" id="with-comment">
+                    <span data-i18n="panelOnlyWithComment">Only with a comment</span>
+                </label>
+            </section>
+
+            <section class="filter-section">
+                <h3 data-i18n="panelFilterSites">Sites</h3>
+                <ul id="site-filters" class="site-list"></ul>
+            </section>
+
+            <button id="clear-filters" class="link-button" type="button" data-i18n="panelClearFilters" hidden>Clear filters</button>
+            <div id="stats" class="stats"></div>
+        </aside>
+
+        <main class="results">
+            <div class="results-toolbar">
+                <span id="result-count" class="result-count"></span>
+                <div class="toolbar-right">
+                    <label class="sort-label">
+                        <span data-i18n="panelSortLabel">Sort by</span>
+                        <select id="sort">
+                            <option value="newest" data-i18n="panelSortNewest">Newest first</option>
+                            <option value="oldest" data-i18n="panelSortOldest">Oldest first</option>
+                            <option value="page" data-i18n="panelSortPage">Page A–Z</option>
+                            <option value="count" data-i18n="panelSortMostAnnotated">Most annotated</option>
+                        </select>
+                    </label>
+                    <button id="collapse-toggle" class="link-button" type="button" data-i18n="panelCollapseAll">Collapse all</button>
+                </div>
+            </div>
+
+            <div id="loading" class="state-box">
+                <div class="spinner"></div>
+                <p data-i18n="panelLoading">Loading your annotations…</p>
+            </div>
+            <div id="empty-state" class="state-box" hidden>
+                <span class="state-icon icon" data-icon="highlighter"></span>
+                <h2 data-i18n="panelEmptyTitle">No annotations yet</h2>
+                <p data-i18n="panelEmptyText">Highlight text on any web page and it will show up here.</p>
+            </div>
+            <div id="no-results" class="state-box" hidden>
+                <span class="state-icon icon" data-icon="search"></span>
+                <h2 data-i18n="panelNoResultsTitle">Nothing matches</h2>
+                <p data-i18n="panelNoResultsText">Try another search or clear the filters.</p>
+            </div>
+            <div id="groups"></div>
+        </main>
+    </div>
+
+    <div id="toast" class="toast" hidden></div>
+
+    <script src="libs/tiptap.js"></script>
+    <script src="storage-backend.js"></script>
+    <script src="annotations.js"></script>
+</body>
+</html>

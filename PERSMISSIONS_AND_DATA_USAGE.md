@@ -4,7 +4,7 @@ This document provides a transparent overview of why Quantum Highlighter PRO req
 
 ## 1. Single Purpose of the Extension
 
-The extension is a web annotation system that allows users to highlight and underline text on any webpage. Users can add rich-text comments to their highlights, which are saved in the browser's own storage and managed through a sidebar. The purpose is to offer a tool for users to save and organize important snippets of information directly on the pages they visit, without relying on any developer-operated service. Optionally — and only if the user explicitly connects their account — annotations can be synced through a hidden, extension-private folder in the **user's own Google Drive**.
+The extension is a web annotation system that allows users to highlight and underline text on any webpage. Users can add rich-text comments to their highlights, which are saved in the browser's own storage and managed through a sidebar and through a full-page panel that lists every annotation across all websites. The purpose is to offer a tool for users to save and organize important snippets of information directly on the pages they visit, without relying on any developer-operated service. Optionally — and only if the user explicitly connects their account — annotations can be synced through a hidden, extension-private folder in the **user's own Google Drive**.
 
 ---
 
@@ -22,6 +22,10 @@ To achieve its purpose, the extension requires the following permissions:
 
 *   **`alarms`:** Used only by the Google Drive sync to retry pending uploads in the background (for example, annotations created while offline are uploaded when the connection returns). The alarm merely wakes the extension's service worker on a schedule; it carries no user data and is removed as soon as there is nothing pending.
 
+*   **`contextMenus`:** Adds a single entry, *View all my annotations*, to the right-click menu of the extension's toolbar icon. It only opens the extension's own annotations panel page; no entries are added to the context menu of web pages.
+
+*   **`favicon`:** Lets the annotations panel show the favicon of each annotated page next to its title, using the icons Chrome already keeps in its local favicon cache. This is purely cosmetic and causes no network requests by the extension.
+
 *   **Host Permission (`https://www.googleapis.com/*`):** Allows the extension to call the official Google Drive API — exclusively to read and write its own annotation files in the hidden app-data folder of the **user's own** Google Drive, and only while the user is signed in. No other host is ever contacted by the extension, and no request to this host is made if the user has not connected Google Drive.
 
 ---
@@ -35,7 +39,7 @@ The extension handles the following types of user data. Everything is stored on 
     *   **Why it's handled:** This is necessary for the extension to be interactive. For example, it needs to know when a user has finished selecting text to show the highlighter menu, or when a user clicks a button to save a note. This activity is processed in real-time and is not logged or analyzed.
 
 *   **Website Content:**
-    *   **What is handled:** The extension saves the text content that the user specifically selects from a webpage.
+    *   **What is handled:** The extension saves the text content that the user specifically selects from a webpage, together with the address of the page (without tracking parameters) and its title, so the annotation can be found again on that page and listed under it in the sidebar and the annotations panel.
     *   **Why it's handled:** This is the core of an annotation. The selected text is saved so it can be displayed as a highlight and stored alongside any associated notes in the sidebar.
 
 *   **Google Account Information (only if the user connects Google Drive):**

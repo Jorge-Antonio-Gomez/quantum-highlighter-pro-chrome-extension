@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resizeHandle = document.getElementById('resize-handle');
     const lockButton = document.getElementById('lock-button');
     const configButton = document.getElementById('config-button');
+    const panelButton = document.getElementById('panel-button');
     const closeButton = document.getElementById('close-button');
     const annotationsList = document.getElementById('annotations-list');
     const forceBlackSwitch = document.getElementById('force-black-switch');
@@ -41,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- STATE ---
     let myTabId = null;
+    let currentPageUrl = null; // pageUrl normalizada del content script (para el panel global)
     let isLocked = false;
     let lastStoredWidth = 420;
     let settings = {
@@ -453,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const commentEl = node.querySelector('.comment');
                 const colorBar = node.querySelector('.annotation-color-bar');
 
-                if (textEl.innerHTML !== annotation.text) {
+                if (annotation.type !== 'note' && textEl.innerHTML !== annotation.text) {
                     textEl.innerHTML = annotation.text;
                 }
                 const newCommentHtml = annotation.comment ? annotation.comment : `<span class="no-comment-placeholder">${chrome.i18n.getMessage('noComment')}</span>`;
@@ -508,6 +510,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = document.createElement('div');
         text.className = 'text';
         text.innerHTML = annotation.text;
+        if (annotation.type === 'note') {
+            // Nota de página (sin anclaje): etiqueta en lugar de cita.
+            card.classList.add('page-note');
+            text.textContent = chrome.i18n.getMessage('panelPageNoteLabel');
+        }
         
         const commentDisplay = document.createElement('div');
         commentDisplay.className = 'comment';
@@ -529,6 +536,8 @@ document.addEventListener('DOMContentLoaded', () => {
         card.appendChild(actionsContainer);
 
         mainContent.addEventListener('click', () => {
+            // Nota de página: no hay resaltado al que desplazarse.
+            if (card.classList.contains('page-note')) return;
             // Huérfana: el resaltado no está en la página, no hay a dónde
             // desplazarse. El anclaje se reintenta solo en cada visita.
             if (card.classList.contains('orphaned')) {
@@ -607,6 +616,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             if (response) {
+                currentPageUrl = response.pageUrl || null;
                 websiteTitle.textContent = response.title || 'No Title';
                 websiteDescription.textContent = response.description || 'No description available.';
                 websiteDomain.textContent = response.domain || '';
@@ -676,6 +686,12 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         chrome.tabs.sendMessage(myTabId, { action: 'startSidebarResize' });
     });
+
+    if (panelButton) {
+        panelButton.addEventListener('click', () => {
+            chrome.runtime.sendMessage({ action: 'openAnnotationsPanel', pageUrl: currentPageUrl || undefined });
+        });
+    }
 
     configButton.addEventListener('click', (e) => {
         e.stopPropagation();

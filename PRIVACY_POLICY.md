@@ -20,6 +20,7 @@ Quantum Highlighter PRO handles a minimal amount of data, which is essential for
 | Data Type | What It Is | Why It's Needed |
 | :--- | :--- | :--- |
 | **Website Content** | The specific text you select on a webpage to create a highlight or an underline. | This is the core of your annotation. The extension needs to save this text to display it in the sidebar and associate it with your notes. |
+| **Page Title and Address** | The title of the page you annotate and its address, without tracking parameters. | They let the extension find your annotations again when you revisit the page and label each page in the sidebar and in the annotations panel. |
 | **User-Generated Content** | The notes and comments you write for each of your highlights. These can include rich text formatting (like bold or links). | This allows you to add context and personal insights to your highlights, which is a key feature of the extension. |
 | **Web Page URL** | The web address (URL) of the page where you create an annotation. | This is crucial for ensuring your highlights and notes automatically appear on the correct page when you revisit it. |
 | **User Activity** | Direct interactions with the extension, such as mouse clicks to select text, menu choices, and keyboard shortcuts. | The extension needs to respond to these actions to function. For example, it detects a `mouseup` event to know when to show the highlighter menu. This activity is not logged or analyzed. |
@@ -35,7 +36,7 @@ Quantum Highlighter PRO handles a minimal amount of data, which is essential for
 *   **Local and Secure:** These are standard, secure storage solutions provided and managed by your web browser. The extension does not have its own database or servers.
 *   **Browser Sync Feature:** If you are logged into your Google Account in your Chrome browser, Google may automatically sync the `chrome.storage.sync` data across your devices where you have the extension installed. This is a feature of the browser itself, and its privacy is governed by Google's Privacy Policy. We do not control this process.
 
-**Optional Google Drive sync (opt-in):** if you explicitly connect your Google Account from the sidebar settings, your annotations are stored in the extension's hidden application-data folder (`appDataFolder`) of **your own Google Drive**, as one JSON file per annotated page containing the selected text, your notes, colors, the page URL, timestamps, and deletion markers.
+**Optional Google Drive sync (opt-in):** if you explicitly connect your Google Account from the sidebar settings, your annotations are stored in the extension's hidden application-data folder (`appDataFolder`) of **your own Google Drive**, as one JSON file per annotated page containing the selected text, your notes, colors, the page URL and title, timestamps, and deletion markers.
 
 *   **Strictly limited access:** the only OAuth scope requested is `drive.appdata`. The extension **cannot see, read, or modify any other file in your Drive**, and the hidden folder is accessible only to this extension — not to us, not to other apps.
 *   **Direct connection:** your data travels exclusively between your browser and Google's servers over HTTPS. It never passes through any server of ours (we have none).

@@ -10,6 +10,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     await chrome.storage.sync.set({ 'highlighter-settings': { useDarkText: true } });
   }
   if (details.reason === "install" || details.reason === "update") {
+    installPanelContextMenu();
     const url = chrome.runtime.getURL("excluded-websites.json");
     try {
       const response = await fetch(url);
@@ -35,10 +36,10 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 
 chrome.action.onClicked.addListener((tab) => {
     if (tab.id) {
-        chrome.tabs.sendMessage(tab.id, { action: "toggleSidebar" }).catch(err => {
-            // This error is expected on pages where the content script can't run,
-            // so we can safely ignore it.
-            console.log("Could not connect to content script. This is expected on some pages (e.g., chrome://newtab).");
+        chrome.tabs.sendMessage(tab.id, { action: "toggleSidebar" }).catch(() => {
+            // Sin content script (chrome://, tienda, visor de PDF…): el sidebar
+            // no puede cargarse, así que se abre el panel global de anotaciones.
+            openAnnotationsPanel();
         });
     }
 });
@@ -46,6 +47,10 @@ chrome.action.onClicked.addListener((tab) => {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'openTab') {
         chrome.tabs.create({ url: request.url, active: true });
+        return;
+    }
+    if (request.action === 'openAnnotationsPanel') {
+        openAnnotationsPanel(request.pageUrl);
         return;
     }
     if (typeof request.action === 'string' && request.action.startsWith('drive:')) {
@@ -57,6 +62,60 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // El resto de acciones (settingsChanged, annotationsUpdated, …) son
     // broadcasts entre content script y sidebar; el SW no participa.
 });
+
+/* =====================================================================
+ * Panel de anotaciones (annotations.html)
+ *
+ * Página de la extensión a pestaña completa con TODAS las anotaciones de
+ * todos los sitios. Se abre desde el sidebar, desde el menú contextual del
+ * icono y, como alternativa, al pulsar el icono en páginas donde el
+ * content script no puede ejecutarse. Se reutiliza la pestaña si ya existe.
+ * ===================================================================== */
+
+const PANEL_PATH = 'annotations.html';
+const PANEL_MENU_ID = 'qhp-open-annotations-panel';
+
+async function openAnnotationsPanel(pageUrl) {
+    const base = chrome.runtime.getURL(PANEL_PATH);
+    try {
+        const tabs = await chrome.tabs.query({ url: `${base}*` });
+        // Sin permiso "tabs", Chrome ignora el filtro `url` y devuelve todas
+        // las pestañas: comprobar la URL antes de reutilizar una.
+        const panelTab = (tabs || []).find((tab) => typeof tab.url === 'string' && tab.url.startsWith(base));
+        if (panelTab) {
+            const tab = panelTab;
+            await chrome.tabs.update(tab.id, { active: true });
+            if (typeof tab.windowId === 'number') {
+                await chrome.windows.update(tab.windowId, { focused: true });
+            }
+            if (pageUrl) {
+                chrome.tabs.sendMessage(tab.id, { action: 'panel:focusPage', pageUrl }).catch(() => {});
+            }
+            return;
+        }
+    } catch (e) {
+        // Sin permiso para filtrar pestañas por URL: se abre una nueva.
+    }
+    const url = pageUrl ? `${base}?page=${encodeURIComponent(pageUrl)}` : base;
+    await chrome.tabs.create({ url, active: true });
+}
+
+function installPanelContextMenu() {
+    if (!chrome.contextMenus) return;
+    chrome.contextMenus.removeAll(() => {
+        chrome.contextMenus.create({
+            id: PANEL_MENU_ID,
+            title: chrome.i18n.getMessage('openAnnotationsPanel'),
+            contexts: ['action'],
+        });
+    });
+}
+
+if (chrome.contextMenus) {
+    chrome.contextMenus.onClicked.addListener((info) => {
+        if (info.menuItemId === PANEL_MENU_ID) openAnnotationsPanel();
+    });
+}
 
 /* =====================================================================
  * Sincronización con Google Drive (drive.appdata) — F2.1–F2.3 del plan.
@@ -611,6 +670,7 @@ async function handleDriveMessage(request) {
         case 'drive:signIn': return handleSignIn();
         case 'drive:signOut': return handleSignOut(request);
         case 'drive:loadPage': return handleLoadPage(String(request.pageUrl || ''));
+        case 'drive:loadAll': return handleLoadAll();
         case 'drive:saveAnnotation': return handleSaveAnnotation(request);
         case 'drive:removeAnnotation': return handleRemoveAnnotation(request);
         case 'drive:stats': return handleStats();
@@ -851,6 +911,42 @@ async function handleLoadPage(pageUrl) {
     return { ok: true, annotations: QHP.shared.liveAnnotations(effective) };
 }
 
+
+/**
+ * Todas las páginas con anotaciones vivas, para el panel global. Lee Drive
+ * (o la caché local si no hay acceso, `fromCache: true`), refresca la caché
+ * y aplica la cola pendiente igual que `handleLoadPage`.
+ */
+async function handleLoadAll() {
+    const session = await getDriveSession();
+    if (!session.signedIn) throw new Error('Google Drive no conectado');
+
+    const { bodies, fromCache } = await collectDrivePageBodies();
+    const queue = await readQueue();
+    const opsByPage = new Map();
+    for (const op of queue) {
+        if (!op || !op.pageUrl) continue;
+        if (!opsByPage.has(op.pageUrl)) opsByPage.set(op.pageUrl, []);
+        opsByPage.get(op.pageUrl).push(op);
+    }
+
+    const pages = [];
+    for (const [pageUrl, body] of bodies) {
+        if (!fromCache) {
+            try { await setCachedPageBody(await sha256Hex(pageUrl), body); } catch (e) { /* caché opcional */ }
+        }
+        const ops = opsByPage.get(pageUrl) || [];
+        const effective = ops.length > 0 ? QHP.shared.applyOpsToPageBody(body, ops) : body;
+        pages.push({ pageUrl, annotations: QHP.shared.liveAnnotations(effective) });
+    }
+    // Páginas creadas offline que aún no existen en Drive: solo viven en la cola.
+    for (const [pageUrl, ops] of opsByPage) {
+        if (bodies.has(pageUrl)) continue;
+        const effective = QHP.shared.applyOpsToPageBody(QHP.shared.emptyPageBody(pageUrl), ops);
+        pages.push({ pageUrl, annotations: QHP.shared.liveAnnotations(effective) });
+    }
+    return { ok: true, pages, fromCache };
+}
 /**
  * files.list vacío es autoritativo: la página no existe en Drive (p. ej.
  * appDataFolder vaciado externamente) y se devuelve un cuerpo vacío, que

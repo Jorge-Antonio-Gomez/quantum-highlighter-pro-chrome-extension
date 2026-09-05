@@ -2279,6 +2279,9 @@
 
             const pending = [];
             this.annotations.forEach(annotation => {
+                // Las notas de página (creadas desde el panel global) no tienen
+                // anclaje: no se pintan ni cuentan como huérfanas.
+                if (annotation.type === 'note') return;
                 if (!document.querySelector(`[data-annotation-id="${annotation.id}"]`)) {
                     pending.push(annotation);
                 }
@@ -2407,6 +2410,12 @@
             const annotationsArray = Array.from(this.annotations.values());
 
             annotationsArray.sort((a, b) => {
+                // Las notas de página no tienen mark: van al principio.
+                const noteA = a.type === 'note';
+                const noteB = b.type === 'note';
+                if (noteA !== noteB) return noteA ? -1 : 1;
+                if (noteA && noteB) return 0;
+
                 const elA = document.querySelector(`[data-annotation-id='${a.id}']`);
                 const elB = document.querySelector(`[data-annotation-id='${b.id}']`);
 
@@ -2533,7 +2542,10 @@
                 comment: '',
                 createdAt: new Date().toISOString(),
                 contentUpdatedAt: now,
-                anchorsUpdatedAt: now
+                anchorsUpdatedAt: now,
+                // Título de la página para el panel global de anotaciones
+                // (capado: en el backend sync cada byte cuenta).
+                pageTitle: String(document.title || '').trim().slice(0, 120),
             };
 
             // Selectores robustos (cita + posición) para re-anclar aunque la
@@ -2747,6 +2759,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 window.highlighterInstance.deleteAnnotation(request.annotationId, true)
                     .then(() => sendResponse({ status: 'deleted' }));
                 return true; // Keep channel open for async response
+            case 'reloadAnnotations':
+                // El panel global editó/borró anotaciones de esta página.
+                if (!request.pageUrl || request.pageUrl === window.highlighterInstance.currentUrl) {
+                    window.highlighterInstance._reloadFromBackend();
+                }
+                sendResponse({ status: 'reloaded' });
+                return;
             case 'settingChanged':
                 window.highlighterInstance.updateSettings(request.settings);
                 sendResponse({ status: 'settings updated' });
@@ -2790,7 +2809,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 image,
                 favicon,
                 url: window.location.href,
-                domain: window.location.hostname
+                domain: window.location.hostname,
+                pageUrl: window.highlighterInstance ? window.highlighterInstance.currentUrl : undefined
             });
             break;
         case 'toggleDisablePage':
