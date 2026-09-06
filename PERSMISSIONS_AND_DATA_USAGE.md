@@ -76,7 +76,7 @@ These are the declarations made in the developer dashboard for this extension, k
 
 | Declaration | Value |
 | :--- | :--- |
-| Data types handled | Website content (selected text and its context; address and title of pages the user annotates) and user activity (interactions with the extension). No personally identifiable, health, financial, authentication, location or communications data; no browsing history. |
+| Data types handled | Website content (selected text and its context; address and title of pages the user annotates), user activity (interactions with the extension) and, only if the user connects the optional Google Drive sync, one item of personally identifiable information: the email address of the connected Google Account, kept on the device solely to show which account is syncing. No health, financial, authentication, location or communications data; no browsing history. |
 | Data sold to third parties | Never. |
 | Data used or transferred for purposes unrelated to the single purpose | Never. |
 | Data used or transferred to determine creditworthiness or for lending | Never. |
