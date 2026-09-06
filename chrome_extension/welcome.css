@@ -70,6 +70,12 @@ body {
     flex-shrink: 0;
 }
 
+.top-links {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
 .github-link {
     border: none;
 }
@@ -545,4 +551,78 @@ h2 {
         margin: 0 -20px -20px -20px;
         padding: 40px 20px;
     }
+}
+
+/* Divulgación destacada de prácticas de datos (política CWS 2026) */
+.disclosure {
+    margin-top: 28px;
+    padding: 22px 26px;
+    border: 1px solid var(--highlighter-border-color);
+    border-left: 4px solid var(--highlighter-primary-color);
+    border-radius: 10px;
+    background-color: #fffaf5;
+    text-align: left;
+}
+
+.disclosure h2 {
+    margin: 0 0 6px;
+    font-size: 1.2em;
+    text-align: left;
+    color: #3a2820;
+}
+
+.disclosure-intro {
+    margin: 0 0 12px;
+    color: #64748b;
+}
+
+.disclosure-list {
+    margin: 0 0 16px;
+    padding-left: 20px;
+    color: #334155;
+}
+
+.disclosure-list li {
+    margin-bottom: 8px;
+}
+
+.disclosure-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.disclosure-link {
+    color: var(--highlighter-primary-color);
+    font-weight: 500;
+}
+
+.disclosure-accept {
+    padding: 10px 22px;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--highlighter-primary-color);
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.disclosure-accept:hover {
+    background-color: #d97706;
+}
+
+.disclosure-accept:disabled {
+    background-color: #94a3b8;
+    cursor: default;
+}
+
+.disclosure-accepted {
+    margin: 12px 0 0;
+    color: #15803d;
+    font-size: 0.95em;
 }

@@ -478,6 +478,7 @@
     // ------------------------------------------------------------------
     function renderAll() {
         renderBackend();
+        renderPrivacyNote();
         renderSites();
         render();
     }
@@ -485,6 +486,51 @@
     function renderBackend() {
         els.backendBadge.textContent = t(state.backend === 'drive' ? 'panelBackendDrive' : 'panelBackendSync');
         els.cacheBanner.hidden = !(state.backend === 'drive' && state.fromCache);
+    }
+
+    /** Nota permanente de privacidad en el lateral (divulgación destacada). */
+    function renderPrivacyNote() {
+        els.privacyNoteText.textContent = t(state.backend === 'drive' ? 'panelPrivacyNoteDrive' : 'panelPrivacyNoteSync');
+        const disclosure = QHP.disclosure;
+        if (disclosure) els.privacyNoteLink.href = disclosure.PRIVACY_POLICY_URL;
+    }
+
+    // ------------------------------------------------------------------
+    // Aviso de prácticas de datos (consentimiento / cambios tras actualizar)
+    // ------------------------------------------------------------------
+    function hideDisclosure() {
+        els.disclosureOverlay.hidden = true;
+    }
+
+    function maybeShowDisclosure() {
+        const disclosure = QHP.disclosure;
+        if (!disclosure) return;
+        disclosure.getState((disclosureState) => {
+            if (!disclosureState.needed) return;
+            const content = disclosure.content(disclosureState.mode);
+            els.disclosureTitle.textContent = content.title;
+            els.disclosureIntro.textContent = content.intro;
+            const parts = [];
+            const addList = (headingText, items) => {
+                const h4 = document.createElement('h4');
+                h4.textContent = headingText;
+                const ul = document.createElement('ul');
+                for (const item of items) {
+                    const li = document.createElement('li');
+                    li.textContent = item;
+                    ul.appendChild(li);
+                }
+                parts.push(h4, ul);
+            };
+            if (content.changes.length > 0) addList(content.changesHeading, content.changes);
+            addList(content.practicesHeading, content.items);
+            els.disclosureBody.replaceChildren(...parts);
+            els.disclosureLink.href = content.url;
+            els.disclosureLink.textContent = content.link;
+            els.disclosureAccept.textContent = content.accept;
+            els.disclosureOverlay.hidden = false;
+            els.disclosureAccept.focus();
+        });
     }
 
     async function renderStats() {
@@ -1383,6 +1429,12 @@
 
         els.darkToggle.addEventListener('click', () => { toggleTheme(); });
 
+        els.disclosureAccept.addEventListener('click', () => {
+            const disclosure = QHP.disclosure;
+            if (disclosure) disclosure.acknowledge(hideDisclosure);
+            else hideDisclosure();
+        });
+
         els.groups.addEventListener('click', onGroupsClick);
         // Los botones de la barra de formato no deben robar el foco al editor.
         els.groups.addEventListener('mousedown', (event) => {
@@ -1396,6 +1448,10 @@
 
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {
+                if (!els.disclosureOverlay.hidden) {
+                    hideDisclosure();
+                    return;
+                }
                 closePopovers();
                 if (state.editing) cancelEdit(true);
                 return;
@@ -1433,6 +1489,9 @@
             if (namespace === 'sync' && changes[SETTINGS_KEY]) {
                 state.settings = { ...state.settings, ...(changes[SETTINGS_KEY].newValue || {}) };
                 applyTheme();
+            }
+            if (namespace === 'sync' && QHP.disclosure && changes[QHP.disclosure.ACK_KEY]) {
+                hideDisclosure();
             }
             if (namespace === 'local' && changes[SESSION_KEY]) {
                 // Iniciar/cerrar sesión de Drive cambia el backend: recargar todo.
@@ -1475,12 +1534,21 @@
             noResults: document.getElementById('no-results'),
             groups: document.getElementById('groups'),
             toast: document.getElementById('toast'),
+            privacyNoteText: document.getElementById('privacy-note-text'),
+            privacyNoteLink: document.getElementById('privacy-note-link'),
+            disclosureOverlay: document.getElementById('disclosure-overlay'),
+            disclosureTitle: document.getElementById('disclosure-title'),
+            disclosureIntro: document.getElementById('disclosure-intro'),
+            disclosureBody: document.getElementById('disclosure-body'),
+            disclosureLink: document.getElementById('disclosure-link'),
+            disclosureAccept: document.getElementById('disclosure-accept'),
         });
 
         document.querySelectorAll('[data-icon]').forEach((el) => { el.innerHTML = iconSvg(el.dataset.icon); });
         localize();
         buildColorFilters();
         wireEvents();
+        maybeShowDisclosure();
 
         chrome.storage.sync.get(SETTINGS_KEY, (items) => {
             state.settings = { ...state.settings, ...((items && items[SETTINGS_KEY]) || {}) };

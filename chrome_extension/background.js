@@ -1,6 +1,6 @@
 // Helpers puros compartidos con el content script (QHP.shared): merge LWW
 // doble, tombstones, cuerpos de página y reensamblado de chunks.
-importScripts('storage-backend.js');
+importScripts('storage-backend.js', 'disclosure.js');
 
 chrome.runtime.onInstalled.addListener(async (details) => {
   if (details.reason === "install") {
@@ -8,6 +8,11 @@ chrome.runtime.onInstalled.addListener(async (details) => {
       url: "welcome.html"
     });
     await chrome.storage.sync.set({ 'highlighter-settings': { useDarkText: true } });
+  }
+  if (details.reason === "update") {
+    // Política CWS 2026: avisar de cambios en las prácticas de datos tras una
+    // actualización. Deja marcado que hay que mostrar "qué cambió".
+    QHP.disclosure.markUpdate();
   }
   if (details.reason === "install" || details.reason === "update") {
     installPanelContextMenu();

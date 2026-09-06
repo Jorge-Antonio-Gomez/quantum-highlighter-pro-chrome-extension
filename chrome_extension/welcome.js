@@ -30,6 +30,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- DATA DISCLOSURE (consent recorded once per practices version) ---
+    function setupDisclosure() {
+        const disclosure = globalThis.QHP && globalThis.QHP.disclosure;
+        const button = document.getElementById('disclosure-accept');
+        const accepted = document.getElementById('disclosure-accepted');
+        if (!disclosure || !button || !accepted) return;
+        const markAccepted = () => {
+            button.disabled = true;
+            accepted.hidden = false;
+        };
+        disclosure.getState((state) => {
+            if (!state.needed) markAccepted();
+        });
+        button.addEventListener('click', () => {
+            disclosure.acknowledge(markAccepted);
+        });
+    }
+
     // --- ELEMENTS ---
     const colorIcon = document.getElementById('color-cycle-icon');
 
@@ -49,5 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     localizeHtmlPage();
     localizeSupportLinks();
+    setupDisclosure();
     initialize();
 });

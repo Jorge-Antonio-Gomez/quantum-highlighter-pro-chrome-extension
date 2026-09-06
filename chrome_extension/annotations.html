@@ -90,6 +90,10 @@
 
             <button id="clear-filters" class="link-button" type="button" data-i18n="panelClearFilters" hidden>Clear filters</button>
             <div id="stats" class="stats"></div>
+            <div id="privacy-note" class="privacy-note">
+                <p id="privacy-note-text"></p>
+                <a id="privacy-note-link" target="_blank" rel="noopener noreferrer" data-i18n="disclosureLink">Read the full privacy policy</a>
+            </div>
         </aside>
 
         <main class="results">
@@ -127,10 +131,23 @@
         </main>
     </div>
 
+    <div id="disclosure-overlay" class="modal-overlay" hidden>
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="disclosure-title">
+            <h2 id="disclosure-title"></h2>
+            <p id="disclosure-intro" class="modal-intro"></p>
+            <div id="disclosure-body"></div>
+            <div class="modal-actions">
+                <a id="disclosure-link" class="btn" target="_blank" rel="noopener noreferrer"></a>
+                <button id="disclosure-accept" class="btn primary" type="button"></button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast" class="toast" hidden></div>
 
     <script src="libs/tiptap.js"></script>
     <script src="storage-backend.js"></script>
+    <script src="disclosure.js"></script>
     <script src="annotations.js"></script>
 </body>
 </html>

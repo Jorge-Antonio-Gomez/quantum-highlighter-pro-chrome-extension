@@ -1407,3 +1407,39 @@ body.dark-mode input:checked + .slider {
     box-shadow: 0 0 0 1px var(--highlighter-border-color);
     margin-bottom: 4px;
 }
+
+/* Aviso de prácticas de datos (mismo contenedor que el modal de sync). */
+.disclosure-modal {
+    max-width: 360px;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+}
+
+.disclosure-modal h4 {
+    margin: 10px 0 4px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--highlighter-text-color-secondary);
+}
+
+.disclosure-modal ul {
+    margin: 0 0 6px;
+    padding-left: 18px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--highlighter-text-color);
+}
+
+.disclosure-modal li {
+    margin-bottom: 4px;
+}
+
+.sync-modal-buttons a.sync-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-sizing: border-box;
+}

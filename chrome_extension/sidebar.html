@@ -187,6 +187,18 @@
         </div>
     </div>
 
+    <div id="disclosure-modal-overlay" class="sync-modal-overlay" style="display: none;">
+        <div class="sync-modal disclosure-modal" role="dialog" aria-modal="true" aria-labelledby="disclosure-modal-title">
+            <h3 id="disclosure-modal-title"></h3>
+            <p id="disclosure-modal-intro"></p>
+            <div id="disclosure-modal-body"></div>
+            <div class="sync-modal-buttons">
+                <a id="disclosure-modal-link" class="sync-button" target="_blank" rel="noopener noreferrer"><span></span></a>
+                <button id="disclosure-modal-accept" class="sync-button primary"><span></span></button>
+            </div>
+        </div>
+    </div>
+
     <div id="tooltip" class="tooltip"></div>
 
     <div id="refresh-toast" class="toast">
@@ -196,6 +208,7 @@
     <script src="libs/floating-ui-core.js"></script>
     <script src="libs/floating-ui-dom.umd.js"></script>
     
+    <script src="disclosure.js"></script>
     <script src="sidebar.js"></script>
 </body>
 </html>

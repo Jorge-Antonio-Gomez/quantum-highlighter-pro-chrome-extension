@@ -1308,6 +1308,114 @@
         }
     }
 
+    class DisclosureManager {
+        /**
+         * Divulgación destacada (política CWS 2026): aviso en página con lo
+         * que la extensión guarda y dónde, al crear la primera anotación, y
+         * "qué cambió" tras una actualización. Solo el botón de aceptar
+         * registra el consentimiento; cerrar sin aceptar lo vuelve a mostrar.
+         */
+        constructor(shadowRoot) {
+            this.shadowRoot = shadowRoot;
+            this.visible = false;
+        }
+
+        /** Resuelve true si el aviso se mostró (y entonces no toca mostrar otros modales). */
+        maybeShow() {
+            return new Promise((resolve) => {
+                const disclosure = globalThis.QHP && globalThis.QHP.disclosure;
+                if (!disclosure || this.visible) {
+                    resolve(false);
+                    return;
+                }
+                disclosure.getState((state) => {
+                    if (!state.needed) {
+                        resolve(false);
+                        return;
+                    }
+                    this.show(disclosure, state.mode);
+                    resolve(true);
+                });
+            });
+        }
+
+        show(disclosure, mode) {
+            const content = disclosure.content(mode);
+            const overlay = document.createElement('div');
+            overlay.className = 'highlighter-modal-overlay';
+            const modal = document.createElement('div');
+            modal.className = 'highlighter-disclosure-modal';
+            modal.setAttribute('role', 'dialog');
+            modal.setAttribute('aria-modal', 'true');
+
+            const heading = document.createElement('div');
+            heading.className = 'heading-wrapper';
+            const icon = document.createElement('img');
+            icon.src = chrome.runtime.getURL('images/icon128.png');
+            icon.alt = '';
+            const title = document.createElement('h3');
+            title.textContent = content.title;
+            heading.append(icon, title);
+
+            const intro = document.createElement('p');
+            intro.className = 'disclosure-intro';
+            intro.textContent = content.intro;
+            modal.append(heading, intro);
+
+            const appendList = (headingText, items) => {
+                const h4 = document.createElement('h4');
+                h4.textContent = headingText;
+                const ul = document.createElement('ul');
+                for (const item of items) {
+                    const li = document.createElement('li');
+                    li.textContent = item;
+                    ul.appendChild(li);
+                }
+                modal.append(h4, ul);
+            };
+            if (content.changes.length > 0) appendList(content.changesHeading, content.changes);
+            appendList(content.practicesHeading, content.items);
+
+            const actions = document.createElement('div');
+            actions.className = 'modal-actions';
+            const link = document.createElement('a');
+            link.className = 'policy-link';
+            link.href = content.url;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.textContent = content.link;
+            const accept = document.createElement('button');
+            accept.className = 'accept-btn';
+            accept.type = 'button';
+            accept.textContent = content.accept;
+            actions.append(link, accept);
+            modal.appendChild(actions);
+
+            overlay.appendChild(modal);
+            this.shadowRoot.appendChild(overlay);
+            this.visible = true;
+
+            const cleanup = () => {
+                document.removeEventListener('keydown', onKey, true);
+                overlay.remove();
+                this.visible = false;
+            };
+            const onKey = (e) => {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    cleanup();
+                }
+            };
+            accept.addEventListener('click', () => disclosure.acknowledge(cleanup));
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) cleanup();
+            });
+            document.addEventListener('keydown', onKey, true);
+            accept.focus();
+        }
+    }
+
     class DonationManager {
         constructor(shadowRoot) {
             this.shadowRoot = shadowRoot;
@@ -1544,6 +1652,7 @@
             }
             this.menu = new HighlightMenu();
             this.donationManager = new DonationManager(this.menu.shadowRoot);
+            this.disclosureManager = new DisclosureManager(this.menu.shadowRoot);
             this.annotations = new Map();
             this.colors = {
                 yellow: 'var(--highlighter-color-yellow)', red: 'var(--highlighter-color-red)',
@@ -2565,7 +2674,11 @@
 
             this.storage.saveAnnotation(annotation, () => {
                 this._notifySidebarOfUpdate();
-                this.donationManager.processNewAnnotation();
+                // Divulgación destacada antes que el recordatorio de apoyo: si
+                // se muestra el aviso de datos, el otro modal espera a otra vez.
+                this.disclosureManager.maybeShow().then((shown) => {
+                    if (!shown) this.donationManager.processNewAnnotation();
+                });
                 this.isCreatingAnnotation = false;
             });
         }

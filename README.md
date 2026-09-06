@@ -16,6 +16,9 @@ A powerful, open-source web annotation extension for Chrome, inspired by Zotero'
 *   **Robust & Dynamic:** Annotations persist reliably, even on dynamic websites like YouTube, thanks to a `MutationObserver`-based re-application system.
 *   **SPA Compatibility:** Advanced support for Single Page Applications (SPAs) with intelligent URL change detection and annotation management.
 *   **Smart URL Handling:** Intelligent parameter filtering for consistent annotation storage across different URL variations.
+*   **Robust Anchoring:** Every annotation stores the exact quote, a few words of context and its position (W3C-style selectors). When a page changes, highlights are re-anchored with fuzzy matching and heal themselves in the background.
+*   **Orphaned Annotations Stay Visible:** If a passage disappears from a page, the annotation is kept in the sidebar (marked as orphaned) and re-anchored automatically on later visits.
+*   **Copy to Clipboard:** One click in the annotation menu copies the highlighted text.
 
 ### 📝 Rich-Text Comments
 
@@ -43,6 +46,8 @@ A powerful, open-source web annotation extension for Chrome, inspired by Zotero'
 ### ⚙️ Advanced Configuration
 *   **Granular Control:** Disable the extension on a specific page or an entire website.
 *   **Force Dark Text:** An option to force black text on highlights to ensure readability on any background.
+*   **Force Solid Highlights:** Replace translucent highlights with solid colors on pages where the blend is hard to read.
+*   **Sidebar Dark Mode:** A dark theme for the sidebar and the annotations panel, remembered across sessions.
 
 ### ☁️ Cross-Device Sync
 *   **Automatic Synchronization:** Out of the box, your annotations and settings are saved to your Google account via `chrome.storage.sync` — no sign-in required.
@@ -124,6 +129,17 @@ If you prefer to install manually or want to test the latest development version
 3.  **Edit in Place:** Change the color or type, edit the comment with the rich-text editor, add page notes, or delete annotations. Open tabs showing that page refresh automatically.
 4.  **Export:** Use the *Export* menu to download the visible annotations as Markdown or JSON.
 
+## Release Notes
+
+Version numbers follow `YYYY.MMDD.N` (publication date plus a daily counter). The Chrome Web Store compares versions number by number and only accepts strictly increasing ones, which is why the month and day keep their leading zeros.
+
+| Version | Date | Highlights |
+| :--- | :--- | :--- |
+| 2026.0905.2 | 2026-09-05 | Global *All annotations* panel (search, filters, editing, page notes, Markdown/JSON export), support links moved from PayPal to Stripe, new store marquee, legal documents aligned with the Chrome Web Store policies in force since August 2026. |
+| 2026.0708.1 | 2026-07-08 | Optional Google Drive sync, robust W3C-style anchoring with self-healing, orphaned annotations surfaced instead of hidden, storage chunking measured in bytes, copy-to-clipboard button. |
+| 2025.0816.1 | 2025-08-16 | Sidebar dark mode, force solid highlights, storage chunking, extension name in the sidebar header. |
+| 2025.0802.1 | 2025-08-02 | Official launch on the Chrome Web Store. |
+
 ## Technology Stack
 
 *   **Chrome Extension Manifest V3:** Modern, secure, and performant extension architecture.
@@ -131,13 +147,15 @@ If you prefer to install manually or want to test the latest development version
 *   **Tiptap:** A headless, framework-agnostic rich-text editor for advanced comments.
 *   **Floating UI:** A powerful library for intelligently positioning floating elements like context menus.
 *   **Custom i18n System:** A dependency-free internationalization system.
+*   **approx-string-match (vendored):** Approximate string matching used to re-anchor highlights when a page changes.
 
 ## Privacy and Security
 
-The extension is designed with your privacy in mind. Your data lives in your browser's storage and — only if you opt in — in a hidden, extension-private folder of your own Google Drive; it is never sent to any server operated by the developer. For more details, please see the following documents:
+The extension is designed with your privacy in mind. Your data lives in your browser's storage and — only if you opt in — in a hidden, extension-private folder of your own Google Drive; it is never sent to any server operated by the developer. The sidebar and the *All annotations* panel are pages of the extension that read that same storage. The extension ships no remote code and no analytics, and its documents are kept aligned with the Chrome Web Store Developer Program Policies (including the Limited Use and Disclosure Requirements updates enforced since August 1, 2026). What it stores and where is stated inside the product too: on the welcome page and in a short notice shown until you acknowledge it, which also lists any change in data practices after an update. For more details, please see the following documents:
 
 *   **[Privacy Policy](PRIVACY_POLICY.md):** Understand how your data is handled.
 *   **[Permissions and Data Usage](PERSMISSIONS_AND_DATA_USAGE.md):** A detailed explanation of the permissions requested by the extension.
+*   **[Store Listing Texts](STORE_LISTING.md):** The exact texts declared in the Chrome Web Store Developer Dashboard.
 *   **[Security Policy](SECURITY.md):** Our commitment to keeping the extension secure.
 
 ## Contributing

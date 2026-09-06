@@ -42,6 +42,18 @@ To help us resolve the issue quickly, please include the following in your repor
 
 Thank you for helping to keep Quantum Highlighter PRO secure.
 
+## Security Design
+
+A short summary of the measures built into the extension, so reviewers and researchers know where to look:
+
+*   **No remote code (Manifest V3):** every script ships inside the package; nothing is fetched, injected from strings, or evaluated at runtime. Third-party libraries (Tiptap, Floating UI, approx-string-match) are vendored in `libs/` in readable, non-obfuscated form.
+*   **Minimal permissions:** no `tabs` permission and no broad host permissions beyond the content scripts; the only host permission is `https://www.googleapis.com/*`, used solely by the opt-in Google Drive sync. See [Permissions and Data Usage](PERSMISSIONS_AND_DATA_USAGE.md).
+*   **Sign-in handled by Chrome:** the Drive sync uses `chrome.identity` with the `drive.appdata` scope only. The extension never sees passwords, keeps no long-lived secrets, and drops the cached token on disconnect. The service worker is the only component that holds the token.
+*   **Encrypted transport:** all Drive traffic goes over HTTPS directly between the browser and Google; there is no developer server in between.
+*   **Isolation on web pages:** the in-page menu lives in a shadow DOM and the sidebar in an extension iframe, so page scripts cannot reach them. Links in comments open with `noopener noreferrer`.
+*   **Sanitized rendering:** the *All annotations* panel renders comments through an allow-list sanitizer (tags and safe `href` schemes only) before inserting them into the page.
+*   **No data collection:** no analytics, telemetry, or crash reporting, which also means there is nothing to leak. Details in the [Privacy Policy](PRIVACY_POLICY.md).
+
 ---
 ## Related Documents
 

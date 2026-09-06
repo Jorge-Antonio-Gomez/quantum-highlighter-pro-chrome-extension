@@ -39,6 +39,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const syncModalNote = document.getElementById('sync-modal-note');
     const syncModalPrimary = document.getElementById('sync-modal-primary');
     const syncModalSecondary = document.getElementById('sync-modal-secondary');
+    const disclosureOverlay = document.getElementById('disclosure-modal-overlay');
+    const disclosureTitle = document.getElementById('disclosure-modal-title');
+    const disclosureIntro = document.getElementById('disclosure-modal-intro');
+    const disclosureBody = document.getElementById('disclosure-modal-body');
+    const disclosureLink = document.getElementById('disclosure-modal-link');
+    const disclosureAccept = document.getElementById('disclosure-modal-accept');
 
     // --- STATE ---
     let myTabId = null;
@@ -261,6 +267,55 @@ document.addEventListener('DOMContentLoaded', () => {
         syncModalOverlay.style.display = 'none';
         syncModalHandlers = { primary: null, secondary: null };
     }
+
+    // --- AVISO DE PRÁCTICAS DE DATOS (divulgación destacada, política CWS 2026) ---
+    function hideDisclosure() {
+        if (disclosureOverlay) disclosureOverlay.style.display = 'none';
+    }
+
+    function maybeShowDisclosure() {
+        const disclosure = globalThis.QHP && globalThis.QHP.disclosure;
+        if (!disclosure || !disclosureOverlay) return;
+        disclosure.getState((state) => {
+            if (!state.needed) return;
+            const content = disclosure.content(state.mode);
+            disclosureTitle.textContent = content.title;
+            disclosureIntro.textContent = content.intro;
+            const fragments = [];
+            const addList = (headingText, items) => {
+                const h4 = document.createElement('h4');
+                h4.textContent = headingText;
+                const ul = document.createElement('ul');
+                items.forEach((item) => {
+                    const li = document.createElement('li');
+                    li.textContent = item;
+                    ul.appendChild(li);
+                });
+                fragments.push(h4, ul);
+            };
+            if (content.changes.length > 0) addList(content.changesHeading, content.changes);
+            addList(content.practicesHeading, content.items);
+            disclosureBody.replaceChildren(...fragments);
+            disclosureLink.href = content.url;
+            disclosureLink.querySelector('span').textContent = content.link;
+            disclosureAccept.querySelector('span').textContent = content.accept;
+            disclosureOverlay.style.display = 'flex';
+        });
+    }
+
+    if (disclosureAccept) {
+        disclosureAccept.addEventListener('click', () => {
+            const disclosure = globalThis.QHP && globalThis.QHP.disclosure;
+            if (disclosure) disclosure.acknowledge(hideDisclosure);
+            else hideDisclosure();
+        });
+    }
+
+    chrome.storage.onChanged.addListener((changes, namespace) => {
+        const disclosure = globalThis.QHP && globalThis.QHP.disclosure;
+        // Aceptado desde otra superficie (página, panel u otro dispositivo).
+        if (namespace === 'sync' && disclosure && changes[disclosure.ACK_KEY]) hideDisclosure();
+    });
 
     let syncRefreshSeq = 0;
 
@@ -820,6 +875,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 forceBlackSwitch.disabled = false;
                 forceSolidSwitch.disabled = false;
                 sidebarDarkModeSwitch.disabled = false;
+
+                maybeShowDisclosure();
             });
         });
     };
